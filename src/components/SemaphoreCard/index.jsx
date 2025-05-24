@@ -1,7 +1,7 @@
 import React from "react";
 
 const SemaphoreCard = ({ semaphore }) => {
-    const { id, name, description, status } = semaphore;
+    const { id, name, description, owner } = semaphore;
     const tasksCount = semaphore.tasks.map((task) => task.status).reduce((acc, status) => {
         if (status === 'Urgente') {
             acc.urgent += 1;
@@ -47,24 +47,25 @@ const SemaphoreCard = ({ semaphore }) => {
     
 
     return (
-        <div className={`rounded-[32px] w-64 shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] hover:-translate-y-0.5 duration-200 bg-gradient-to-tr from-emerald-500 to-teal-600 text-white order-${calculateOrder()}`}>
-            <div className="p-4">
+        <div className={`flex flex-col justify-between rounded-[32px] w-64 shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] hover:-translate-y-0.5 duration-200 bg-gradient-to-tr from-emerald-500 to-teal-600 text-white order-${calculateOrder()}`}>
+            <div className="flex flex-col justify-between h-full gap-2 p-4">
                 <h2 className="text-2xl font-semibold">{name}</h2>
-                <p>{description}</p>
-                <button onClick={() => alert(`Semaphore ID: ${id}`)}>View Details</button>
+                <p className="text-sm">{description}</p>
+                <b className="text-sm">Encargado: {owner}</b>
+                <button onClick={() => alert(`Semaphore ID: ${id}`)} className="px-2 py-1 border-2 rounded-full text-sm font-semibold">View Details</button>
             </div>
             <div className="w-full bg-gray-200 grid grid-cols-3 p-2 rounded-b-[32px]">
                 <div className="flex flex-col items-center text-rose-700 border-r border-white">
                     <h3 className="text-xl font-semibold">{tasksCount.urgent}</h3>
-                    <p className="uppercase text-[10px] font-medium">Urgent</p>
+                    <p className="uppercase text-[10px] font-medium">Urgente</p>
                 </div>
                 <div className="flex flex-col items-center text-amber-500 border-r border-white">
                     <h3 className="text-xl font-semibold">{tasksCount.attention}</h3>
-                    <p className="uppercase text-[10px] font-medium">Attention</p>
+                    <p className="uppercase text-[10px] font-medium">En atención</p>
                 </div>
                 <div className="flex flex-col items-center text-teal-500">
                     <h3 className="text-xl font-semibold">{tasksCount.pending}</h3>
-                    <p className="uppercase text-[10px] font-medium">Pending</p>
+                    <p className="uppercase text-[10px] font-medium">Pendiente</p>
                 </div>
             </div>
         </div>

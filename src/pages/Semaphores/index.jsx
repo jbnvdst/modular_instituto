@@ -7,7 +7,8 @@ const Semaphores = () => {
         { 
             id: 1,
             name: "Farmacia",
-            description: "Description 1",
+            description: "Suministro y control de medicamentos e insumos esenciales para el tratamiento.",
+            owner: "Dr. Pedro Rodríguez",
             tasks: [
                 { id: 1, name: "Falta surtir medicamento de quimioterapia", status: "Urgente" },
                 { id: 2, name: "Inventario mensual pendiente", status: "Atención" },
@@ -20,7 +21,8 @@ const Semaphores = () => {
         { 
             id: 2,
             name: "Oncología Médica",
-            description: "Description 2",
+            description: "Diagnóstico y tratamiento integral del cáncer mediante quimioterapia y fármacos.",
+            owner: "Dra. Yessica Marmolejo",
             tasks: [
                 { id: 5, name: "Faltan resultados de laboratorio para paciente", status: "Urgente" },
                 { id: 6, name: "Actualizar historial clínico digital", status: "Atención" },
@@ -29,7 +31,8 @@ const Semaphores = () => {
         { 
             id: 3,
             name: "Enfermería",
-            description: "Description 2",
+            description: "Atención directa al paciente, administración de medicamentos y monitoreo continuo.",
+            owner: "Dra. Sofía López",
             tasks: [
                 { id: 7, name: "Suministro de guantes y mascarillas bajo", status: "Urgente" },
                 { id: 8, name: "Capacitación en manejo de bomba de infusión", status: "Pendiente" },
@@ -41,7 +44,8 @@ const Semaphores = () => {
         { 
             id: 4,
             name: "Administración ",
-            description: "Description 2",
+            description: "Gestión de recursos, personal, compras y operaciones internas del hospital.",
+            owner: "Dr. Guillermo Salcedo",
             tasks: [
                 { id: 10, name: "Falta firmar convenios con proveedores", status: "Pendiente" },
                 { id: 11, name: "Solicitudes de pago atrasadas", status: "Urgente" },
@@ -55,7 +59,8 @@ const Semaphores = () => {
         { 
             id: 5,
             name: "Radioterapia ",
-            description: "Description 2",
+            description: "Aplicación de tratamientos con radiación para combatir células cancerosas.",
+            owner: "Dr. Pablo Macias",
             tasks: [
                 { id: 15, name: "Carga incompleta de expedientes en sistema", status: "Atención" },
                 { id: 22, name: "Faltan dosímetros personales en stock", status: "Urgente" },
@@ -64,7 +69,8 @@ const Semaphores = () => {
         { 
             id: 6,
             name: "Urgencias",
-            description: "Description 3",
+            description: "Atención inmediata a pacientes con condiciones críticas o complicaciones graves.",
+            owner: "Dr. Javier Martínez",
             tasks: [
                 { id: 1, name: "Falta surtir medicamento de quimioterapia", status: "Urgente" },
                 { id: 23, name: "Sesiones de apoyo emocional no agendadas", status: "Pendiente" },
