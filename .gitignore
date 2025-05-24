@@ -30,3 +30,6 @@ dist-ssr
 *.gif
 *.webp
 *.svg
+
+!src/assets/icons/*.png
+!src/assets/images/*.jpg
