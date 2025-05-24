@@ -47,12 +47,12 @@ const SemaphoreCard = ({ semaphore }) => {
     
 
     return (
-        <div className={`flex flex-col justify-between rounded-[32px] w-64 shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] hover:-translate-y-0.5 duration-200 bg-gradient-to-tr from-emerald-500 to-teal-600 text-white order-${calculateOrder()}`}>
+        <div className={`flex flex-col justify-between rounded-[32px] w-64 shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] hover:-translate-y-1 duration-200 bg-gradient-to-tr from-emerald-500 to-teal-600 text-white order-${calculateOrder()}`}>
             <div className="flex flex-col justify-between h-full gap-2 p-4">
                 <h2 className="text-2xl font-semibold">{name}</h2>
                 <p className="text-sm">{description}</p>
                 <b className="text-sm">Encargado: {owner}</b>
-                <button onClick={() => alert(`Semaphore ID: ${id}`)} className="px-2 py-1 border-2 rounded-full text-sm font-semibold">View Details</button>
+                <button onClick={() => alert(`Semaphore ID: ${id}`)} className="px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">View Details</button>
             </div>
             <div className="w-full bg-gray-200 grid grid-cols-3 p-2 rounded-b-[32px]">
                 <div className="flex flex-col items-center text-rose-700 border-r border-white">

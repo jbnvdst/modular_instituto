@@ -4,7 +4,6 @@ import Home from './pages/Home'
 import Profile from './pages/Profile'
 import Semaphores from './pages/Semaphores'
 import Login from './pages/Login'
-import { Layout } from './components/Layout'
 
 const AppRoutes = () => {
   let routes = useRoutes([
@@ -20,9 +19,7 @@ const AppRoutes = () => {
 function App() {
   return (
     <BrowserRouter>
-      <Layout>
         <AppRoutes />
-      </Layout>
     </BrowserRouter>
   )
 }

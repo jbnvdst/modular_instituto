@@ -13,7 +13,7 @@ const Sidebar = () => {
                 <h1 className="text-gray-900 font-medium text-lg p-10">App Logo</h1>
                 <ul className="flex flex-col w-full">
                     <li className="w-full">
-                        <NavLink to="/home" className={({ isActive }) => `flex gap-2 w-full bg-gray-200 py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
+                        <NavLink to="/" className={({ isActive }) => `flex gap-2 w-full bg-gray-200 py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
                             <img src={homeIcon} className="w-5 h-5"/><span className="font-medium">Inicio</span>
                         </NavLink>
                     </li>

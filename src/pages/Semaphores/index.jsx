@@ -1,4 +1,5 @@
 import React from "react";
+import { Layout } from "../../components/Layout";
 import { Card } from "../../components/Card";
 import { SemaphoreCard } from "../../components/SemaphoreCard";
 
@@ -93,33 +94,35 @@ const Semaphores = () => {
     }, { urgent: 0, attention: 0, pending: 0 });
     
     return (
-        <div className="flex flex-col gap-2">
-            <h2 className="text-sm text-gray-500">Semaphores</h2>
-            <div className="grid grid-cols-4 gap-4">
-                <Card>
-                    <h3 className="text-sm text-gray-500">Áreas</h3>
-                    <b className="text-black">{areas.length}</b>
-                </Card>
-                <Card>
-                    <h3 className="text-sm text-gray-500">Tareas urgentes</h3>
-                    <b className="text-black">{tasksCount.urgent}</b>
-                </Card>
-                <Card>
-                    <h3 className="text-sm text-gray-500">Tareas en atención</h3>
-                    <b className="text-black">{tasksCount.attention}</b>
-                </Card>
-                <Card>
-                    <h3 className="text-sm text-gray-500">Tareas pendientes</h3>
-                    <b className="text-black">{tasksCount.pending}</b>
-                </Card>
+        <Layout>
+            <div className="flex flex-col gap-2">
+                <h2 className="text-sm text-gray-500">Semaphores</h2>
+                <div className="grid grid-cols-4 gap-4">
+                    <Card>
+                        <h3 className="text-sm text-gray-500">Áreas</h3>
+                        <b className="text-black">{areas.length}</b>
+                    </Card>
+                    <Card>
+                        <h3 className="text-sm text-gray-500">Tareas urgentes</h3>
+                        <b className="text-black">{tasksCount.urgent}</b>
+                    </Card>
+                    <Card>
+                        <h3 className="text-sm text-gray-500">Tareas en atención</h3>
+                        <b className="text-black">{tasksCount.attention}</b>
+                    </Card>
+                    <Card>
+                        <h3 className="text-sm text-gray-500">Tareas pendientes</h3>
+                        <b className="text-black">{tasksCount.pending}</b>
+                    </Card>
+                </div>
+                <h2 className="text-sm text-gray-500">Áreas</h2>
+                <div className="flex flex-wrap gap-4">
+                    {areas.map((area) => (
+                        <SemaphoreCard key={area.id} semaphore={area} />
+                    ))}
+                </div>
             </div>
-            <h2 className="text-sm text-gray-500">Áreas</h2>
-            <div className="flex flex-wrap gap-4">
-                {areas.map((area) => (
-                    <SemaphoreCard key={area.id} semaphore={area} />
-                ))}
-            </div>
-        </div>
+        </Layout>
     );
 }
 
