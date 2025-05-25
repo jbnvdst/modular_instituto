@@ -1,50 +1,175 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { Layout } from "../../components/Layout";
 import { CountingCard } from "../../components/CountingCard";
 import { PiNotificationDuotone, PiSirenDuotone } from "react-icons/pi";
 import { IoSettingsSharp } from "react-icons/io5";
 import { PiUsersThreeFill } from "react-icons/pi";
 import { BiSolidReport } from "react-icons/bi";
+import { lastNotifications } from "../../utils/data/lastNotifications";
+import * as Chart from "chart.js/auto";
+import { areas } from "../../utils/data/areas";
 
 const Home = () => {
-    const lastNotifications = [
-        {
-            id: 1,
-            title: "Código Azul en Urgencias",
-            area: "Sala de Urgencias",
-            time: "5 minutos",
-            type: "emergency"
-        },
-        {
-            id: 2,
-            title: "Consulta de Infectología Programada",
-            area: "Consultorios Externos",
-            time: "10 minutos",
-            type: "advice"
-        },
-        {
-            id: 3,
-            title: "Alerta de Saturación en Pediatría",
-            area: "Pediatría - Sala de Observación",
-            time: "19 minutos",
-            type: "advice"
-        },
-        {
-            id: 4,
-            title: "Fallo en Suministro de Oxígeno",
-            area: "Quirófano 2",
-            time: "20 minutos",
-            type: "critical"
-        },
-        {
-            id: 5,
-            title: "Ingreso de Paciente con Politraumatismo",
-            area: "Sala de Trauma - Urgencias",
-            time: "30 minutos",
-            type: "emergency"
-        }
-    ];
+    const chartRef = useRef(null);
+    const chartInstance = useRef(null);
 
+     useEffect(() => {
+        Chart.Chart.register(
+        Chart.CategoryScale,
+        Chart.LinearScale,
+        Chart.BarElement,
+        Chart.Title,
+        Chart.Tooltip,
+        Chart.Legend
+        );
+    }, []);
+
+    useEffect(() => {
+        if (!chartRef.current) return;
+
+        // Destruir gráfica anterior si existe
+        if (chartInstance.current) {
+        chartInstance.current.destroy();
+        }
+
+        // Procesar datos
+        const processedData = areas.map(area => {
+        const statusCounts = {
+            'Urgente': 0,
+            'Atención': 0,
+            'Pendiente': 0
+        };
+
+        area.tasks.forEach(task => {
+            if (statusCounts.hasOwnProperty(task.status)) {
+            statusCounts[task.status]++;
+            }
+        });
+
+        return {
+            name: area.name,
+            ...statusCounts
+        };
+        });
+
+        const labels = processedData.map(item => item.name);
+        const urgenteData = processedData.map(item => item.Urgente);
+        const atencionData = processedData.map(item => item.Atención);
+        const pendienteData = processedData.map(item => item.Pendiente);
+
+        const ctx = chartRef.current.getContext('2d');
+        
+        chartInstance.current = new Chart.Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+            {
+                label: 'Urgente',
+                data: urgenteData,
+                backgroundColor: '#DC2626',
+                borderColor: '#B91C1C',
+                borderWidth: 1
+            },
+            {
+                label: 'Atención',
+                data: atencionData,
+                backgroundColor: '#F59E0B',
+                borderColor: '#D97706',
+                borderWidth: 1
+            },
+            {
+                label: 'Pendiente',
+                data: pendienteData,
+                backgroundColor: '#16A34A',
+                borderColor: '#15803D',
+                borderWidth: 1
+            }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+            title: {
+                display: true,
+                text: 'Tareas por Área Hospitalaria',
+                font: {
+                size: 18,
+                weight: 'bold'
+                },
+                padding: 20
+            },
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                padding: 20,
+                font: {
+                    size: 12
+                }
+                }
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                title: function(context) {
+                    return context[0].label;
+                },
+                label: function(context) {
+                    return `${context.dataset.label}: ${context.parsed.y} tareas`;
+                }
+                }
+            }
+            },
+            scales: {
+            x: {
+                stacked: true,
+                title: {
+                display: true,
+                text: 'Áreas Hospitalarias',
+                font: {
+                    size: 14,
+                    weight: 'bold'
+                }
+                },
+                ticks: {
+                maxRotation: 45,
+                minRotation: 0
+                }
+            },
+            y: {
+                stacked: true,
+                beginAtZero: true,
+                title: {
+                display: true,
+                text: 'Número de Tareas',
+                font: {
+                    size: 14,
+                    weight: 'bold'
+                }
+                },
+                ticks: {
+                stepSize: 1
+                }
+            }
+            },
+            interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+            }
+        }
+        });
+
+        // Cleanup function
+        return () => {
+        if (chartInstance.current) {
+            chartInstance.current.destroy();
+        }
+        };
+    }, []);
+  
     return (
         <Layout>
             <h1 className="text-sm text-gray-500">Home</h1>
@@ -122,6 +247,12 @@ const Home = () => {
                     </div>
                     <div className="mt-4">
                         {/* Aquí iría el gráfico */}
+                    </div>
+                </div>
+                <div className="bg-white shadow-md rounded-2xl p-4">
+                    <h1 className="text-gray-800 font-bold text-lg">Estadisticas</h1>
+                    <div className="relative h-96">
+                        <canvas ref={chartRef} />
                     </div>
                 </div>
             </div>
