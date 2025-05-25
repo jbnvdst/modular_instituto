@@ -2,6 +2,9 @@ import React from "react";
 import { Layout } from "../../components/Layout";
 import { CountingCard } from "../../components/CountingCard";
 import { PiNotificationDuotone, PiSirenDuotone } from "react-icons/pi";
+import { IoSettingsSharp } from "react-icons/io5";
+import { PiUsersThreeFill } from "react-icons/pi";
+import { BiSolidReport } from "react-icons/bi";
 
 const Home = () => {
     const lastNotifications = [
@@ -83,14 +86,38 @@ const Home = () => {
                         </div>
                     </div>
                 </div>
-                <div className="bg-white shadow-md rounded-2xl p-4">
+                <div className="flex flex-col bg-white shadow-md rounded-2xl p-4 gap-2">
                     <h1 className="text-gray-800 font-bold text-lg">Acciones Rapidas</h1>
-                    <div className="flex gap-2 items-center">
-                        <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-3">
+                    <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
+                        <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
                             <PiSirenDuotone className="text-white" size={20} />
                         </div>
                         <div>
-                            <h1 className="text-gray-800 font-medium text-md">Código Azul</h1>
+                            <h1 className="text-gray-800 font-semibold text-sm ">Gestionar Emergencias</h1>
+                        </div>
+                    </div>
+                    <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
+                        <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
+                            <PiUsersThreeFill className="text-white" size={20} />
+                        </div>
+                        <div>
+                            <h1 className="text-gray-800 font-semibold text-sm ">Gestion de personal</h1>
+                        </div>
+                    </div>
+                    <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
+                        <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
+                            <BiSolidReport className="text-white" size={20} />
+                        </div>
+                        <div>
+                            <h1 className="text-gray-800 font-semibold text-sm ">Descargar reporte del ultimo mes</h1>
+                        </div>
+                    </div>
+                    <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
+                        <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
+                            <IoSettingsSharp className="text-white" size={20} />
+                        </div>
+                        <div>
+                            <h1 className="text-gray-800 font-semibold text-sm ">Configuración</h1>
                         </div>
                     </div>
                     <div className="mt-4">
@@ -98,6 +125,7 @@ const Home = () => {
                     </div>
                 </div>
             </div>
+            
         </Layout>
     );
 }
