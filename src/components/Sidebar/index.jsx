@@ -1,30 +1,30 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import adminIcon from "../../assets/icons/admin.png";
-import semaphoreIcon from "../../assets/icons/semaphore.png";
-import homeIcon from "../../assets/icons/home.png";
+import { GoHome } from "react-icons/go";
+import { BsStoplights } from "react-icons/bs";
+import { LuUserRoundCog } from "react-icons/lu";
 
 const Sidebar = () => {
-    const activeStyle = 'text-blue-400';
+    const activeStyle = 'text-[#266b6b] bg-[#f1fdfb] rounded-xl';
     const unactiveStyle = 'text-gray-900 hover:text-gray-700';
     return (
-        <aside className="bg-gray-200 rounded-2xl w-[248px] h-svh">
+        <aside className="bg-[#feffff] rounded-r-2xl w-[248px] h-svh shadow-lg border border-r-gray-100">
             <nav className="w-full flex flex-col items-center gap-16">
-                <h1 className="text-gray-900 font-medium text-lg p-10">App Logo</h1>
+                <h1 className="text-gray-900 font-semibold text-lg p-8">App Logo</h1>
                 <ul className="flex flex-col w-full">
                     <li className="w-full">
-                        <NavLink to="/" className={({ isActive }) => `flex gap-2 w-full bg-gray-200 py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
-                            <img src={homeIcon} className="w-5 h-5"/><span className="font-medium">Inicio</span>
+                        <NavLink to="/" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
+                            <GoHome className={({ isActive }) => ` ${isActive ? activeStyle : unactiveStyle}`} size={22}/><span className="font-medium">Inicio</span>
                         </NavLink>
                     </li>
                     <li className="w-full">
-                        <NavLink to="/semaphores" className={({ isActive }) => `flex gap-2 w-full bg-gray-200 py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
-                            <img src={semaphoreIcon} className="w-5 h-5"/><span className="font-medium">Semáforos</span>
+                        <NavLink to="/semaphores" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
+                            <BsStoplights className={({ isActive }) => ` ${isActive ? activeStyle : unactiveStyle}`} size={22} /><span className="font-medium">Semáforos</span>
                         </NavLink>
                     </li>
                     <li className="w-full">
-                        <NavLink to="/profile" className={({ isActive }) => `flex gap-2 w-full bg-gray-200 py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
-                            <img src={adminIcon} className="w-5 h-5"/><span className="font-medium">Admin</span>
+                        <NavLink to="/profile" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
+                            <LuUserRoundCog className={({ isActive }) => ` ${isActive ? activeStyle : unactiveStyle}`} size={22} /><span className="font-medium">Admin</span>
                         </NavLink>
                     </li>
                 </ul>
