@@ -1,22 +1,25 @@
 import React, { useState } from 'react';
 import { Activity, User, Lock, Eye, EyeOff } from 'lucide-react';
 import docImage from '../../assets/img/doc.svg'; // Asegúrate de que la ruta sea correcta
-
+import { useAuth } from '../../utils/context/AuthContext'; // Asegúrate de que la ruta sea correcta
 const Login = () => {
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setIsLoading(true);
-    
-    // Simular proceso de login
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await login(email, password);
       alert('Login exitoso!');
-    }, 1500);
+      // Aquí puedes redirigir si lo necesitas
+    } catch {
+      alert('Credenciales incorrectas');
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -90,7 +93,7 @@ const Login = () => {
             </div>
 
             {/* Formulario */}
-            <div onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               
               {/* Campo Usuario */}
               <div className="space-y-2">
@@ -162,7 +165,7 @@ const Login = () => {
 
               {/* Botón de envío */}
               <button
-                onClick={handleSubmit}
+                type="submit"
                 disabled={isLoading}
                 className="w-full bg-teal-600 cursor-pointer text-white py-3 px-4 rounded-lg font-medium hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg"
               >
@@ -175,7 +178,7 @@ const Login = () => {
                   'Iniciar Sesión'
                 )}
               </button>
-            </div>
+            </form>
 
             {/* Footer */}
             <div className="mt-8 text-center">
