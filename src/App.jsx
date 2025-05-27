@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import Profile from './pages/Profile'
 import Semaphores from './pages/Semaphores'
 import Login from './pages/Login'
+import Admin from './pages/Admin'
 
 const AppRoutes = () => {
   let routes = useRoutes([
@@ -11,7 +12,8 @@ const AppRoutes = () => {
     { path: '/profile', element: <Profile /> },
     { path: '/semaphores', element: <Semaphores /> },
     { path : '/login', element: <Login /> },
-  ])
+    { path: '/admin', element: <Admin /> }
+    ])
 
   return routes
 }

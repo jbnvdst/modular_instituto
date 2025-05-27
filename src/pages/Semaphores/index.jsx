@@ -25,8 +25,9 @@ const Semaphores = () => {
             {selectedArea && (
                 <SemaphoreDetail semaphore={selectedArea} onClose={setSelectedArea}/>  
             )}
+            <h2 className="text-sm text-gray-500">Semaphores</h2>
+                <hr className="my-4 border-gray-200"/>
             <div className="flex flex-col gap-2">
-                <h2 className="text-sm text-gray-500">Semaphores</h2>
                 <div className="grid grid-cols-4 gap-4">
                     <Card>
                         <h3 className="text-sm text-gray-500">Áreas</h3>

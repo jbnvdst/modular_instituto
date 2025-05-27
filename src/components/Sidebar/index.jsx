@@ -23,7 +23,7 @@ const Sidebar = () => {
                         </NavLink>
                     </li>
                     <li className="w-full">
-                        <NavLink to="/profile" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
+                        <NavLink to="/admin" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
                             <LuUserRoundCog className={({ isActive }) => ` ${isActive ? activeStyle : unactiveStyle}`} size={22} /><span className="font-medium">Admin</span>
                         </NavLink>
                     </li>
