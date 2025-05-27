@@ -6,6 +6,8 @@ import logoutIcon from "../../assets/icons/exit.png";
 import profilePic from "../../assets/img/default_profile.jpg";
 
 const Layout = ({ children }) => {
+    const [showModal, setShowModal] = React.useState(false);
+
     return (
         <div className="flex w-svw overflow-x-hidden overflow-y-auto">
             <Sidebar />
@@ -20,14 +22,38 @@ const Layout = ({ children }) => {
                         <NavLink to="/profile">
                             <img src={profilePic} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
                         </NavLink>
-                        <button className="bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200">
-                            <img src={logoutIcon} alt="Notifications" className="w-4 h-4" />
+                        <button
+                            className="bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200"
+                            onClick={() => setShowModal(true)}
+                        >
+                            <img src={logoutIcon} alt="Logout" className="w-4 h-4" />
                         </button>
                     </div>
                 </header>
                 <main className="px-5 pl-8">
                     {children}
                 </main>
+                {showModal && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                        <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full">
+                            <h2 className="text-xl font-semibold mb-4 text-gray-800">¿Seguro que quieres cerrar sesión?</h2>
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                    onClick={() => setShowModal(false)}
+                                >
+                                    Cancelar
+                                </button>
+                                <a
+                                    href="/login"
+                                    className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                                >
+                                    Sí, cerrar sesión
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
