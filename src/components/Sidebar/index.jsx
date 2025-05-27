@@ -8,7 +8,7 @@ const Sidebar = () => {
     const activeStyle = 'text-[#266b6b] bg-[#f1fdfb] rounded-xl';
     const unactiveStyle = 'text-gray-900 hover:text-gray-700';
     return (
-        <aside className="bg-[#feffff] rounded-r-2xl w-[248px] h-svh shadow-lg border border-r-gray-100">
+        <aside className=" bg-[#feffff] rounded-r-2xl w-[248px] h-svh shadow-lg border border-r-gray-100">
             <nav className="w-full flex flex-col items-center gap-16">
                 <h1 className="text-gray-900 font-semibold text-lg p-8">App Logo</h1>
                 <ul className="flex flex-col w-full">
