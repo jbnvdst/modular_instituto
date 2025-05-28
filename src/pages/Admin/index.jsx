@@ -1,27 +1,47 @@
 import React, { useState } from "react";
-import { Users, Building2, Shield, Plus, Edit2, Trash2, Search, UserCheck, AlertTriangle } from "lucide-react";
+import { Users, Building2, Shield, Plus, Edit2, Trash2, Search, UserCheck, AlertTriangle, Edit } from "lucide-react";
 import { Layout } from "../../components/Layout";
+import { useAreas } from "../../utils/context/AreasContext";
+import { EditUser } from "../../components/EditUser";
+import axios from "axios";
 
 const Admin = () => {
     const [activeTab, setActiveTab] = useState('usuarios');
     const [searchTerm, setSearchTerm] = useState('');
+    const { areas, fetchAreas, createArea } = useAreas();
+    const [users, setUsers] = useState([]);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [confirmationModal, setConfirmationModal] = useState(null);
 
-    // Datos de ejemplo
-    const usuarios = [
-        { id: 1, nombre: "Dr. María González", email: "maria.gonzalez@hospital.com", area: "Cardiología", rol: "Especialista", estado: "Activo" },
-        { id: 2, nombre: "Dr. Enrique Rodríguez", email: "enrique.rodriguez@hospital.com", area: "Pediatría", rol: "Jefe de Área", estado: "Activo" },
-        { id: 3, nombre: "Dr. Pedro Martínez", email: "pedro.martinez@hospital.com", area: "Urgencias", rol: "Especialista", estado: "Inactivo" },
-        { id: 4, nombre: "Dra. Ana López", email: "ana.lopez@hospital.com", area: "Ginecología", rol: "Especialista", estado: "Activo" },
-    ];
+    React.useEffect(() => {
+        fetchUsers();
+        fetchAreas();
+    }, []);
 
-    const areas = [
-        { id: 1, nombre: "Cardiología", color: "bg-red-100 border-red-200", icon: "❤️", personal: 8, activos: 7 },
-        { id: 2, nombre: "Pediatría", color: "bg-blue-100 border-blue-200", icon: "👶", personal: 12, activos: 11 },
-        { id: 3, nombre: "Urgencias", color: "bg-yellow-100 border-yellow-200", icon: "🚨", personal: 15, activos: 14 },
-        { id: 4, nombre: "Ginecología", color: "bg-pink-100 border-pink-200", icon: "🏥", personal: 6, activos: 6 },
-        { id: 5, nombre: "Traumatología", color: "bg-green-100 border-green-200", icon: "🦴", personal: 10, activos: 9 },
-        { id: 6, nombre: "Neurología", color: "bg-purple-100 border-purple-200", icon: "🧠", personal: 7, activos: 6 },
-    ];
+    const handleDeleteUser = async (userId) => {
+        try {
+            const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/auth/delete/${userId}`);
+            if (response.status === 200) {
+                setUsers((prevUsers) => prevUsers.filter(user => user.id !== userId));
+                console.log("Usuario eliminado exitosamente");
+            } else {
+                console.error("Error al eliminar el usuario:", response.data);
+            }
+        } catch (error) {
+            console.error("Error al eliminar el usuario:", error);
+        }
+        setConfirmationModal(null);
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const reponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/get`);
+            console.log(reponse.data);
+            setUsers(reponse.data);
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    };
 
     const jerarquia = [
         { nivel: 1, cargo: "Director General", personas: ["Dr. García"], color: "bg-teal-600" },
@@ -33,9 +53,9 @@ const Admin = () => {
     const TabButton = ({ id, label, icon: Icon, isActive, onClick }) => (
         <button
             onClick={() => onClick(id)}
-            className={`flex items-center px-6 py-3 font-medium rounded-lg transition-all duration-200 ${
+            className={`flex items-center px-6 py-3 cursor-pointer font-medium rounded-lg transition-all duration-200 ${
                 isActive 
-                    ? 'bg-teal-600 text-white shadow-md' 
+                    ? 'bg-gradient-to-tr from-emerald-500 to-teal-600 text-white shadow-md' 
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
             }`}
         >
@@ -46,17 +66,16 @@ const Admin = () => {
 
     const UsuariosTab = () => (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-end">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800">Gestión de Usuarios</h2>
                     <p className="text-gray-600 mt-1">Administra el personal médico del hospital</p>
                 </div>
-                <button className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors flex items-center">
+                <button onClick={() => setSelectedUser(0)} className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">
                     <Plus size={20} className="mr-2" />
                     Nuevo Usuario
                 </button>
             </div>
-
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div className="p-4 border-b border-gray-200">
                     <div className="relative">
@@ -83,31 +102,31 @@ const Admin = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {usuarios.map((usuario) => (
-                                <tr key={usuario.id} className="hover:bg-gray-50">
+                            {users.map((user) => (
+                                <tr key={user.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div>
-                                            <div className="text-sm font-medium text-gray-900">{usuario.nombre}</div>
-                                            <div className="text-sm text-gray-500">{usuario.email}</div>
+                                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                            <div className="text-sm text-gray-500">{user.email}</div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{usuario.area}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{usuario.rol}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.area || "no asignada"}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.role}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                            usuario.estado === 'Activo' 
+                                            user.active 
                                                 ? 'bg-green-100 text-green-800' 
                                                 : 'bg-red-100 text-red-800'
                                         }`}>
-                                            {usuario.estado}
+                                            {user.active ? 'Activo' : 'Inactivo'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div className="flex space-x-2">
-                                            <button className="text-blue-600 hover:text-blue-800">
+                                            <button onClick={() => setSelectedUser(user)} className="text-blue-600 hover:text-blue-800">
                                                 <Edit2 size={16} />
                                             </button>
-                                            <button className="text-red-600 hover:text-red-800">
+                                            <button onClick={() => setConfirmationModal(user.id)} className="text-red-600 hover:text-red-800">
                                                 <Trash2 size={16} />
                                             </button>
                                         </div>
@@ -128,7 +147,7 @@ const Admin = () => {
                     <h2 className="text-2xl font-bold text-gray-800">Gestión de Áreas</h2>
                     <p className="text-gray-600 mt-1">Administra las áreas médicas del hospital</p>
                 </div>
-                <button className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors flex items-center">
+                <button className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">
                     <Plus size={20} className="mr-2" />
                     Nueva Área
                 </button>
@@ -136,23 +155,26 @@ const Admin = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {areas.map((area) => (
-                    <div key={area.id} className={`bg-white rounded-lg border-2 ${area.color} p-6 hover:shadow-lg transition-shadow`}>
-                        <div className="flex items-center justify-between mb-4">
+                    <div key={area.id} className={`h-full flex flex-col bg-white justify-between ${area.color} rounded-2xl border-2 border-gray-100 hover:shadow-lg transition-shadow`}>
+                        <div className="flex items-center justify-between mb-4 rounded-t-2xl px-4 py-3 bg-gradient-to-tr from-emerald-500 to-teal-600">
                             <div className="flex items-center">
-                                <span className="text-2xl mr-3">{area.icon}</span>
-                                <h3 className="text-lg font-semibold text-gray-800">{area.nombre}</h3>
+                                <h3 className="text-lg font-semibold text-white">{area.nombre}</h3>
                             </div>
                             <div className="flex space-x-1">
-                                <button className="text-blue-600 hover:text-blue-800 p-1">
+                                <button className="cursor-pointer text-white hover:text-gray-800 p-1">
                                     <Edit2 size={16} />
                                 </button>
-                                <button className="text-red-600 hover:text-red-800 p-1">
+                                <button className="cursor-pointer text-red-600 hover:text-red-800 p-1">
                                     <Trash2 size={16} />
                                 </button>
                             </div>
                         </div>
-                        
-                        <div className="space-y-3">
+                        <div className="flex flex-col justify-between items-start px-4 pb-4 gap-2">
+                                <span className="text-sm text-gray-600">{area.description}</span>
+                                <span className="text-sm font-semibold text-gray-800">Encargado: {area.owner}</span>
+                        </div>
+                        <div className="px-4 pb-4">
+                            
                             <div className="flex justify-between items-center">
                                 <span className="text-sm text-gray-600">Personal Total:</span>
                                 <span className="font-semibold text-gray-800">{area.personal}</span>
@@ -163,7 +185,7 @@ const Admin = () => {
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
                                 <div 
-                                    className="bg-teal-600 h-2 rounded-full transition-all duration-300"
+                                    className="bg-gradient-to-tr from-emerald-500 to-teal-600 h-2 rounded-full transition-all duration-300"
                                     style={{ width: `${(area.activos / area.personal) * 100}%` }}
                                 ></div>
                             </div>
@@ -268,6 +290,33 @@ const Admin = () => {
                 {/* Content */}
                 {renderContent()}
             </div>
+            {/* Confirmation Modal */}
+            {confirmationModal !== null && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-md">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-4">Confirmar Eliminación</h2>
+                        <p className="text-gray-600 mb-4">¿Estás seguro de que deseas eliminar al usuario {users.find(user => user.id === confirmationModal)?.name}?</p>
+                        <div className="flex justify-end space-x-2">
+                            <button 
+                                onClick={() => setConfirmationModal(null)} 
+                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                onClick={() => handleDeleteUser(confirmationModal)} 
+                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                            >
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Edit User Modal */}
+            {selectedUser !== null && (
+                <EditUser user={selectedUser} setUsers={setUsers} onClick={() => setSelectedUser(null)}/>
+            )}
         </Layout>
     );
 };

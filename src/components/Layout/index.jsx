@@ -28,7 +28,7 @@ const Layout = ({ children }) => {
             <Sidebar />
             <div className="w-full">
                 <header className="flex justify-between items-center w-full px-5 pl-8 pt-8">
-                    <h3 className="text-3xl font-bold  text-gray-800">{pageTitle}</h3>
+                    <h3 className="ml-[230px] text-3xl font-bold  text-gray-800">{pageTitle}</h3>
                     <div className="flex items-center gap-4">
                         <input type="text" placeholder="Search..." className="text-gray-900 bg-white border border-gray-200 shadow-xs w-72 text-md rounded-sm px-2 py-1" />
                         <button className="bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200">
@@ -45,7 +45,7 @@ const Layout = ({ children }) => {
                         </button>
                     </div>
                 </header>
-                <main className="px-5 pl-8">
+                <main className="ml-[230px] px-5 pl-8">
                     {children}
                 </main>
                 {showModal && (

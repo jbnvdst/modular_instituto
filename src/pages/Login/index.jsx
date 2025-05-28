@@ -15,7 +15,6 @@ const Login = () => {
     try {
       await login(email, password);
       alert('Login exitoso!');
-      // Aquí puedes redirigir si lo necesitas
     } catch {
       alert('Credenciales incorrectas');
     }

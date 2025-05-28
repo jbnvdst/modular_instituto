@@ -5,6 +5,7 @@ import Profile from './pages/Profile'
 import Semaphores from './pages/Semaphores'
 import Login from './pages/Login'
 import Admin from './pages/Admin'
+import { AreasProvider } from "./utils/context/AreasContext";
 
 const AppRoutes = () => {
   let routes = useRoutes([
@@ -20,10 +21,12 @@ const AppRoutes = () => {
 
 function App() {
   return (
-    <BrowserRouter>
+    <AreasProvider>
+      <BrowserRouter>
         <AppRoutes />
-    </BrowserRouter>
-  )
+      </BrowserRouter>
+    </AreasProvider>
+  );
 }
 
 export default App

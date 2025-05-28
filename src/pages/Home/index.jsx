@@ -175,7 +175,7 @@ const Home = () => {
             <h1 className="text-sm text-gray-500">Home</h1>
             <hr className="my-4 border-gray-200"/>
             <div className="flex flex-col gap-2 shadow-md bg-gradient-to-tr from-[#0f7871] to-[#13b2a0] rounded-2xl p-6">
-                <h1 className="text-white font-bold text-2xl">Bienvenido, Dr. García</h1>
+                <h1 className="text-white font-bold text-2xl">Bienvenido Pedro</h1>
                 <p className="text-white text-xs">Sistema de gestión hospitalaria operando correctamente</p>
                 <p className="text-white text-xs mt-4">Última actualización: 2025-05-20</p>
             </div>
