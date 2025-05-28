@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import { Sidebar } from "../Sidebar";
 import bellIcon from "../../assets/icons/bell.png";
 import logoutIcon from "../../assets/icons/exit.png";
@@ -8,21 +8,27 @@ import { ModalAlert } from "../../components/ModalAlert";
 
 const Layout = ({ children }) => {
     const [showModal, setShowModal] = useState(false);
-
-    // Obtener la ruta actual
-    const location = window.location.pathname;
+    const [searchValue, setSearchValue] = useState("");
+    const location = useLocation(); // Usar hook de react-router
 
     // Definir los títulos según la ruta
     let pageTitle = "App";
-    if (location === "/" || location === "/home") {
+    if (location.pathname === "/" || location.pathname === "/home") {
         pageTitle = "Inicio";
-    } else if (location.startsWith("/semaphores")) {
+    } else if (location.pathname.startsWith("/semaphores")) {
         pageTitle = "Semáforos";
-    } else if (location.startsWith("/profile")) {
+    } else if (location.pathname.startsWith("/profile")) {
         pageTitle = "Perfil";
-    } else if (location.startsWith("/admin")) {
+    } else if (location.pathname.startsWith("/admin")) {
         pageTitle = "Panel de Administración";
+    } else if (location.pathname.startsWith("/notification")) {
+        pageTitle = "Notificaciones";
     }
+
+    // Limpiar el input de búsqueda al cambiar de ruta
+    useEffect(() => {
+        setSearchValue("");
+    }, [location.pathname]);
 
     return (
         <div className="flex w-svw overflow-x-hidden overflow-y-auto">
@@ -31,10 +37,24 @@ const Layout = ({ children }) => {
                 <header className="flex justify-between items-center w-full px-5 pl-8 pt-8">
                     <h3 className="ml-[230px] text-3xl font-bold  text-gray-800">{pageTitle}</h3>
                     <div className="flex items-center gap-4">
-                        <input type="text" placeholder="Search..." className="text-gray-900 bg-white border border-gray-200 shadow-xs w-72 text-md rounded-sm px-2 py-1" />
-                        <button className="bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200">
+                        <input
+                            type="search"
+                            name="search-no-autofill"
+                            autoComplete="off"
+                            autoCorrect="off"
+                            autoCapitalize="off"
+                            spellCheck={false}
+                            placeholder="Search..."
+                            value={searchValue}
+                            onChange={e => setSearchValue(e.target.value)}
+                            className="text-gray-900 bg-white border border-gray-200 shadow-xs w-72 text-md rounded-sm px-2 py-1"
+                        />
+                        <NavLink
+                            to="/notification"
+                            className="bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200"
+                        >
                             <img src={bellIcon} alt="Notifications" className="w-4 h-4" />
-                        </button>
+                        </NavLink>
                         <NavLink to="/profile">
                             <img src={profilePic} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
                         </NavLink>
@@ -57,7 +77,6 @@ const Layout = ({ children }) => {
                         confirmText="Cerrar sesión"
                         onCancel={() => setShowModal(false)}
                         onConfirm={() => {
-                            // Aquí va tu lógica para cerrar sesión
                             localStorage.removeItem("token");
                             window.location.href = "/login";
                         }}
@@ -68,4 +87,4 @@ const Layout = ({ children }) => {
     );
 }
 
-export { Layout };
+export default Layout;

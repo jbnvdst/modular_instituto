@@ -5,7 +5,9 @@ import Profile from './pages/Profile'
 import Semaphores from './pages/Semaphores'
 import Login from './pages/Login'
 import Admin from './pages/Admin'
+import Notifications from './pages/Notifications'
 import { AreasProvider } from "./utils/context/AreasContext";
+
 
 const AppRoutes = () => {
   let routes = useRoutes([
@@ -13,7 +15,8 @@ const AppRoutes = () => {
     { path: '/profile', element: <Profile /> },
     { path: '/semaphores', element: <Semaphores /> },
     { path : '/login', element: <Login /> },
-    { path: '/admin', element: <Admin /> }
+    { path: '/admin', element: <Admin /> },
+    { path: '/notification', element: <Notifications /> },
     ])
 
   return routes

@@ -11,7 +11,6 @@ export const AreasProvider = ({ children }) => {
   const fetchAreas = async () => {
     const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/area/`);
     const data = await res.json();
-    console.log("Respuesta de la API de áreas:", data); // <-- AGREGA ESTA LÍNEA
     setAreas(Array.isArray(data) ? data : data.areas || []);
   };
 

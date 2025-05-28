@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Users, Building2, Shield, Plus, Edit2, Trash2, Search, UserCheck, AlertTriangle } from "lucide-react";
-import { Layout } from "../../components/Layout";
+import  Layout  from "../../components/Layout";
 import { EditUser } from "../../components/EditUser";
 import axios from "axios";
 import { ModalAlert } from "../../components/ModalAlert";
@@ -22,7 +22,6 @@ const Admin = () => {
             const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/auth/delete/${userId}`);
             if (response.status === 200) {
                 setUsers((prevUsers) => prevUsers.filter(user => user.id !== userId));
-                console.log("Usuario eliminado exitosamente");
             } else {
                 console.error("Error al eliminar el usuario:", response.data);
             }
@@ -35,7 +34,6 @@ const Admin = () => {
     const fetchUsers = async () => {
         try {
             const reponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/get`);
-            console.log(reponse.data);
             setUsers(reponse.data);
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -179,10 +177,10 @@ const Admin = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div className="flex space-x-2">
-                                            <button onClick={() => setSelectedUser(user)} className="text-blue-600 hover:text-blue-800">
+                                            <button onClick={() => setSelectedUser(user)} className="text-blue-600 cursor-pointer hover:text-blue-800">
                                                 <Edit2 size={16} />
                                             </button>
-                                            <button onClick={() => setConfirmationModal(user.id)} className="text-red-600 hover:text-red-800">
+                                            <button onClick={() => setConfirmationModal(user.id)} className="text-red-600 cursor-pointer hover:text-red-800">
                                                 <Trash2 size={16} />
                                             </button>
                                         </div>
@@ -197,7 +195,7 @@ const Admin = () => {
     );
 
     const AreasTab = () => (
-        <div className="space-y-6">
+        <div className="flex flex-col gap-3 pb-5">
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800">Gestión de Áreas</h2>
@@ -253,13 +251,13 @@ const Admin = () => {
     );
 
     const PermisosTab = () => (
-        <div className="space-y-6">
+        <div className="flex flex-col gap-3 pb-5">
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800">Gestión de Permisos</h2>
                     <p className="text-gray-600 mt-1">Administra la jerarquía y permisos del hospital</p>
                 </div>
-                <button className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors flex items-center">
+                <button className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">
                     <Shield size={20} className="mr-2" />
                     Configurar Permisos
                 </button>

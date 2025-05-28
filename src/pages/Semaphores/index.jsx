@@ -1,5 +1,5 @@
 import React from "react";
-import { Layout } from "../../components/Layout";
+import  Layout  from "../../components/Layout";
 import { Card } from "../../components/Card";
 import { SemaphoreCard } from "../../components/SemaphoreCard";
 import { SemaphoreDetail } from "../../components/SemaphoreDetail";

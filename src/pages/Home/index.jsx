@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
 import axios from "axios";
-import { Layout } from "../../components/Layout";
+import Layout from "../../components/Layout";
 import { CountingCard } from "../../components/CountingCard";
+import { NavLink } from "react-router-dom";
 import { PiNotificationDuotone, PiSirenDuotone } from "react-icons/pi";
 import { IoSettingsSharp } from "react-icons/io5";
 import { PiUsersThreeFill } from "react-icons/pi";
@@ -10,34 +11,38 @@ import { lastNotifications } from "../../utils/data/lastNotifications";
 import * as Chart from "chart.js/auto";
 import { areas } from "../../utils/data/areas";
 
-function getEmailFromToken() {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log("Payload del token:", payload); // <-- Agrega esto
-        return payload.email || null;
-    } catch {
-        return null;
-    }
-}
 
-function getIdFromToken() {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return payload.id || null;
-    } catch {
-        return null;
+    function getEmailFromToken() {
+        const token = localStorage.getItem("token");
+        if (!token) return null;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            console.log("Payload del token:", payload); // <-- Agrega esto
+            return payload.email || null;
+        } catch {
+            return null;
+        }
     }
-}
+
+    function getIdFromToken() {
+        const token = localStorage.getItem("token");
+        if (!token) return null;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.id || null;
+        } catch {
+            return null;
+        }
+    }
 
 const Home = () => {
     const [nombre, setNombre] = useState("");
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
+    const lineChartRef = useRef(null);
+    const lineChartInstance = useRef(null);
 
+    
     useEffect(() => {
         const id = getIdFromToken();
         axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/get/`)
@@ -55,6 +60,8 @@ const Home = () => {
         Chart.CategoryScale,
         Chart.LinearScale,
         Chart.BarElement,
+        Chart.LineElement,
+        Chart.PointElement, 
         Chart.Title,
         Chart.Tooltip,
         Chart.Legend
@@ -104,22 +111,22 @@ const Home = () => {
             {
                 label: 'Urgente',
                 data: urgenteData,
-                backgroundColor: '#DC2626',
-                borderColor: '#B91C1C',
+                backgroundColor: '#ff000070',
+                borderColor: '#fff',
                 borderWidth: 1
             },
             {
                 label: 'Atención',
                 data: atencionData,
-                backgroundColor: '#F59E0B',
-                borderColor: '#D97706',
+                backgroundColor: '#F59E0B70',
+                borderColor: '#fff',
                 borderWidth: 1
             },
             {
                 label: 'Pendiente',
                 data: pendienteData,
-                backgroundColor: '#16A34A',
-                borderColor: '#15803D',
+                backgroundColor: '#16A34A70',
+                borderColor: '#fff',
                 borderWidth: 1
             }
             ]
@@ -127,24 +134,12 @@ const Home = () => {
         options: {
             responsive: true,
             plugins: {
+                legend: {
+                    display: false, 
+                },
             title: {
                 display: true,
-                text: 'Tareas por Área Hospitalaria',
-                font: {
-                size: 18,
-                weight: 'bold'
-                },
                 padding: 20
-            },
-            legend: {
-                display: true,
-                position: 'top',
-                labels: {
-                padding: 20,
-                font: {
-                    size: 12
-                }
-                }
             },
             tooltip: {
                 mode: 'index',
@@ -160,41 +155,33 @@ const Home = () => {
             }
             },
             scales: {
-            x: {
-                stacked: true,
-                title: {
-                display: true,
-                text: 'Áreas Hospitalarias',
-                font: {
-                    size: 14,
-                    weight: 'bold'
-                }
+                x: {
+                    stacked: true,
+                    title: {
+                    display: true,
+                    },
+                    ticks: {
+                    maxRotation: 45,
+                    minRotation: 0
+                    }
                 },
-                ticks: {
-                maxRotation: 45,
-                minRotation: 0
-                }
-            },
-            y: {
+                y: {
                 stacked: true,
                 beginAtZero: true,
+                min: 0,
+                max: 10,
                 title: {
-                display: true,
-                text: 'Número de Tareas',
-                font: {
-                    size: 14,
-                    weight: 'bold'
-                }
+                    display: true,
                 },
                 ticks: {
-                stepSize: 1
+                    stepSize: 1,
+                    autoSkip: false,
+                    callback: function(value) {
+                    return Number.isInteger(value) ? value.toString() : '';
+                    }
                 }
-            }
-            },
-            interaction: {
-            mode: 'nearest',
-            axis: 'x',
-            intersect: false
+                }
+
             }
         }
         });
@@ -206,7 +193,77 @@ const Home = () => {
         }
         };
     }, []);
-  
+
+    const lineDatasets = [
+        {
+            label: 'Urgente',
+            data: [4, 6, 2, 7, 3, 5, 8],
+            borderColor: '#DC262670',
+            backgroundColor: 'rgba(220, 38, 38, 0.3)',
+            tension: 0.4,
+            fill: false
+        },
+        {
+            label: 'Atención',
+            data: [3, 2, 4, 6, 1, 5, 2],
+            borderColor: '#F59E0B70',
+            backgroundColor: 'rgba(245, 158, 11, 0.3)',
+            tension: 0.4,
+            fill: false
+        },
+        {
+            label: 'Pendiente',
+            data: [5, 4, 3, 2, 1, 0, 2],
+            borderColor: '#16A34A70',
+            backgroundColor: 'rgba(22, 163, 74, 0.3)',
+            tension: 0.4,
+            fill: false
+        }
+    ];
+
+    useEffect(() => {
+        if (!lineChartRef.current) return;
+
+        if (lineChartInstance.current) {
+            lineChartInstance.current.destroy();
+        }
+
+        const ctx = lineChartRef.current.getContext('2d');
+        lineChartInstance.current = new Chart.Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+                datasets: lineDatasets // Usar el array definido arriba
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        padding: 20
+                    },
+                    legend: {
+                        display: false // CAMBIAR ESTO: de 'top' a false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: 0,
+                        max: 10
+                    }
+                }
+            }
+        });
+
+        return () => {
+            if (lineChartInstance.current) {
+                lineChartInstance.current.destroy();
+            }
+        };
+    }, []);
+
+
     return ( 
         <Layout>
             <h1 className="text-sm text-gray-500">Home</h1>
@@ -232,12 +289,14 @@ const Home = () => {
                                 <h1 className="text-gray-800 font-bold text-lg">Actividad Reciente</h1>
                                 <p className="text-gray-500 text-sm">Últimos 30 días</p>
                             </div>
-                            <button className="px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">Ver más</button>
+                            <NavLink to="/notification">
+                                <button className="px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">Ver más</button>
+                            </NavLink>
                         </div>
                         <div className="mt-4">
                             <div className="divide-y divide-gray-200">
                                 {lastNotifications.map((notification) => (
-                                <div className="flex items-center py-2">
+                                <div key={notification.id} className="flex items-center py-2">
                                     <PiSirenDuotone className={`${notification.type === "critical" ? "text-red-500" : notification.type === "emergency" ? "text-yellow-500" : "text-green-500"}  mr-3 mt-1`} size={24} />
                                     <div className="flex flex-col flex-1">
                                         <p className="text-gray-800">{notification.title}</p>
@@ -252,22 +311,24 @@ const Home = () => {
                 </div>
                 <div className="flex flex-col bg-white shadow-md rounded-2xl p-4 gap-2">
                     <h1 className="text-gray-800 font-bold text-lg">Acciones Rapidas</h1>
-                    <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
-                        <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
-                            <PiSirenDuotone className="text-white" size={20} />
+                        <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
+                            <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
+                                <PiSirenDuotone className="text-white" size={20} />
+                            </div>
+                            <div>
+                                <h1 className="text-gray-800 font-semibold text-sm ">Gestionar emergencias</h1>
+                            </div>
                         </div>
-                        <div>
-                            <h1 className="text-gray-800 font-semibold text-sm ">Gestionar Emergencias</h1>
+                    <NavLink to="/admin">
+                        <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
+                            <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
+                                <PiUsersThreeFill className="text-white" size={20} />
+                            </div>
+                            <div>
+                                <h1 className="text-gray-800 font-semibold text-sm ">Gestion de personal</h1>
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
-                        <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
-                            <PiUsersThreeFill className="text-white" size={20} />
-                        </div>
-                        <div>
-                            <h1 className="text-gray-800 font-semibold text-sm ">Gestion de personal</h1>
-                        </div>
-                    </div>
+                    </NavLink>
                     <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
                         <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
                             <BiSolidReport className="text-white" size={20} />
@@ -288,12 +349,49 @@ const Home = () => {
                         {/* Aquí iría el gráfico */}
                     </div>
                 </div>
-                <div className="bg-white shadow-md rounded-2xl p-4">
-                    <h1 className="text-gray-800 font-bold text-lg">Estadisticas</h1>
-                    <div className="relative h-96">
-                        <canvas ref={chartRef} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 my-6">
+                    <div className="bg-white shadow-md rounded-2xl p-4">
+                        <h1 className="text-gray-800 font-bold text-lg">Semaforos por area (de la semana)</h1>
+                        <div className="flex justify-center gap-6 -mb-10 mt-5">
+                            <div className="flex items-center gap-2">
+                                <PiSirenDuotone size={20} color="#DC2626" />
+                                <span className="text-sm font-medium text-gray-700">Urgente</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <PiSirenDuotone size={20} color="#F59E0B" />
+                                <span className="text-sm font-medium text-gray-700">Atención</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <PiSirenDuotone size={20} color="#16A34A" />
+                                <span className="text-sm font-medium text-gray-700">Pendiente</span>
+                            </div>
+                        </div>
+                        <div className="relative h-full">
+                            <canvas ref={chartRef} />
+                        </div>
                     </div>
-                </div>
+                    <div className="bg-white shadow-md rounded-2xl p-4">
+                        <h1 className="text-gray-800 font-bold text-lg">Semaforos de todas las areas (de la semana)</h1>
+                        <div className="flex justify-center gap-6 -mb-10 mt-5">
+                            <div className="flex items-center gap-2">
+                                <PiSirenDuotone size={20} color="#DC2626" />
+                                <span className="text-sm font-medium text-gray-700">Urgente</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <PiSirenDuotone size={20} color="#F59E0B" />
+                                <span className="text-sm font-medium text-gray-700">Atención</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <PiSirenDuotone size={20} color="#16A34A" />
+                                <span className="text-sm font-medium text-gray-700">Pendiente</span>
+                            </div>
+                        </div>
+                        
+                        <div className="relative h-full">
+                            <canvas ref={lineChartRef} />
+                        </div>
+                    </div>
             </div>
             
         </Layout>

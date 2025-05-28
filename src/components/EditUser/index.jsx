@@ -73,48 +73,105 @@ function EditUser({ user, setUsers, onClick, fetchUsers }) {
   };
 
   return (
-    <div className='w-[100svw] h-[100svh] flex items-center justify-center fixed top-0 left-0 bg-[#000000A5] z-50'>
-      <div className='bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-md'>
-        <h1 className='text-2xl font-bold text-gray-800'>
-          {isEdit ? 'Editar' : 'Agregar'} usuario
-        </h1>
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-          enableReinitialize
-        >
-          <Form className='flex flex-col gap-4 mt-4'>
-            <div>
-              <label className='block font-semibold'>Nombre</label>
-              <Field name='name' className='border rounded px-2 py-1 w-full' />
-              <ErrorMessage name='name' component='div' className='text-red-500 text-sm' />
-            </div>
-            <div>
-              <label className='block font-semibold'>Email</label>
-              <Field name='email' type='email' className='border rounded px-2 py-1 w-full' />
-              <ErrorMessage name='email' component='div' className='text-red-500 text-sm' />
-            </div>
-            <div>
-              <label className='block font-semibold'>Contraseña {isEdit && <span className="text-xs text-gray-400">(dejar vacío para no cambiar)</span>}</label>
-              <Field name='password' type='password' className='border rounded px-2 py-1 w-full' />
-              <ErrorMessage name='password' component='div' className='text-red-500 text-sm' />
-            </div>
-            <div>
-              <label className='block font-semibold'>Confirmar contraseña</label>
-              <Field name='confirmPassword' type='password' className='border rounded px-2 py-1 w-full' />
-              <ErrorMessage name='confirmPassword' component='div' className='text-red-500 text-sm' />
-            </div>
-            <div className='flex justify-between mt-4'>
-              <button type='submit' className='bg-blue-600 text-white px-4 py-2 rounded'>
-                Guardar
-              </button>
-              <button type='button' onClick={onClick} className='bg-gray-300 px-4 py-2 rounded'>
-                Cerrar
-              </button>
-            </div>
-          </Form>
-        </Formik>
+    <div className="fixed inset-0 bg-[#000000A8] bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+        <div className="p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-6">
+            {isEdit ? 'Editar' : 'Agregar'} usuario
+          </h2>
+          
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+            enableReinitialize
+          >
+            <Form className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  Nombre
+                </label>
+                <Field 
+                  name="name" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                  placeholder="Ingresa tu nombre"
+                />
+                <ErrorMessage 
+                  name="name" 
+                  component="div" 
+                  className="text-red-500 text-sm mt-1" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  Email
+                </label>
+                <Field 
+                  name="email" 
+                  type="email" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                  placeholder="ejemplo@correo.com"
+                />
+                <ErrorMessage 
+                  name="email" 
+                  component="div" 
+                  className="text-red-500 text-sm mt-1" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  Contraseña {isEdit && <span className="text-xs text-gray-400">(dejar vacío para no cambiar)</span>}
+                </label>
+                <Field 
+                  name="password" 
+                  type="password" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                  placeholder="Nueva contraseña"
+                />
+                <ErrorMessage 
+                  name="password" 
+                  component="div" 
+                  className="text-red-500 text-sm mt-1" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  Confirmar contraseña
+                </label>
+                <Field 
+                  name="confirmPassword" 
+                  type="password" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                  placeholder="Confirma tu contraseña"
+                />
+                <ErrorMessage 
+                  name="confirmPassword" 
+                  component="div" 
+                  className="text-red-500 text-sm mt-1" 
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button 
+                  type="submit" 
+                  className="bg-teal-600 cursor-pointer hover:bg-teal-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+                >
+                  Guardar
+                </button>
+                <button 
+                  type="button" 
+                  onClick={onClick} 
+                  className="bg-gray-300 cursor-pointer hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </Form>
+          </Formik>
+        </div>
       </div>
     </div>
   )
