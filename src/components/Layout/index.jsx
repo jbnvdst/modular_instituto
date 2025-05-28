@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Sidebar } from "../Sidebar";
 import bellIcon from "../../assets/icons/bell.png";
 import logoutIcon from "../../assets/icons/exit.png";
 import profilePic from "../../assets/img/default_profile.jpg";
+import { ModalAlert } from "../../components/ModalAlert";
 
 const Layout = ({ children }) => {
-    const [showModal, setShowModal] = React.useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     // Obtener la ruta actual
     const location = window.location.pathname;
@@ -49,25 +50,18 @@ const Layout = ({ children }) => {
                     {children}
                 </main>
                 {showModal && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                        <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full">
-                            <h2 className="text-xl font-semibold mb-4 text-gray-800">¿Seguro que quieres cerrar sesión?</h2>
-                            <div className="flex justify-end gap-3">
-                                <button
-                                    className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                    onClick={() => setShowModal(false)}
-                                >
-                                    Cancelar
-                                </button>
-                                <a
-                                    href="/login"
-                                    className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
-                                >
-                                    Sí, cerrar sesión
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    <ModalAlert
+                        title="Cerrar sesión"
+                        message="¿Estás seguro de que deseas cerrar sesión?"
+                        cancelText="Cancelar"
+                        confirmText="Cerrar sesión"
+                        onCancel={() => setShowModal(false)}
+                        onConfirm={() => {
+                            // Aquí va tu lógica para cerrar sesión
+                            localStorage.removeItem("token");
+                            window.location.href = "/login";
+                        }}
+                    />
                 )}
             </div>
         </div>

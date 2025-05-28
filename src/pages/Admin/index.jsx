@@ -1,21 +1,20 @@
 import React, { useState } from "react";
-import { Users, Building2, Shield, Plus, Edit2, Trash2, Search, UserCheck, AlertTriangle, Edit } from "lucide-react";
+import { Users, Building2, Shield, Plus, Edit2, Trash2, Search, UserCheck, AlertTriangle } from "lucide-react";
 import { Layout } from "../../components/Layout";
-import { useAreas } from "../../utils/context/AreasContext";
 import { EditUser } from "../../components/EditUser";
 import axios from "axios";
+import { ModalAlert } from "../../components/ModalAlert";
 
 const Admin = () => {
     const [activeTab, setActiveTab] = useState('usuarios');
     const [searchTerm, setSearchTerm] = useState('');
-    const { areas, fetchAreas, createArea } = useAreas();
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [isCreatingUser, setIsCreatingUser] = useState(false);
     const [confirmationModal, setConfirmationModal] = useState(null);
 
     React.useEffect(() => {
         fetchUsers();
-        fetchAreas();
     }, []);
 
     const handleDeleteUser = async (userId) => {
@@ -50,6 +49,57 @@ const Admin = () => {
         { nivel: 4, cargo: "Especialistas", personas: ["Dr. Pedro Martínez", "Dra. Sofia Reyes", "Dr. Carlos Mendez", "Dra. Isabel Vega"], color: "bg-teal-300" },
     ];
 
+    const areas = [
+        {
+            id: 1,
+            nombre: "Cardiología",
+            description: "Área de atención cardíaca",
+            owner: "Dr. García",
+            personal: 10,
+            activos: 8
+        },
+        {
+            id: 2,
+            nombre: "Pediatría",
+            description: "Área de atención infantil",
+            owner: "Dra. López",
+            personal: 12,
+            activos: 10
+        },
+        {
+            id: 3,
+            nombre: "Farmacia",
+            description: "Área de medicamentos",
+            owner: "Lic. Pérez",
+            personal: 5,
+            activos: 5
+        },
+        {
+            id: 4,
+            nombre: "Farmacia",
+            description: "Área de medicamentos",
+            owner: "Lic. Pérez",
+            personal: 5,
+            activos: 5
+        },
+        {
+            id: 5,
+            nombre: "Farmacia",
+            description: "Área de medicamentos",
+            owner: "Lic. Pérez",
+            personal: 5,
+            activos: 5
+        },
+        {
+            id: 6,
+            nombre: "Farmacia",
+            description: "Área de medicamentos",
+            owner: "Lic. Pérez",
+            personal: 5,
+            activos: 5
+        }
+    ];
+
     const TabButton = ({ id, label, icon: Icon, isActive, onClick }) => (
         <button
             onClick={() => onClick(id)}
@@ -65,18 +115,24 @@ const Admin = () => {
     );
 
     const UsuariosTab = () => (
-        <div className="space-y-6">
+        <div className="flex flex-col gap-3 pb-5">
             <div className="flex justify-between items-end">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800">Gestión de Usuarios</h2>
                     <p className="text-gray-600 mt-1">Administra el personal médico del hospital</p>
                 </div>
-                <button onClick={() => setSelectedUser(0)} className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">
+                <button
+                    onClick={() => {
+                        setSelectedUser({});
+                        setIsCreatingUser(true);
+                    }}
+                    className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200"
+                >
                     <Plus size={20} className="mr-2" />
                     Nuevo Usuario
                 </button>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
                 <div className="p-4 border-b border-gray-200">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -153,7 +209,7 @@ const Admin = () => {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                 {areas.map((area) => (
                     <div key={area.id} className={`h-full flex flex-col bg-white justify-between ${area.color} rounded-2xl border-2 border-gray-100 hover:shadow-lg transition-shadow`}>
                         <div className="flex items-center justify-between mb-4 rounded-t-2xl px-4 py-3 bg-gradient-to-tr from-emerald-500 to-teal-600">
@@ -292,30 +348,29 @@ const Admin = () => {
             </div>
             {/* Confirmation Modal */}
             {confirmationModal !== null && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-md">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-4">Confirmar Eliminación</h2>
-                        <p className="text-gray-600 mb-4">¿Estás seguro de que deseas eliminar al usuario {users.find(user => user.id === confirmationModal)?.name}?</p>
-                        <div className="flex justify-end space-x-2">
-                            <button 
-                                onClick={() => setConfirmationModal(null)} 
-                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                            >
-                                Cancelar
-                            </button>
-                            <button 
-                                onClick={() => handleDeleteUser(confirmationModal)} 
-                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                            >
-                                Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <ModalAlert
+                        title="Confirmar Eliminación"
+                        message="¿Estás seguro de que deseas eliminar al usuario?"
+                        cancelText="Cancelar"
+                        confirmText="Eliminar"
+                        onCancel={() => setConfirmationModal(null)}
+                        onConfirm={() => {
+                            handleDeleteUser(confirmationModal)
+                        }}
+                    />
             )}
             {/* Edit User Modal */}
             {selectedUser !== null && (
-                <EditUser user={selectedUser} setUsers={setUsers} onClick={() => setSelectedUser(null)}/>
+                <EditUser
+                    user={selectedUser}
+                    setUsers={setUsers}
+                    onClick={() => {
+                        setSelectedUser(null);
+                        setIsCreatingUser(false);
+                    }}
+                    fetchUsers={fetchUsers}
+                    isCreating={isCreatingUser}
+                />
             )}
         </Layout>
     );

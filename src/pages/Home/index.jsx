@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
+import axios from "axios";
 import { Layout } from "../../components/Layout";
 import { CountingCard } from "../../components/CountingCard";
 import { PiNotificationDuotone, PiSirenDuotone } from "react-icons/pi";
@@ -9,11 +10,47 @@ import { lastNotifications } from "../../utils/data/lastNotifications";
 import * as Chart from "chart.js/auto";
 import { areas } from "../../utils/data/areas";
 
+function getEmailFromToken() {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log("Payload del token:", payload); // <-- Agrega esto
+        return payload.email || null;
+    } catch {
+        return null;
+    }
+}
+
+function getIdFromToken() {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.id || null;
+    } catch {
+        return null;
+    }
+}
+
 const Home = () => {
+    const [nombre, setNombre] = useState("");
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
 
-     useEffect(() => {
+    useEffect(() => {
+        const id = getIdFromToken();
+        axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/get/`)
+            .then(res => {
+                const usuario = res.data.find(
+                    u => u.id === id
+                );
+                setNombre(usuario ? usuario.name : "Usuario");
+            })
+            .catch(() => setNombre("Usuario"));
+    }, []);
+
+    useEffect(() => {
         Chart.Chart.register(
         Chart.CategoryScale,
         Chart.LinearScale,
@@ -170,12 +207,14 @@ const Home = () => {
         };
     }, []);
   
-    return (
+    return ( 
         <Layout>
             <h1 className="text-sm text-gray-500">Home</h1>
             <hr className="my-4 border-gray-200"/>
             <div className="flex flex-col gap-2 shadow-md bg-gradient-to-tr from-[#0f7871] to-[#13b2a0] rounded-2xl p-6">
-                <h1 className="text-white font-bold text-2xl">Bienvenido Pedro</h1>
+                <h1 className="text-white font-bold text-2xl">
+                    Hola {nombre}
+                </h1>
                 <p className="text-white text-xs">Sistema de gestión hospitalaria operando correctamente</p>
                 <p className="text-white text-xs mt-4">Última actualización: 2025-05-20</p>
             </div>

@@ -13,7 +13,10 @@ const Login = () => {
     if (e) e.preventDefault();
     setIsLoading(true);
     try {
-      await login(email, password);
+      const user = await login(email, password); // <-- tu función login debe retornar el usuario
+      if (user && user.name) {
+        localStorage.setItem("userName", user.name); // Guarda el nombre
+      }
       alert('Login exitoso!');
     } catch {
       alert('Credenciales incorrectas');

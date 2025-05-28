@@ -1,10 +1,11 @@
-import React, { use } from 'react'
+import React from 'react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import axios from 'axios'
-import { SiEightsleep } from 'react-icons/si'
 
-function EditUser({ user, setUsers, onClick }) {
+function EditUser({ user, setUsers, onClick, fetchUsers }) {
+  const isEdit = !!user && !!user.id;
+
   const initialValues = {
     name: user?.name || '',
     email: user?.email || '',
@@ -15,63 +16,73 @@ function EditUser({ user, setUsers, onClick }) {
   const validationSchema = Yup.object({
     name: Yup.string().required('El nombre es obligatorio'),
     email: Yup.string().email('Email inválido').required('El email es obligatorio'),
-    password: Yup.string().min(6, 'Mínimo 6 caracteres').required('La contraseña es obligatoria'),
-    confirmPassword: Yup.string()
-      .oneOf([Yup.ref('password'), null], 'Las contraseñas no coinciden')
-      .required('Confirma tu contraseña'),
+    password: isEdit
+      ? Yup.string()
+      : Yup.string().min(6, 'Mínimo 6 caracteres').required('La contraseña es obligatoria'),
+    confirmPassword: isEdit
+      ? Yup.string().oneOf([Yup.ref('password'), null], 'Las contraseñas no coinciden')
+      : Yup.string().oneOf([Yup.ref('password'), null], 'Las contraseñas no coinciden').required('Confirma tu contraseña'),
   })
 
   const handleSubmit = async (values, { resetForm }) => {
-  if (values.password !== values.confirmPassword) {
-    alert('Las contraseñas no coinciden');
-    return;
-  }
-
-  const body = {
-    name: values.name,
-    email: values.email,
-    password: values.password,
-  };
-
-  try {
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`,
-      body,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    if (response.status === 201) {
-        const userWithOutPassword = {
-          ...response.data.user,
-          password: undefined, // Exclude password from the user object
-        };
-      setUsers((prevUsers) => [...prevUsers, userWithOutPassword]);
-      onClick();
-      resetForm();
-      onClick();
-    } else {
-      alert('Error al crear el usuario. Por favor, inténtalo de nuevo.');
+    if (values.password !== values.confirmPassword) {
+      alert('Las contraseñas no coinciden');
+      return;
     }
-  } catch (error) {
-    console.error('Error al crear el usuario:', error);
-    alert('Error al crear el usuario. Por favor, inténtalo de nuevo.');
-  }
-};
 
+    const body = {
+      name: values.name,
+      email: values.email,
+      ...(values.password ? { password: values.password } : {}),
+    };
+
+    try {
+      if (isEdit) {
+        // EDITAR USUARIO
+        const response = await axios.put(
+          `${import.meta.env.VITE_API_BASE_URL}/api/auth/update/${user.id}`,
+          body,
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+        if (response.status === 200) {
+          await fetchUsers();
+          onClick();
+          resetForm();
+        } else {
+          alert('Error al editar el usuario. Por favor, inténtalo de nuevo.');
+        }
+      } else {
+        // CREAR USUARIO
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`,
+          body,
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+        if (response.status === 201) {
+          await fetchUsers();
+          onClick();
+          resetForm();
+        } else {
+          alert('Error al crear el usuario. Por favor, inténtalo de nuevo.');
+        }
+      }
+    } catch (error) {
+      alert('Error al guardar el usuario. Por favor, inténtalo de nuevo.');
+      console.error(error);
+    }
+  };
 
   return (
     <div className='w-[100svw] h-[100svh] flex items-center justify-center fixed top-0 left-0 bg-[#000000A5] z-50'>
       <div className='bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-md'>
         <h1 className='text-2xl font-bold text-gray-800'>
-          {user === 0 ? 'Agregar' : 'Editar'} usuario
+          {isEdit ? 'Editar' : 'Agregar'} usuario
         </h1>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
+          enableReinitialize
         >
           <Form className='flex flex-col gap-4 mt-4'>
             <div>
@@ -85,7 +96,7 @@ function EditUser({ user, setUsers, onClick }) {
               <ErrorMessage name='email' component='div' className='text-red-500 text-sm' />
             </div>
             <div>
-              <label className='block font-semibold'>Contraseña</label>
+              <label className='block font-semibold'>Contraseña {isEdit && <span className="text-xs text-gray-400">(dejar vacío para no cambiar)</span>}</label>
               <Field name='password' type='password' className='border rounded px-2 py-1 w-full' />
               <ErrorMessage name='password' component='div' className='text-red-500 text-sm' />
             </div>
