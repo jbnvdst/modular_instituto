@@ -50,51 +50,51 @@ const Admin = () => {
     const areas = [
         {
             id: 1,
-            nombre: "Cardiología",
-            description: "Área de atención cardíaca",
+            name: "Cardiology",
+            description: "Cardiac care area",
             owner: "Dr. García",
-            personal: 10,
-            activos: 8
+            staff: 10,
+            active: 8
         },
         {
             id: 2,
-            nombre: "Pediatría",
-            description: "Área de atención infantil",
+            name: "Pediatrics",
+            description: "Child care area",
             owner: "Dra. López",
-            personal: 12,
-            activos: 10
+            staff: 12,
+            active: 10
         },
         {
             id: 3,
-            nombre: "Farmacia",
-            description: "Área de medicamentos",
+            name: "Pharmacy",
+            description: "Medication area",
             owner: "Lic. Pérez",
-            personal: 5,
-            activos: 5
+            staff: 5,
+            active: 5
         },
         {
             id: 4,
-            nombre: "Farmacia",
-            description: "Área de medicamentos",
+            name: "Pharmacy",
+            description: "Medication area",
             owner: "Lic. Pérez",
-            personal: 5,
-            activos: 5
+            staff: 5,
+            active: 5
         },
         {
             id: 5,
-            nombre: "Farmacia",
-            description: "Área de medicamentos",
+            name: "Pharmacy",
+            description: "Medication area",
             owner: "Lic. Pérez",
-            personal: 5,
-            activos: 5
+            staff: 5,
+            active: 5
         },
         {
             id: 6,
-            nombre: "Farmacia",
-            description: "Área de medicamentos",
+            name: "Pharmacy",
+            description: "Medication area",
             owner: "Lic. Pérez",
-            personal: 5,
-            activos: 5
+            staff: 5,
+            active: 5
         }
     ];
 
@@ -212,7 +212,7 @@ const Admin = () => {
                     <div key={area.id} className={`h-full flex flex-col bg-white justify-between ${area.color} rounded-2xl border-2 border-gray-100 hover:shadow-lg transition-shadow`}>
                         <div className="flex items-center justify-between mb-4 rounded-t-2xl px-4 py-3 bg-gradient-to-tr from-emerald-500 to-teal-600">
                             <div className="flex items-center">
-                                <h3 className="text-lg font-semibold text-white">{area.nombre}</h3>
+                                <h3 className="text-lg font-semibold text-white">{area.name}</h3>
                             </div>
                             <div className="flex space-x-1">
                                 <button className="cursor-pointer text-white hover:text-gray-800 p-1">
@@ -231,9 +231,9 @@ const Admin = () => {
                             
                             <div className="flex justify-between items-center">
                                 <span className="text-sm text-gray-600">Personal Total:</span>
-                                <span className="font-semibold text-gray-800">{area.personal}</span>
+                                <span className="font-semibold text-gray-800">{area.staff}</span>
                             </div>
-                            <div className="flex justify-between items-center">
+                            {/* <div className="flex justify-between items-center">
                                 <span className="text-sm text-gray-600">Activos:</span>
                                 <span className="font-semibold text-green-600">{area.activos}</span>
                             </div>
@@ -242,7 +242,7 @@ const Admin = () => {
                                     className="bg-gradient-to-tr from-emerald-500 to-teal-600 h-2 rounded-full transition-all duration-300"
                                     style={{ width: `${(area.activos / area.personal) * 100}%` }}
                                 ></div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 ))}

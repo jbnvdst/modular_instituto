@@ -1,6 +1,8 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { GoHome } from "react-icons/go";
+
+import { Activity } from 'lucide-react';
 import { BsStoplights } from "react-icons/bs";
 import { LuUserRoundCog } from "react-icons/lu";
 
@@ -10,7 +12,14 @@ const Sidebar = () => {
     return (
         <aside className=" fixed bg-[#feffff] rounded-r-2xl w-[230px] h-svh shadow-lg border border-r-gray-100">
             <nav className="w-full flex flex-col items-center gap-16">
-                <h1 className="text-gray-900 font-semibold text-lg p-8">App Logo</h1>
+                <div className="flex justify-center items-center pt-8 gap-2">
+                    <div className="inline-flex items-center justify-center w-10 h-10 bg-teal-600 rounded-2xl shadow-lg">
+                        <Activity className="text-white w-6 h-6" />
+                    </div>
+                    <h1 className="text-lg font-semibold text-gray-800">
+                        Portal Médico
+                    </h1>
+                </div>
                 <ul className="flex flex-col w-full">
                     <li className="w-full">
                         <NavLink to="/" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>

@@ -341,9 +341,11 @@ const Home = () => {
                         <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
                             <IoSettingsSharp className="text-white" size={20} />
                         </div>
-                        <div>
-                            <h1 className="text-gray-800 font-semibold text-sm ">Configuración</h1>
-                        </div>
+                        <NavLink to="/profile">
+                            <div>
+                                <h1 className="text-gray-800 font-semibold text-sm ">Configuración</h1>
+                            </div>
+                        </NavLink>
                     </div>
                     <div className="mt-4">
                         {/* Aquí iría el gráfico */}
