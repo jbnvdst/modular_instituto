@@ -3,15 +3,19 @@ import  Layout  from "../../components/Layout";
 import { Card } from "../../components/Card";
 import { SemaphoreCard } from "../../components/SemaphoreCard";
 import { SemaphoreDetail } from "../../components/SemaphoreDetail";
-import { areas } from "../../utils/data/areas";
+// import { areas } from "../../utils/data/areas";
+import { useAreas } from "../../utils/context/AreasContext";
 
 const Semaphores = () => {
     const [selectedArea, setSelectedArea] = React.useState(null);
+    const { areas, loadingAreas } = useAreas();
+
 
     const tasksCount = areas.reduce((acc, area) => {
-        const urgentTasks = area.tasks.filter(task => task.status === 'Urgente').length;
-        const attentionTasks = area.tasks.filter(task => task.status === 'Atención').length;
-        const pendingTasks = area.tasks.filter(task => task.status === 'Pendiente').length;
+        console.log(areas);
+        const urgentTasks = area.tasks.filter(task => task.priority === 'rojo').length;
+        const attentionTasks = area.tasks.filter(task => task.priority === 'amarillo').length;
+        const pendingTasks = area.tasks.filter(task => task.priority === 'verde').length;
 
         return {
             urgent: acc.urgent + urgentTasks,
@@ -27,6 +31,7 @@ const Semaphores = () => {
             )}
             <h2 className="text-sm text-gray-500">Semaphores</h2>
                 <hr className="my-4 border-gray-200"/>
+            {loadingAreas ? "Cargando áreas..." :
             <div className="flex flex-col gap-2">
                 <div className="grid grid-cols-4 gap-4">
                     <Card>
@@ -52,7 +57,7 @@ const Semaphores = () => {
                         <SemaphoreCard key={area.id} semaphore={area} setSelectedArea={setSelectedArea}/>
                     ))}
                 </div>
-            </div>
+            </div>}
         </Layout>
     );
 }

@@ -3,15 +3,15 @@ import closeIcon from "../../assets/icons/close.png";
 import { TaskCard } from "../TaskCard";
 
 const SemaphoreDetail = ({ semaphore, onClose }) => {
-    const { id, name, description, owner } = semaphore;
-    const tasksCount = semaphore.tasks.map((task) => task.status).reduce((acc, status) => {
-        if (status === 'Urgente') {
+    const { id, name, description, ownerUser } = semaphore;
+    const tasksCount = semaphore.tasks.map((task) => task.priority).reduce((acc, priority) => {
+        if (priority === 'rojo') {
             acc.urgent += 1;
         }
-        if (status === 'Atención') {
+        if (priority === 'amarillo') {
             acc.attention += 1;
         }
-        if (status === 'Pendiente') {
+        if (priority === 'verde') {
             acc.pending += 1;
         }
         return acc;
@@ -27,12 +27,12 @@ const SemaphoreDetail = ({ semaphore, onClose }) => {
                         <img src={closeIcon} alt="Close" className="w-4 h-4 cursor-pointer invert" onClick={() => onClose(null)} />
                     </div>
                     <p className="text-sm">{description}</p>
-                    <b className="text-sm">Encargado: {owner}</b>
+                    <b className="text-sm">Encargado: {ownerUser.name}</b>
                 </div>
                 <div className="flex flex-col gap-2 p-4 bg-white">
-                    {semaphore.tasks.map((task) => (
+                    {semaphore.tasks.length > 0 ? semaphore.tasks.map((task) => (
                         <TaskCard key={task.id} task={task} />
-                    ))}
+                    )) : <h1 className="text-gray-900">No hay niguna tarea en esta area</h1>}
                 </div>
                 <div className="w-full bg-gray-200 grid grid-cols-3 p-2 rounded-b-[32px]">
                     <div className="flex flex-col items-center text-rose-700 border-r border-white">

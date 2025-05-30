@@ -1,15 +1,15 @@
 import React from "react";
 
 const SemaphoreCard = ({ semaphore, setSelectedArea }) => {
-    const { id, name, description, owner } = semaphore;
-    const tasksCount = semaphore.tasks.map((task) => task.status).reduce((acc, status) => {
-        if (status === 'Urgente') {
+    const { id, name, description, ownerUser } = semaphore;
+    const tasksCount = semaphore.tasks.map((task) => task.priority).reduce((acc, priority) => {
+        if (priority === 'rojo') {
             acc.urgent += 1;
         }
-        if (status === 'Atención') {
+        if (priority === 'amarillo') {
             acc.attention += 1;
         }
-        if (status === 'Pendiente') {
+        if (priority === 'verde') {
             acc.pending += 1;
         }
         return acc;
@@ -32,13 +32,13 @@ const SemaphoreCard = ({ semaphore, setSelectedArea }) => {
     const calculateOrder = () => {
         let order = 0;
         semaphore.tasks.forEach((task) => {
-            if (task.status === 'Urgente') {
+            if (task.priority === 'rojo') {
                 order += 100;
             }
-            if (task.status === 'Atención') {
+            if (task.priority === 'amarillo') {
                 order += 10;
             }
-            if (task.status === 'Pendiente') {
+            if (task.priority === 'verde') {
                 order += 1;
             }
         });
@@ -54,7 +54,7 @@ const SemaphoreCard = ({ semaphore, setSelectedArea }) => {
                 </div>
                 <div className="flex flex-col h-full justify-between gap-2 px-4 pb-4">
                     <p className="text-sm">{description}</p>
-                    <b className="text-sm">Encargado: {owner}</b>
+                    <b className="text-sm">Encargado: {ownerUser.name}</b>
                     <button onClick={() => setSelectedArea(semaphore)} className="px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">View Details</button>
                 </div>
             </div>

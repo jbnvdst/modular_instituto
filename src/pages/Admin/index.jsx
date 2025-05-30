@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Users, Building2, Shield, Plus, Edit2, Trash2, Search, UserCheck, AlertTriangle } from "lucide-react";
 import  Layout  from "../../components/Layout";
 import { EditUser } from "../../components/EditUser";
 import axios from "axios";
 import { ModalAlert } from "../../components/ModalAlert";
+import { useAreas } from "../../utils/context/AreasContext";
+import { EditArea } from "../../components/EditArea";
 
 const Admin = () => {
     const [activeTab, setActiveTab] = useState('usuarios');
@@ -12,6 +14,10 @@ const Admin = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [isCreatingUser, setIsCreatingUser] = useState(false);
     const [confirmationModal, setConfirmationModal] = useState(null);
+    const { areas, setAreas } = useAreas(); 
+    const [selectedArea, setSelectedArea] = useState(null);
+    const [isCreatingArea, setIsCreatingArea] = useState(false);
+    const [confirmationAreaModal, setConfirmationAreaModal] = useState(null);
 
     React.useEffect(() => {
         fetchUsers();
@@ -31,6 +37,21 @@ const Admin = () => {
         setConfirmationModal(null);
     };
 
+    const handleDeleteArea = async (areaId) => {
+        try {
+            const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/area/${areaId}`);
+            if (response.status === 200) {
+                setAreas((prevAreas) => prevAreas.filter(area => area.id !== areaId));
+                setConfirmationAreaModal(null);
+            } else {
+                alert("Error al eliminar el área.");
+            }
+        } catch (error) {
+            alert("Error al eliminar el área.");
+            console.error(error);
+        }
+    };
+
     const fetchUsers = async () => {
         try {
             const reponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/get`);
@@ -47,56 +68,6 @@ const Admin = () => {
         { nivel: 4, cargo: "Especialistas", personas: ["Dr. Pedro Martínez", "Dra. Sofia Reyes", "Dr. Carlos Mendez", "Dra. Isabel Vega"], color: "bg-teal-300" },
     ];
 
-    const areas = [
-        {
-            id: 1,
-            name: "Cardiology",
-            description: "Cardiac care area",
-            owner: "Dr. García",
-            staff: 10,
-            active: 8
-        },
-        {
-            id: 2,
-            name: "Pediatrics",
-            description: "Child care area",
-            owner: "Dra. López",
-            staff: 12,
-            active: 10
-        },
-        {
-            id: 3,
-            name: "Pharmacy",
-            description: "Medication area",
-            owner: "Lic. Pérez",
-            staff: 5,
-            active: 5
-        },
-        {
-            id: 4,
-            name: "Pharmacy",
-            description: "Medication area",
-            owner: "Lic. Pérez",
-            staff: 5,
-            active: 5
-        },
-        {
-            id: 5,
-            name: "Pharmacy",
-            description: "Medication area",
-            owner: "Lic. Pérez",
-            staff: 5,
-            active: 5
-        },
-        {
-            id: 6,
-            name: "Pharmacy",
-            description: "Medication area",
-            owner: "Lic. Pérez",
-            staff: 5,
-            active: 5
-        }
-    ];
 
     const TabButton = ({ id, label, icon: Icon, isActive, onClick }) => (
         <button
@@ -198,10 +169,16 @@ const Admin = () => {
         <div className="flex flex-col gap-3 pb-5">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Gestión de Áreas</h2>
+                    <h2 onClick={() => console.log(areas)} className="text-2xl font-bold text-gray-800">Gestión de Áreas</h2>
                     <p className="text-gray-600 mt-1">Administra las áreas médicas del hospital</p>
                 </div>
-                <button className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">
+                <button
+                    onClick={() => {
+                        setSelectedArea({});
+                        setIsCreatingArea(true);
+                    }}
+                    className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200"
+                >
                     <Plus size={20} className="mr-2" />
                     Nueva Área
                 </button>
@@ -215,23 +192,32 @@ const Admin = () => {
                                 <h3 className="text-lg font-semibold text-white">{area.name}</h3>
                             </div>
                             <div className="flex space-x-1">
-                                <button className="cursor-pointer text-white hover:text-gray-800 p-1">
+                                <button
+                                    className="cursor-pointer text-white hover:text-gray-800 p-1"
+                                    onClick={() => {
+                                        setSelectedArea(area);
+                                        setIsCreatingArea(false); // Es edición, no creación
+                                    }}
+                                >
                                     <Edit2 size={16} />
                                 </button>
-                                <button className="cursor-pointer text-red-600 hover:text-red-800 p-1">
+                                <button
+                                    className="cursor-pointer text-red-600 hover:text-red-800 p-1"
+                                    onClick={() => setConfirmationAreaModal(area.id)}
+                                >
                                     <Trash2 size={16} />
                                 </button>
                             </div>
                         </div>
                         <div className="flex flex-col justify-between items-start px-4 pb-4 gap-2">
                                 <span className="text-sm text-gray-600">{area.description}</span>
-                                <span className="text-sm font-semibold text-gray-800">Encargado: {area.owner}</span>
+                                <span className="text-sm font-semibold text-gray-800">Encargado: {area.ownerUser.name}</span>
                         </div>
                         <div className="px-4 pb-4">
                             
                             <div className="flex justify-between items-center">
                                 <span className="text-sm text-gray-600">Personal Total:</span>
-                                <span className="font-semibold text-gray-800">{area.staff}</span>
+                                <span className="font-semibold text-gray-800">{area.usersCount}</span>
                             </div>
                             {/* <div className="flex justify-between items-center">
                                 <span className="text-sm text-gray-600">Activos:</span>
@@ -368,6 +354,32 @@ const Admin = () => {
                     }}
                     fetchUsers={fetchUsers}
                     isCreating={isCreatingUser}
+                />
+            )}
+            {/* Edit Area Modal */}
+            {selectedArea !== null && (
+                <EditArea
+                    area={selectedArea} 
+                    onClick={() => {
+                        setSelectedArea(null);
+                        setIsCreatingArea(false);
+                    }}
+                    isCreating={isCreatingArea}
+                    users={users} 
+                />
+            )}
+            {/* Confirmation Area Modal */}
+            {confirmationAreaModal !== null && (
+                <ModalAlert
+                    title="Confirmar Eliminación"
+                    message="¿Estás seguro de que deseas eliminar el área?"
+                    cancelText="Cancelar"
+                    confirmText="Eliminar"
+                    onCancel={() => setConfirmationAreaModal(null)}
+                    onConfirm={() => {
+                        handleDeleteArea(confirmationAreaModal);
+                        setConfirmationAreaModal(null);
+                    }}
                 />
             )}
         </Layout>
