@@ -23,6 +23,8 @@ const Layout = ({ children }) => {
         pageTitle = "Panel de Administración";
     } else if (location.pathname.startsWith("/notification")) {
         pageTitle = "Notificaciones";
+    } else if (location.pathname.startsWith("/areas")) {
+        pageTitle = "Gestión de Áreas Asignadas";
     }
 
     // Limpiar el input de búsqueda al cambiar de ruta

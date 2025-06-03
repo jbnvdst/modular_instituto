@@ -1,10 +1,10 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { GoHome } from "react-icons/go";
-
 import { Activity } from 'lucide-react';
 import { BsStoplights } from "react-icons/bs";
 import { LuUserRoundCog } from "react-icons/lu";
+import { IoLayersOutline } from "react-icons/io5";
 
 const Sidebar = () => {
     const activeStyle = 'text-[#266b6b] bg-[#f1fdfb] rounded-xl';
@@ -29,6 +29,11 @@ const Sidebar = () => {
                     <li className="w-full">
                         <NavLink to="/semaphores" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
                             <BsStoplights className={({ isActive }) => ` ${isActive ? activeStyle : unactiveStyle}`} size={22} /><span className="font-medium">Semáforos</span>
+                        </NavLink>
+                    </li>
+                    <li className="w-full">
+                        <NavLink to="/areas" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
+                            <IoLayersOutline  className={({ isActive }) => ` ${isActive ? activeStyle : unactiveStyle}`} size={22} /><span className="font-medium">Areas</span>
                         </NavLink>
                     </li>
                     <li className="w-full">
