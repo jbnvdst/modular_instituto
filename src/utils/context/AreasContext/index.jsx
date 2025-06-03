@@ -8,14 +8,14 @@ export const AreasProvider = ({ children }) => {
   const [ loadingAreas , setLoadingAreas ] = useState(true);
 
   const fetchAreas = async () => {
-    console.log("Fetching areas...");
+    // console.log("Fetching areas...");
     setLoadingAreas(true);
     try {
         const reponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/area/tasksByArea`);
         // console.log("Areas fetched:", reponse.data);
         setAreas(reponse.data);
     } catch (error) {
-        // console.error("Error fetching areas:", error);
+        console.error("Error fetching areas:", error);
     }
     setLoadingAreas(false);
   };

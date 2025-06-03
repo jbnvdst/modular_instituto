@@ -8,20 +8,29 @@ import { useAreas } from "../../utils/context/AreasContext";
 import { EditArea } from "../../components/EditArea";
 
 const Admin = () => {
-    const [activeTab, setActiveTab] = useState('usuarios');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [users, setUsers] = useState([]);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [isCreatingUser, setIsCreatingUser] = useState(false);
-    const [confirmationModal, setConfirmationModal] = useState(null);
+    const [ activeTab, setActiveTab] = useState('usuarios');
+    const [ searchTerm, setSearchTerm] = useState('');
+    const [ users, setUsers] = useState([]);
+    const [ selectedUser, setSelectedUser] = useState(null);
+    const [ isCreatingUser, setIsCreatingUser] = useState(false);
+    const [ confirmationModal, setConfirmationModal] = useState(null);
     const { areas, setAreas } = useAreas(); 
-    const [selectedArea, setSelectedArea] = useState(null);
-    const [isCreatingArea, setIsCreatingArea] = useState(false);
-    const [confirmationAreaModal, setConfirmationAreaModal] = useState(null);
+    const [ areaToEdit, setAreaToEdit] = useState(null);
+    const [ isCreatingArea, setIsCreatingArea] = useState(false);
+    const [ confirmationAreaModal, setConfirmationAreaModal] = useState(null);
+    const [ selectedArea, setSelectedArea ] = useState(null);
+    const [ personalInArea, setPersonalInArea ] = useState([]);
+    const [ isCreatingPersonal, setIsCreatingPersonal ] = useState(false);
+    const [ selectedPersonal , setSelectedPersonal ] = useState({});
 
     React.useEffect(() => {
         fetchUsers();
     }, []);
+
+    useEffect(() => {
+        fetchPersonal();
+    }, [selectedArea]);
+
 
     const handleDeleteUser = async (userId) => {
         try {
@@ -58,6 +67,16 @@ const Admin = () => {
             setUsers(reponse.data);
         } catch (error) {
             console.error("Error fetching users:", error);
+        }
+    };
+
+    const fetchPersonal = async () => {
+        try {
+            if (!selectedArea) return; // No hay área seleccionada
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/user-areas/getUsers/${selectedArea.id}`);
+            setPersonalInArea(response.data);
+        } catch (error) {
+            console.error("Error fetching personal in area:", error);
         }
     };
 
@@ -165,76 +184,219 @@ const Admin = () => {
         </div>
     );
 
-    const AreasTab = () => (
-        <div className="flex flex-col gap-3 pb-5">
+    const AreasTab = () => {
+        return (
+            <div className="flex flex-col gap-3 pb-5">
             <div className="flex justify-between items-center">
-                <div>
-                    <h2 onClick={() => console.log(areas)} className="text-2xl font-bold text-gray-800">Gestión de Áreas</h2>
-                    <p className="text-gray-600 mt-1">Administra las áreas médicas del hospital</p>
+                {selectedArea ? (
+                <div className="flex w-full justify-between items-center">
+                    <h1
+                    onClick={() => console.log(selectedArea)}
+                    className="text-2xl font-bold text-gray-800"
+                    >
+                    Área: {selectedArea.name}
+                    </h1>
+                    <button
+                    onClick={() => setSelectedArea(null)}
+                    className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200"
+                    >
+                    Volver
+                    </button>
                 </div>
-                <button
+                ) : (
+                <div className="flex w-full justify-between items-center">
+                    <div>
+                    <h2
+                        onClick={() => console.log(areas)}
+                        className="text-2xl font-bold text-gray-800"
+                    >
+                        Gestión de Áreas
+                    </h2>
+                    <p className="text-gray-600 mt-1">
+                        Administra las áreas médicas del hospital
+                    </p>
+                    </div>
+                    <button
                     onClick={() => {
-                        setSelectedArea({});
+                        setAreaToEdit({});
                         setIsCreatingArea(true);
                     }}
                     className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200"
-                >
+                    >
                     <Plus size={20} className="mr-2" />
                     Nueva Área
+                    </button>
+                </div>
+                )}
+            </div>
+
+            {!selectedArea && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
+                {areas.map((area) => (
+                    <div
+                    key={area.id}
+                    className={`h-full flex flex-col bg-white justify-between ${area.color} rounded-2xl border-2 border-gray-100 hover:shadow-lg transition-shadow`}
+                    >
+                    <div className="flex items-center justify-between mb-4 rounded-t-2xl px-4 py-3 bg-gradient-to-tr from-emerald-500 to-teal-600">
+                        <div className="flex items-center">
+                        <h3 className="text-lg font-semibold text-white">{area.name}</h3>
+                        </div>
+                        <div className="flex space-x-1">
+                        <button
+                            className="cursor-pointer text-white hover:text-gray-800 p-1"
+                            onClick={() => {
+                            setAreaToEdit(area);
+                            setIsCreatingArea(false);
+                            }}
+                        >
+                            <Edit2 size={16} />
+                        </button>
+                        <button
+                            className="cursor-pointer text-red-600 hover:text-red-800 p-1"
+                            onClick={() => setConfirmationAreaModal(area.id)}
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col justify-between items-start px-4 pb-4 gap-2">
+                        <span className="text-sm text-gray-600">{area.description}</span>
+                        <span className="text-sm font-semibold text-gray-800">
+                        Encargado: {area.ownerUser.name}
+                        </span>
+                    </div>
+
+                    <div className="flex flex-col items-end px-4 gap-4 pb-4">
+                        <div className="flex w-full items-center gap-2">
+                        <span className="text-sm text-gray-600">Personal Total:</span>
+                        <span className="font-semibold text-gray-800">{area.usersCount}</span>
+                        </div>
+
+                        <button
+                        onClick={() => setSelectedArea(area)}
+                        className="flex justify-end px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200"
+                        >
+                        <h1>Gestionar personal</h1>
+                        </button>
+                    </div>
+                    </div>
+                ))}
+                </div>
+            )}
+
+            {selectedArea && (
+    <div className="w-full flex flex-col gap-6">
+        <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-sm p-6">
+            <div className="flex items-center justify-between">
+                <h3 onClick={() => console.log(personalInArea)} className="text-lg font-semibold text-gray-800 mb-4">Personal Asignado</h3>
+                <button
+                    onClick={() => {
+                        setIsCreatingPersonal(true); 
+                        setSelectedPersonal({});
+                    }}
+                    className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">
+                    <Plus size={20} className="mr-2" />
+                    Agregar Personal
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
-                {areas.map((area) => (
-                    <div key={area.id} className={`h-full flex flex-col bg-white justify-between ${area.color} rounded-2xl border-2 border-gray-100 hover:shadow-lg transition-shadow`}>
-                        <div className="flex items-center justify-between mb-4 rounded-t-2xl px-4 py-3 bg-gradient-to-tr from-emerald-500 to-teal-600">
-                            <div className="flex items-center">
-                                <h3 className="text-lg font-semibold text-white">{area.name}</h3>
-                            </div>
-                            <div className="flex space-x-1">
-                                <button
-                                    className="cursor-pointer text-white hover:text-gray-800 p-1"
-                                    onClick={() => {
-                                        setSelectedArea(area);
-                                        setIsCreatingArea(false); // Es edición, no creación
-                                    }}
-                                >
-                                    <Edit2 size={16} />
-                                </button>
-                                <button
-                                    className="cursor-pointer text-red-600 hover:text-red-800 p-1"
-                                    onClick={() => setConfirmationAreaModal(area.id)}
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            </div>
+            {/* Formulario para agregar nuevo personal */}
+            {isCreatingPersonal && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                    <h4 className="text-md font-medium text-gray-700 mb-4">Nuevo Personal</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+                            <input
+                                type="text"
+                                value={selectedPersonal.name || ''}
+                                onChange={(e) => setSelectedPersonal({...selectedPersonal, name: e.target.value})}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                                placeholder="Nombre completo"
+                            />
                         </div>
-                        <div className="flex flex-col justify-between items-start px-4 pb-4 gap-2">
-                                <span className="text-sm text-gray-600">{area.description}</span>
-                                <span className="text-sm font-semibold text-gray-800">Encargado: {area.ownerUser.name}</span>
-                        </div>
-                        <div className="px-4 pb-4">
-                            
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600">Personal Total:</span>
-                                <span className="font-semibold text-gray-800">{area.usersCount}</span>
-                            </div>
-                            {/* <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600">Activos:</span>
-                                <span className="font-semibold text-green-600">{area.activos}</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div 
-                                    className="bg-gradient-to-tr from-emerald-500 to-teal-600 h-2 rounded-full transition-all duration-300"
-                                    style={{ width: `${(area.activos / area.personal) * 100}%` }}
-                                ></div>
-                            </div> */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                            <select
+                                value={selectedPersonal.role || ''}
+                                onChange={(e) => setSelectedPersonal({...selectedPersonal, role: e.target.value})}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                            >
+                                <option value="">Seleccionar rol</option>
+                                <option value="Administrador">Administrador</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Empleado">Empleado</option>
+                                <option value="Técnico">Técnico</option>
+                            </select>
                         </div>
                     </div>
-                ))}
+                    <div className="flex justify-end space-x-2 mt-4">
+                        <button
+                            onClick={() => {
+                                setIsCreatingUser(false);
+                                setSelectedPersonal({});
+                            }}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            onClick={() => {
+                                // Aquí iría la lógica para guardar el usuario
+                                console.log('Guardar usuario:', selectedPersonal);
+                                setIsCreatingUser(false);
+                                setSelectedPersonal({});
+                            }}
+                            className="px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-transparent rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        >
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {personalInArea.map((user) => (
+                            <tr key={user.id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div>
+                                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                        <div className="text-sm text-gray-500">{user.email}</div>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.areas[0].UserArea.role}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div className="flex space-x-2">
+                                        <button onClick={() => console.log("Haz la funcion de editar usuario")} className="text-blue-600 cursor-pointer hover:text-blue-800">
+                                            <Edit2 size={16} />
+                                        </button>
+                                        <button onClick={() => console.log("Haz la funcion de eliminr usuario")} className="text-red-600 cursor-pointer hover:text-red-800">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
-    );
+    </div>
+)}
+            </div>
+        );
+        };
+
 
     const PermisosTab = () => (
         <div className="flex flex-col gap-3 pb-5">
@@ -357,11 +519,11 @@ const Admin = () => {
                 />
             )}
             {/* Edit Area Modal */}
-            {selectedArea !== null && (
+            {areaToEdit !== null && (
                 <EditArea
-                    area={selectedArea} 
+                    area={areaToEdit} 
                     onClick={() => {
-                        setSelectedArea(null);
+                        setAreaToEdit(null);
                         setIsCreatingArea(false);
                     }}
                     isCreating={isCreatingArea}

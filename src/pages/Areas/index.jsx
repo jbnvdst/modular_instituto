@@ -1,40 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Layout from '../../components/Layout';
 import { ChevronDown, Plus, Users, FileText, Download, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { NewTask } from '../../components/NewTask';
+import { useAreas } from '../../utils/context/AreasContext';
+import { useAuth } from '../../utils/context/AuthContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 function Areas() {
   const [selectedArea, setSelectedArea] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-//   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', priority: 'medium', assignedTo: '' });
+  const { areas, loadingAreas } = useAreas();
+  const { user } = useAuth();
+  
+  // Ajusta el filtro para usar ownerId
+  const userAreas = areas.filter(area => area.ownerId === user?.id);
 
-  // Datos simulados - aquí usarías axios para obtener los datos reales
-  const userAreas = [
-    { id: 1, name: 'Urgencias', code: 'URG' },
-    { id: 2, name: 'Pediatría', code: 'PED' },
-    { id: 3, name: 'Cardiología', code: 'CAR' },
-    { id: 4, name: 'Quirófano 2', code: 'Q2' }
-  ];
-
-  const [areaData, setAreaData] = useState({
-    tasks: [
-      { id: 1, title: 'Revisar equipos de monitoreo', priority: 'high', assignedBy: 'Dr. García', assignedTo: 'Enf. López', createdAt: '2025-06-03 08:30' },
-      { id: 2, title: 'Actualizar inventario medicamentos', priority: 'medium', assignedBy: 'Dra. Martínez', assignedTo: 'Aux. Pérez', createdAt: '2025-06-03 09:15' },
-      { id: 3, title: 'Preparar sala de trauma', priority: 'high', assignedBy: 'Dr. Rodríguez', assignedTo: 'Enf. Sánchez', createdAt: '2025-06-03 10:00' },
-      { id: 4, title: 'Revisar protocolos COVID', priority: 'low', assignedBy: 'Dra. Herrera', assignedTo: 'Enf. Gómez', createdAt: '2025-06-03 11:30' }
-    ],
-    staff: [
-      { id: 1, name: 'Dr. García', role: 'Médico Residente', status: 'Activo' },
-      { id: 2, name: 'Enf. López', role: 'Enfermera Jefe', status: 'Activo' },
-      { id: 3, name: 'Aux. Pérez', role: 'Auxiliar', status: 'Descanso' },
-      { id: 4, name: 'Enf. Sánchez', role: 'Enfermera', status: 'Activo' }
-    ]
-  });
+  // Obtén los datos del área seleccionada
+  const areaData = userAreas.find(area => area.id === selectedArea);
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -120,9 +106,11 @@ function Areas() {
                 </span>
                 <ChevronDown className="w-5 h-5 text-gray-400" />
                 </button>
-                
                 {isDropdownOpen && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+                    {userAreas.length === 0 && (
+                    <div className="px-4 py-3 text-gray-500">No tienes áreas asignadas como encargado.</div>
+                    )}
                     {userAreas.map(area => (
                     <button
                         key={area.id}
@@ -155,29 +143,32 @@ function Areas() {
                     <span>Nueva Tarea</span>
                     </button>
                 </div>
-                
                 <div className="space-y-3">
-                    {areaData.tasks.map(task => (
-                    <div key={task.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div className="flex items-center space-x-3">
-                        <div className={`p-2 rounded-full ${getPriorityColor(task.priority)}`}>
-                            {getPriorityIcon(task.priority)}
+                    {areaData?.tasks?.length > 0 ? (
+                      areaData.tasks.map(task => (
+                        <div key={task.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                          <div className="flex items-center space-x-3">
+                            <div className={`p-2 rounded-full ${getPriorityColor(task.priority)}`}>
+                              {getPriorityIcon(task.priority)}
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900">{task.title}</h4>
+                              <p className="text-sm text-gray-500">
+                                Asignado por: {task.assignedBy} | Para: {task.assignedTo}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(task.priority)}`}>
+                              {task.priority === 'high' ? 'Urgente' : task.priority === 'medium' ? 'Normal' : 'Baja'}
+                            </span>
+                            <p className="text-xs text-gray-500 mt-1">{task.createdAt}</p>
+                          </div>
                         </div>
-                        <div>
-                            <h4 className="font-medium text-gray-900">{task.title}</h4>
-                            <p className="text-sm text-gray-500">
-                            Asignado por: {task.assignedBy} | Para: {task.assignedTo}
-                            </p>
-                        </div>
-                        </div>
-                        <div className="text-right">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(task.priority)}`}>
-                            {task.priority === 'high' ? 'Urgente' : task.priority === 'medium' ? 'Normal' : 'Baja'}
-                        </span>
-                        <p className="text-xs text-gray-500 mt-1">{task.createdAt}</p>
-                        </div>
-                    </div>
-                    ))}
+                      ))
+                    ) : (
+                      <div className="text-gray-500">No hay tareas en esta área.</div>
+                    )}
                 </div>
                 </div>
 
@@ -190,19 +181,23 @@ function Areas() {
                     <h3 className="text-lg font-semibold text-gray-900">Personal Asignado</h3>
                     </div>
                     <div className="space-y-3">
-                    {areaData.staff.map(person => (
+                    {areaData?.staff?.length > 0 ? (
+                      areaData.staff.map(person => (
                         <div key={person.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                        <div>
+                          <div>
                             <h4 className="font-medium text-gray-900">{person.name}</h4>
                             <p className="text-sm text-gray-500">{person.role}</p>
-                        </div>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            person.status === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                        }`}>
+                          </div>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                              person.status === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
                             {person.status}
-                        </span>
+                          </span>
                         </div>
-                    ))}
+                      ))
+                    ) : (
+                      <div className="text-gray-500">No hay personal asignado a esta área.</div>
+                    )}
                     </div>
                 </div>
 
