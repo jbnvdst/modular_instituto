@@ -1,110 +1,49 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Bell, AlertTriangle, Clock, CheckCircle, Users, Activity, Thermometer, Stethoscope, Heart, Brain } from "lucide-react";
 import Layout from "../../components/Layout"; 
+import axios from "axios";
+import { useAuth } from "../../utils/context/AuthContext"; // Assuming you have an AuthContext for user authentication
+import { Notification } from "../../components/Notification";
 
 const Notifications = () => {
-    const [notifications] = useState([
-        {
-            id: 1,
-            type: "urgente",
-            title: "Falta de Oxígeno en UCI",
-            area: "Unidad de Cuidados Intensivos",
-            description: "Reservas de oxígeno por debajo del 20%. Requiere reabastecimiento inmediato.",
-            time: "2 minutos",
-            icon: <Thermometer className="w-5 h-5" />,
-            priority: "high"
-        },
-        {
-            id: 2,
-            type: "urgente",
-            title: "Personal Insuficiente en Emergencias",
-            area: "Sala de Emergencias",
-            description: "Solo 2 enfermeros disponibles para 15 pacientes en espera.",
-            time: "8 minutos",
-            icon: <Users className="w-5 h-5" />,
-            priority: "high"
-        },
-        {
-            id: 3,
-            type: "atencion",
-            title: "Mantenimiento de Equipos Programado",
-            area: "Cardiología",
-            description: "Revisión preventiva de electrocardiógrafos programada para mañana.",
-            time: "15 minutos",
-            icon: <Heart className="w-5 h-5" />,
-            priority: "medium"
-        },
-        {
-            id: 4,
-            type: "atencion",
-            title: "Solicitud de Materiales Quirúrgicos",
-            area: "Quirófano 3",
-            description: "Instrumentos especializados para cirugía de neurocirugía.",
-            time: "25 minutos",
-            icon: <Brain className="w-5 h-5" />,
-            priority: "medium"
-        },
-        {
-            id: 5,
-            type: "pendiente",
-            title: "Informe Mensual de Pediatría",
-            area: "Pediatría",
-            description: "Estadísticas del mes disponibles para revisión.",
-            time: "1 hora",
-            icon: <Stethoscope className="w-5 h-5" />,
-            priority: "low"
-        },
-        {
-            id: 6,
-            type: "pendiente",
-            title: "Capacitación de Personal Completada",
-            area: "Recursos Humanos",
-            description: "15 enfermeros completaron el curso de actualización.",
-            time: "2 horas",
-            icon: <CheckCircle className="w-5 h-5" />,
-            priority: "low"
-        }
-    ]);
-
+    const [notifications , setNotifications ] = useState([]);
     const [filter, setFilter] = useState('todas');
+    const { user } = useAuth(); 
+    const redNotificationTypes = ['critical_task']
+    const yellowNotificationTypes = ['solved_task', 'area_created']
+    const greenNotificationTypes = ['user_added_to_area', 'user_removed_from_area', 'welcome']
 
-    const getTypeConfig = (type) => {
-        const configs = {
-            urgente: {
-                bgColor: 'bg-red-50',
-                borderColor: 'border-l-red-500',
-                iconBg: 'bg-red-100',
-                iconColor: 'text-red-600',
-                textColor: 'text-red-800',
-                count: notifications.filter(n => n.type === 'urgente').length
-            },
-            atencion: {
-                bgColor: 'bg-yellow-50',
-                borderColor: 'border-l-yellow-500',
-                iconBg: 'bg-yellow-100',
-                iconColor: 'text-yellow-600',
-                textColor: 'text-yellow-800',
-                count: notifications.filter(n => n.type === 'atencion').length
-            },
-            pendiente: {
-                bgColor: 'bg-green-50',
-                borderColor: 'border-l-green-500',
-                iconBg: 'bg-green-100',
-                iconColor: 'text-green-600',
-                textColor: 'text-green-800',
-                count: notifications.filter(n => n.type === 'pendiente').length
-            }
-        };
-        return configs[type];
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+        const fetchNotifications = async () => {
+        try {
+            // const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/notification/user/${user.id}`);
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/notification/user/e6739733-62d2-4875-a100-e45a8225c2d9`);
+            setNotifications(response.data);
+        }
+        catch (error) {
+            console.error("Error fetching notifications:", error);
+        }};
+
+    const getFilteredNotifications = () => {
+    if (filter === 'todas') return notifications;
+    if (filter === 'urgente') return notifications.filter(n => redNotificationTypes.includes(n.type));
+    if (filter === 'atencion') return notifications.filter(n => yellowNotificationTypes.includes(n.type));
+    if (filter === 'pendiente') return notifications.filter(n => greenNotificationTypes.includes(n.type));
+    return notifications;
     };
+
+    
 
     const filteredNotifications = filter === 'todas' 
         ? notifications 
-        : notifications.filter(n => n.type === filter);
+        : notifications.filter(n => filter.includes(n.type));
 
-    const urgentCount = notifications.filter(n => n.type === 'urgente').length;
-    const attentionCount = notifications.filter(n => n.type === 'atencion').length;
-    const pendingCount = notifications.filter(n => n.type === 'pendiente').length;
+    const urgentCount = notifications.filter(n => redNotificationTypes.includes(n.type)).length;
+    const attentionCount = notifications.filter(n => yellowNotificationTypes.includes(n.type)).length;
+    const pendingCount = notifications.filter(n => greenNotificationTypes.includes(n.type)).length;
 
     return (
         <Layout>
@@ -235,44 +174,9 @@ const Notifications = () => {
                                 </div>
 
                                 <div className="divide-y divide-gray-200">
-                                    {filteredNotifications.map((notification) => {
-                                        const config = getTypeConfig(notification.type);
-                                        return (
-                                            <div key={notification.id} className={`p-6 ${config.bgColor} border-l-4 ${config.borderColor}`}>
-                                                <div className="flex items-start space-x-4">
-                                                    <div className={`p-2 ${config.iconBg} rounded-lg`}>
-                                                        <div className={config.iconColor}>
-                                                            {notification.icon}
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center justify-between">
-                                                            <h3 className="text-sm font-semibold text-gray-900">
-                                                                {notification.title}
-                                                            </h3>
-                                                            <span className="text-xs text-gray-500">
-                                                                hace {notification.time}
-                                                            </span>
-                                                        </div>
-                                                        <p className="text-sm font-medium text-gray-700 mt-1">
-                                                            {notification.area}
-                                                        </p>
-                                                        <p className="text-sm text-gray-600 mt-2">
-                                                            {notification.description}
-                                                        </p>
-                                                        <div className="flex items-center mt-3 space-x-3">
-                                                            <button className="text-xs font-medium text-teal-600 hover:text-teal-800">
-                                                                Ver detalles
-                                                            </button>
-                                                            <button className="text-xs font-medium text-gray-500 hover:text-gray-700">
-                                                                Marcar como leída
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                    {getFilteredNotifications().map((notification) => 
+                                        <Notification key={notification.id} notification={notification} />
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -298,7 +202,7 @@ const Notifications = () => {
                                 </div>
                             </div>
 
-                            {/* Status by Area */}
+                            {/* Status by relatedArea.name */}
                             <div className="bg-white rounded-lg shadow-sm p-6">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Estado por Área</h3>
                                 <div className="space-y-4">

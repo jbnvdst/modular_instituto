@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, use } from "react";
 import { Users, Building2, Shield, Plus, Edit2, Trash2, Search, UserCheck, AlertTriangle } from "lucide-react";
 import  Layout  from "../../components/Layout";
 import { EditUser } from "../../components/EditUser";
@@ -6,6 +6,7 @@ import axios from "axios";
 import { ModalAlert } from "../../components/ModalAlert";
 import { useAreas } from "../../utils/context/AreasContext";
 import { EditArea } from "../../components/EditArea";
+import { Formik, Form, Field } from "formik";
 
 const Admin = () => {
     const [ activeTab, setActiveTab] = useState('usuarios');
@@ -23,9 +24,15 @@ const Admin = () => {
     const [ isCreatingPersonal, setIsCreatingPersonal ] = useState(false);
     const [ selectedPersonal , setSelectedPersonal ] = useState({});
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchUsers();
     }, []);
+
+    const filterPersonal = () => {
+        const personalInAreaIds = new Set(personalInArea.map(user => user.id));
+        const filteredUsers = users.filter(user => !personalInAreaIds.has(user.id));
+        return filteredUsers;
+    }
 
     useEffect(() => {
         fetchPersonal();
@@ -286,116 +293,157 @@ const Admin = () => {
             )}
 
             {selectedArea && (
-    <div className="w-full flex flex-col gap-6">
-        <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-sm p-6">
-            <div className="flex items-center justify-between">
-                <h3 onClick={() => console.log(personalInArea)} className="text-lg font-semibold text-gray-800 mb-4">Personal Asignado</h3>
-                <button
-                    onClick={() => {
-                        setIsCreatingPersonal(true); 
-                        setSelectedPersonal({});
-                    }}
-                    className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">
-                    <Plus size={20} className="mr-2" />
-                    Agregar Personal
-                </button>
-            </div>
+                <div className="w-full flex flex-col gap-6">
+                    <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-sm p-6">
+                        <div className="flex items-center justify-between">
+                            <h3 onClick={() => console.log(personalInArea)} className="text-lg font-semibold text-gray-800 mb-4">Personal Asignado</h3>
+                            <button
+                                onClick={() => {
+                                    setIsCreatingPersonal(true); 
+                                    setSelectedPersonal({});
+                                }}
+                                className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">
+                                <Plus size={20} className="mr-2" />
+                                Agregar Personal
+                            </button>
+                        </div>
 
-            {/* Formulario para agregar nuevo personal */}
-            {isCreatingPersonal && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                    <h4 className="text-md font-medium text-gray-700 mb-4">Nuevo Personal</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
-                            <input
-                                type="text"
-                                value={selectedPersonal.name || ''}
-                                onChange={(e) => setSelectedPersonal({...selectedPersonal, name: e.target.value})}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                                placeholder="Nombre completo"
-                            />
+                        {/* Formulario para agregar nuevo personal */}
+                        {isCreatingPersonal && (
+                            <div className="mb-6 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                <h4 className="text-md font-medium text-gray-700 mb-4">Nuevo Personal</h4>
+
+                                <Formik
+                                    initialValues={{
+                                        name: '',
+                                        role: ''
+                                    }}
+                                    onSubmit={ async ( values, { resetForm }) => {
+                                        // console.log('Guardar usuario:', values);
+                                        try {
+                                            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/user-areas`, {
+                                                userId: values.userId,
+                                                areaId: selectedArea.id,
+                                                role: values.role
+                                            });
+                                            if (response.status === 200) {
+                                                console.log(response.data.user);
+                                                const newPersonal = {
+                                                    // id: response.data.user.id,
+                                                    // name: response.data.user.name,
+                                                    // email: response.data.user.email,
+                                                    ...response.data.user,
+                                                    areas: [{
+                                                        id: selectedArea.id,
+                                                        UserArea: {
+                                                            role: values.role
+                                                        }
+                                                    }]
+                                                }
+                                                setPersonalInArea((prev) => [...prev, newPersonal]);
+                                            } else {
+                                                console.error("Error al agregar personal:", response.data);
+                                            }
+                                        } catch (error) {
+                                            console.error("Error al agregar personal:", error);
+                                        }
+                                        resetForm();
+                                    }}
+                                >
+                                    {({ resetForm }) => (
+                                        <Form>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label onClick={() => console.log(users)} className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+                                                    <Field
+                                                        as="select"
+                                                        name="userId"
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                                                    >
+                                                        <option value="">Seleccionar usuario</option>
+                                                        {filterPersonal().map((user) => (
+                                                            <option key={user.id} value={user.id}>{user.name}</option>
+                                                        ))}
+                                                    </Field>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                                                    <Field
+                                                        as="select"
+                                                        name="role"
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                                                    >
+                                                        <option value="">Seleccionar rol</option>
+                                                        <option value="jefe">Jefe de area</option>
+                                                        <option value="subjefe">Sub jefe de area</option>
+                                                        <option value="miembro">Miembro</option>
+                                                    </Field>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-end space-x-2 mt-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setIsCreatingUser(false);
+                                                        resetForm();
+                                                    }}
+                                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                                >
+                                                    Cancelar
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    className="px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-transparent rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                                >
+                                                    Agregar
+                                                </button>
+                                            </div>
+                                        </Form>
+                                    )}
+                                </Formik>
+                            </div>
+                        )}
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {personalInArea.map((user) => (
+                                        <tr key={user.id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div>
+                                                    <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                                    <div className="text-sm text-gray-500">{user.email}</div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.areas[0].UserArea.role}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <div className="flex space-x-2">
+                                                    <button onClick={() => console.log("Haz la funcion de editar usuario")} className="text-blue-600 cursor-pointer hover:text-blue-800">
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button onClick={() => console.log("Haz la funcion de eliminr usuario")} className="text-red-600 cursor-pointer hover:text-red-800">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
-                            <select
-                                value={selectedPersonal.role || ''}
-                                onChange={(e) => setSelectedPersonal({...selectedPersonal, role: e.target.value})}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                            >
-                                <option value="">Seleccionar rol</option>
-                                <option value="Administrador">Administrador</option>
-                                <option value="Supervisor">Supervisor</option>
-                                <option value="Empleado">Empleado</option>
-                                <option value="Técnico">Técnico</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div className="flex justify-end space-x-2 mt-4">
-                        <button
-                            onClick={() => {
-                                setIsCreatingUser(false);
-                                setSelectedPersonal({});
-                            }}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            onClick={() => {
-                                // Aquí iría la lógica para guardar el usuario
-                                console.log('Guardar usuario:', selectedPersonal);
-                                setIsCreatingUser(false);
-                                setSelectedPersonal({});
-                            }}
-                            className="px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-transparent rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        >
-                            Agregar
-                        </button>
                     </div>
                 </div>
             )}
-
-            <div className="overflow-x-auto">
-                <table className="w-full">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {personalInArea.map((user) => (
-                            <tr key={user.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                                        <div className="text-sm text-gray-500">{user.email}</div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.areas[0].UserArea.role}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div className="flex space-x-2">
-                                        <button onClick={() => console.log("Haz la funcion de editar usuario")} className="text-blue-600 cursor-pointer hover:text-blue-800">
-                                            <Edit2 size={16} />
-                                        </button>
-                                        <button onClick={() => console.log("Haz la funcion de eliminr usuario")} className="text-red-600 cursor-pointer hover:text-red-800">
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
         </div>
-    </div>
-)}
-            </div>
-        );
-        };
+    );
+};
 
 
     const PermisosTab = () => (
