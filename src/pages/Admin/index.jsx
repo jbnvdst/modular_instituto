@@ -29,7 +29,6 @@ const Admin = () => {
         const filteredUsers = users.filter(user => !personalInAreaIds.has(user.id));
         return filteredUsers;
     }
-
     useEffect(() => {
         fetchPersonal();
     }, [selectedArea]);

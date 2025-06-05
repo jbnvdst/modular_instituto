@@ -13,13 +13,14 @@ const UsuariosTab = ({users, setUsers, fetchUsers}) => {
 
     useEffect(() => {
         // if (filteredUsers.length === 0 )setSearchTerm('');
-        if (searchTerm === ''){
+        if (searchTerm === ''){ 
             setFilteredUsers(users);
         }
         else{
-            setFilteredUsers(users.filter(u => (u.name.toLowerCase().includes(searchTerm.toLowerCase()))));
+            setFilteredUsers(users.filter(u => (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.role.includes(searchTerm.toLowerCase()) || u.areas.some(area => area.name.toLowerCase().includes(searchTerm.toLocaleLowerCase())))));
         }
     }, [searchTerm, users])
+
     
     const handleDeleteUser = async (userId) => {
         try {
@@ -83,11 +84,11 @@ const UsuariosTab = ({users, setUsers, fetchUsers}) => {
                                 <tr key={user.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div>
-                                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                            <div onClick={() => console.log(user)} className="text-sm font-medium text-gray-900">{user.name}</div>
                                             <div className="text-sm text-gray-500">{user.email}</div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.area || "no asignada"}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.areas.length > 0 ? user.areas.map(area => area.name).join(", ") :"No asignada"}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.role}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${

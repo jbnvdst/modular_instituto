@@ -17,13 +17,15 @@ const Notifications = () => {
 
 
     useEffect(() => {
-        fetchNotifications();
-    }, []);
+        if (user && user.id) {
+            fetchNotifications();
+        }
+    }, [user]);
 
     const fetchNotifications = async () => {
     try {
-        // const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/notification/user/${user.id}`);
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/notification/user/e6739733-62d2-4875-a100-e45a8225c2d9`);
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/notification/user/${user.id}`);
+        // const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/notification/user/e6739733-62d2-4875-a100-e45a8225c2d9`);
         setNotifications(response.data);
     }
     catch (error) {

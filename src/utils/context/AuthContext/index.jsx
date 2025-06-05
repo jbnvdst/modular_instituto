@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("token", data.token);
     // Decodifica el token para obtener el usuario
     const payload = JSON.parse(atob(data.token.split('.')[1]));
-    setUser({ id: payload.id, role: payload.role });
+    setUser({ id: payload.id, role: payload.role, name: payload.name });
     return data;
   };
 
@@ -41,7 +41,8 @@ export const AuthProvider = ({ children }) => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
       const payload = JSON.parse(atob(storedToken.split('.')[1]));
-      setUser({ id: payload.id, role: payload.role });
+      setUser({ id: payload.id, role: payload.role, name: payload.name });
+      // console.log(payload);
       setToken(storedToken);
     }
   }, []);

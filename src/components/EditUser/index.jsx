@@ -9,6 +9,7 @@ function EditUser({ user, setUsers, onClick, fetchUsers }) {
   const initialValues = {
     name: user?.name || '',
     email: user?.email || '',
+    role: 'default',
     password: '',
     confirmPassword: '',
   }
@@ -16,6 +17,7 @@ function EditUser({ user, setUsers, onClick, fetchUsers }) {
   const validationSchema = Yup.object({
     name: Yup.string().required('El nombre es obligatorio'),
     email: Yup.string().email('Email inválido').required('El email es obligatorio'),
+    role: Yup.string().notOneOf(["default"], "Debes seleccionar una opción válida").required('El rol es obligatorio'),
     password: isEdit
       ? Yup.string()
       : Yup.string().min(6, 'Mínimo 6 caracteres').required('La contraseña es obligatoria'),
@@ -33,11 +35,12 @@ function EditUser({ user, setUsers, onClick, fetchUsers }) {
     const body = {
       name: values.name,
       email: values.email,
+      role: values.role,
       ...(values.password ? { password: values.password } : {}),
     };
 
     try {
-      if (isEdit) {
+      if (isEdit) {  
         // EDITAR USUARIO
         const response = await axios.put(
           `${import.meta.env.VITE_API_BASE_URL}/api/auth/update/${user.id}`,
@@ -115,6 +118,26 @@ function EditUser({ user, setUsers, onClick, fetchUsers }) {
                 />
                 <ErrorMessage 
                   name="email" 
+                  component="div" 
+                  className="text-red-500 text-sm mt-1" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  Rol
+                </label>
+                <Field 
+                  as="select"
+                  name="role"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                >
+                  <option value="default">Selecciona un rol</option>
+                  <option value="medico">Medico</option>
+                  <option value="admin">Admin</option>
+                </Field>
+                <ErrorMessage 
+                  name="role" 
                   component="div" 
                   className="text-red-500 text-sm mt-1" 
                 />

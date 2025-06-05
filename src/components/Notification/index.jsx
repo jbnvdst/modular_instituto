@@ -61,7 +61,7 @@ function Notification({ notification , setNotifications }) {
                         </span>
                     </div>
                     <p className="text-sm font-medium text-gray-700 mt-1">
-                        {notification.relatedArea.name}
+                        {notification.relatedArea?.name || "Sin área"}
                     </p>
                     <p className="text-sm text-gray-600 mt-2">
                         {notification.description}
