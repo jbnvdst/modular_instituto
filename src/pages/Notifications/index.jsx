@@ -4,6 +4,7 @@ import Layout from "../../components/Layout";
 import axios from "axios";
 import { useAuth } from "../../utils/context/AuthContext"; // Assuming you have an AuthContext for user authentication
 import { Notification } from "../../components/Notification";
+import { AddTask } from "../../components/AddTask";
 
 const Notifications = () => {
     const [notifications , setNotifications ] = useState([]);
@@ -12,27 +13,30 @@ const Notifications = () => {
     const redNotificationTypes = ['critical_task']
     const yellowNotificationTypes = ['solved_task', 'area_created']
     const greenNotificationTypes = ['user_added_to_area', 'user_removed_from_area', 'welcome']
+    const [showAddTask, setShowAddTask] = useState(false);
+
 
     useEffect(() => {
         fetchNotifications();
     }, []);
 
-        const fetchNotifications = async () => {
-        try {
-            // const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/notification/user/${user.id}`);
-            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/notification/user/e6739733-62d2-4875-a100-e45a8225c2d9`);
-            setNotifications(response.data);
-        }
-        catch (error) {
-            console.error("Error fetching notifications:", error);
-        }};
+    const fetchNotifications = async () => {
+    try {
+        // const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/notification/user/${user.id}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/notification/user/e6739733-62d2-4875-a100-e45a8225c2d9`);
+        setNotifications(response.data);
+    }
+    catch (error) {
+        console.error("Error fetching notifications:", error);
+    }};
 
     const getFilteredNotifications = () => {
-    if (filter === 'todas') return notifications;
-    if (filter === 'urgente') return notifications.filter(n => redNotificationTypes.includes(n.type));
-    if (filter === 'atencion') return notifications.filter(n => yellowNotificationTypes.includes(n.type));
-    if (filter === 'pendiente') return notifications.filter(n => greenNotificationTypes.includes(n.type));
-    return notifications;
+        if (filter === 'todas') return notifications.filter(n => !n.read);
+        if (filter === 'urgente') return notifications.filter(n => (redNotificationTypes.includes(n.type) && !n.read));
+        if (filter === 'atencion') return notifications.filter(n => (yellowNotificationTypes.includes(n.type) && !n.read));
+        if (filter === 'pendiente') return notifications.filter(n => (greenNotificationTypes.includes(n.type) && !n.read));
+        if (filter === 'leidos') return notifications.filter(n => n.read);
+        return notifications;
     };
 
     
@@ -41,9 +45,10 @@ const Notifications = () => {
         ? notifications 
         : notifications.filter(n => filter.includes(n.type));
 
-    const urgentCount = notifications.filter(n => redNotificationTypes.includes(n.type)).length;
-    const attentionCount = notifications.filter(n => yellowNotificationTypes.includes(n.type)).length;
-    const pendingCount = notifications.filter(n => greenNotificationTypes.includes(n.type)).length;
+    const urgentCount = notifications.filter(n => (redNotificationTypes.includes(n.type) && !n.read)).length;
+    const attentionCount = notifications.filter(n => (yellowNotificationTypes.includes(n.type) && !n.read)).length;
+    const pendingCount = notifications.filter(n => (greenNotificationTypes.includes(n.type) && !n.read)).length;
+    const readCount = notifications.filter(n => n.read).length;
 
     return (
         <Layout>
@@ -124,7 +129,7 @@ const Notifications = () => {
                             <div className="bg-white rounded-lg shadow-sm">
                                 <div className="p-6 border-b border-gray-200">
                                     <div className="flex items-center justify-between mb-4">
-                                        <h2 className="text-lg font-semibold text-gray-900">Notificaciones Recientes</h2>
+                                        <h2 onClick={ () => console.log(notifications)} className="text-lg font-semibold text-gray-900">Notificaciones Recientes</h2>
                                         <span className="text-sm text-gray-500">Últimas 24 horas</span>
                                     </div>
                                     
@@ -170,12 +175,22 @@ const Notifications = () => {
                                         >
                                             Pendiente ({pendingCount})
                                         </button>
+                                        <button
+                                            onClick={() => setFilter('leidos')}
+                                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                                filter === 'leidos' 
+                                                    ? 'bg-blue-100 text-blue-600' 
+                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            Leídos ({readCount})
+                                        </button>
                                     </div>
                                 </div>
 
                                 <div className="divide-y divide-gray-200">
                                     {getFilteredNotifications().map((notification) => 
-                                        <Notification key={notification.id} notification={notification} />
+                                        <Notification key={notification.id} notification={notification} setNotifications={setNotifications} />
                                     )}
                                 </div>
                             </div>
@@ -187,7 +202,10 @@ const Notifications = () => {
                             <div className="bg-white rounded-lg shadow-sm p-6">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
                                 <div className="space-y-3">
-                                    <button className="w-full flex items-center p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors">
+                                    <button 
+                                        onClick={() => setShowAddTask(true)}
+                                        className="w-full flex items-center p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                                        >
                                         <Bell className="w-5 h-5 text-teal-600 mr-3" />
                                         <span className="text-sm font-medium text-teal-800">Crear Alerta</span>
                                     </button>
@@ -236,6 +254,13 @@ const Notifications = () => {
                     </div>
                 </div>
             </div>
+            {showAddTask && (
+                <AddTask 
+                    onClick={() => setShowAddTask(false)} 
+                    fetchAlerts={fetchNotifications} 
+                />
+            )}
+
         </Layout>
     );
 };

@@ -1,20 +1,47 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Bell } from "lucide-react";
+import axios from 'axios';
 
-function Notification({ notification }) {
+function Notification({ notification , setNotifications }) {
     const redNotificationTypes = ['critical_task']
     const yellowNotificationTypes = ['solved_task', 'area_created']
+    const [ loading , setLoading ] = useState(false);
 
-
-    const config = {
-        bgColor: 'bg-white',
-        borderColor: redNotificationTypes.includes(notification.type) ? '#ef444490' : yellowNotificationTypes.includes(notification.type) ? '#f59e0b90' : '#10b98190',
-        iconBg: redNotificationTypes.includes(notification.type) ? 'bg-[#ef444420]' : yellowNotificationTypes.includes(notification.type) ? 'bg-[#f59e0b20]' : 'bg-[#10b98120]',
-        iconColor: redNotificationTypes.includes(notification.type) ? 'text-[#ef4444]' : yellowNotificationTypes.includes(notification.type) ? 'text-[#f59e0b]' : 'text-[#10b981]'
+    const handleMarkAsRead = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/notification/markAsRead/${notification.id}`);
+            if (response.status === 200) {
+                setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, read: !n.read } : n));
+            }
+        } catch (error) {
+            console.error('Error al marcar la notificación como leída:', error);
+        }
+        finally {
+            setLoading(false);
+        }
     }
 
-    // ['welcome', 'critical_task', 'solved_task', 'area_created','user_added_to_area','user_removed_from_area']
-    console.log(config.borderColor)
+    const getConfig = () => {
+        if (notification.read) {
+            return {
+                bgColor: 'bg-white',
+                borderColor: "#cacaca",
+                iconBg: "bg-gray-200",
+                iconColor: "text-gray-400"
+            }
+        }
+        else {
+            return {
+                bgColor: 'bg-white',
+                borderColor: redNotificationTypes.includes(notification.type) ? '#ef444490' : yellowNotificationTypes.includes(notification.type) ? '#f59e0b90' : '#10b98190',
+                iconBg: redNotificationTypes.includes(notification.type) ? 'bg-[#ef444420]' : yellowNotificationTypes.includes(notification.type) ? 'bg-[#f59e0b20]' : 'bg-[#10b98120]',
+                iconColor: redNotificationTypes.includes(notification.type) ? 'text-[#ef4444]' : yellowNotificationTypes.includes(notification.type) ? 'text-[#f59e0b]' : 'text-[#10b981]'
+            }
+        }
+    }
+
+    const config = getConfig();
 
     
 
@@ -43,8 +70,8 @@ function Notification({ notification }) {
                         <button className="text-xs font-medium text-teal-600 hover:text-teal-800">
                             Ver detalles
                         </button>
-                        <button className="text-xs font-medium text-gray-500 hover:text-gray-700">
-                            Marcar como leída
+                        <button onClick={ () => handleMarkAsRead(notification.id) } disabled={loading} className="text-xs font-medium text-gray-500 hover:text-gray-700">
+                            {loading ? "Cargando..." : notification.read ? "Marcar como no leída" : "Marcar como leída"}
                         </button>
                     </div>
                 </div>
