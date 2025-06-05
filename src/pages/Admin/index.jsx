@@ -13,9 +13,6 @@ const Admin = () => {
         fetchUsers();
     }, []);
 
-
-
-
     const fetchUsers = async () => {
         try {
             const reponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/get`);
@@ -25,7 +22,6 @@ const Admin = () => {
         }
     };
 
-    
 
     const jerarquia = [
         { nivel: 1, cargo: "Director General", personas: ["Dr. García"], color: "bg-teal-600" },
