@@ -9,7 +9,8 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
 
   const login = async (email, password) => {
-    const response = await fetch(`${VITE_API_BASE_URL}/api/auth/login/`, {
+    console.log("Login attempt with email:", VITE_API_BASE_URL);
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
