@@ -10,7 +10,7 @@ import Areas from './pages/Areas'
 import { AreasProvider } from "./utils/context/AreasContext";
 
 
-const AppRoutes = () => { 
+const AppRoutes = () => {
   let routes = useRoutes([
     { path: '/', element: <Home /> },
     { path: '/profile', element: <Profile /> },
