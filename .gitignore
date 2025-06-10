@@ -24,12 +24,12 @@ dist-ssr
 *.sw?
 
 # Media files
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.webp
-*.svg
+# *.png
+# *.jpg
+# *.jpeg
+# *.gif
+# *.webp
+# *.svg
 
-!src/assets/icons/*.png
-!src/assets/images/*.jpg
+# !src/assets/icons/*.png
+# !src/assets/images/*.jpg
