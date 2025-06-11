@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 const SemaphoreCard = ({ semaphore, setSelectedArea }) => {
+    const [order, setOrder] = React.useState(0);
+    const [average, setAverage] = React.useState(0);
     const { id, name, description, ownerUser } = semaphore;
+
     const tasksCount = semaphore.tasks.map((task) => task.priority).reduce((acc, priority) => {
         if (priority === 'rojo') {
             acc.urgent += 1;
@@ -15,6 +18,13 @@ const SemaphoreCard = ({ semaphore, setSelectedArea }) => {
         return acc;
     }
     , { urgent: 0, attention: 0, pending: 0 });
+
+    useEffect(() => {
+        let value = calculateOrder();
+        setOrder(value);
+        setAverage(value < 0 ? 100 - (value * -1 / semaphore.tasks.length) : 100);
+        console.log(`Order: ${value}, Average: ${100 - (value * -1 / semaphore.tasks.length)}`);
+    }, [semaphore.tasks]);
 
     // const getStatusColor = (status) => {
     //     switch (status) {
@@ -30,6 +40,7 @@ const SemaphoreCard = ({ semaphore, setSelectedArea }) => {
     // }
 
     const calculateOrder = () => {
+        if(semaphore.tasks.length === 0) return 0;
         let order = 0;
         semaphore.tasks.forEach((task) => {
             if (task.priority === 'rojo') {
@@ -43,14 +54,48 @@ const SemaphoreCard = ({ semaphore, setSelectedArea }) => {
             }
         });
         return order * -1;
-    }
+
+        // let average = order / semaphore.tasks.length;
+    };
     
+    const getColor = () => {
+        let avg = average;
+        // Asegura que el valor esté entre 0 y 100
+        // Clamp entre 0 y 100
+        avg = Math.max(0, Math.min(100, avg));
+
+        // Define los colores como objetos RGBA
+        const red =    { r: 255, g: 0,   b: 0,   a: 112 }; // #FF000070
+        const yellow = { r: 245, g: 158, b: 11,  a: 112 }; // #F59E0B70
+        const green =  { r: 22,  g: 163, b: 74,  a: 112 }; // #16A34A70
+
+        let start, end, ratio;
+
+        if (avg <= 50) {
+            ratio = avg / 50;
+            start = red;
+            end = yellow;
+        } else {
+            ratio = (avg - 50) / 50;
+            start = yellow;
+            end = green;
+        }
+
+        const r = Math.round(start.r + (end.r - start.r) * ratio);
+        const g = Math.round(start.g + (end.g - start.g) * ratio);
+        const b = Math.round(start.b + (end.b - start.b) * ratio);
+        const a = Math.round(start.a + (end.a - start.a) * ratio);
+
+        const toHex = (c) => c.toString(16).padStart(2, '0');
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}${toHex(a)}`;
+    }
 
     return (
-        <div className={`flex flex-col overflow-hidden justify-between rounded-[32px] w-64 shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] hover:-translate-y-1 duration-200 bg-white`} style={{ order: calculateOrder() }}>
+        <div className={`flex flex-col overflow-hidden justify-between rounded-[32px] w-64 shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] hover:-translate-y-1 duration-200 bg-white`} style={{ order: order }}>
             <div className="flex flex-col justify-between h-full gap-2">
-                <div className="w-full px-4 py-3 bg-gradient-to-tr from-emerald-500 to-teal-600">
+                <div className="flex justify-between w-full px-4 py-3" style={{ backgroundColor: getColor(order) }}>
                     <h2 className="text-2xl text-white font-semibold">{name}</h2>
+                    <h1 className="text-4xl text-white font-semibold">{average}</h1>
                 </div>
                 <div className="flex flex-col h-full justify-between gap-2 px-4 pb-4">
                     <p className="text-sm">{description}</p>
