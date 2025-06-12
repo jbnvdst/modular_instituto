@@ -12,6 +12,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 function Areas() {
   const [selectedArea, setSelectedArea] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showNewTaskModal, setShowNewTaskModal] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', priority: 'medium', assignedTo: '' });
   const { areas, loadingAreas } = useAreas();
   const { user } = useAuth();
@@ -136,11 +137,11 @@ function Areas() {
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-900">Tareas del Área</h3>
                     <button
-                    onClick={() => setShowNewTaskModal(true)}
-                    className="flex items-center space-x-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors"
+                      onClick={() => setShowNewTaskModal(true)}
+                      className="flex items-center space-x-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors"
                     >
-                    <Plus className="w-4 h-4" />
-                    <span>Nueva Tarea</span>
+                      <Plus className="w-4 h-4" />
+                      <span>Nueva Tarea</span>
                     </button>
                 </div>
                 <div className="space-y-3">
@@ -221,15 +222,15 @@ function Areas() {
             </>
             )}
 
-            {/* Modal Nueva Tarea
+            Modal Nueva Tarea
             {showNewTaskModal && (
             <NewTask
               areaId={selectedArea}
               onClose={() => setShowNewTaskModal(false)}
               users={areaData.staff}
-              fetchTasks={fetchTasks} // si tienes una función para refrescar tareas
+              // fetchTasks={fetchTasks} // si tienes una función para refrescar tareas
             />
-            )} */}
+            )}
         </div>
         </div>
     </Layout>

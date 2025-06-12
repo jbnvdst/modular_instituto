@@ -7,7 +7,7 @@ function NewTask({ areaId, onClose, users = [], fetchTasks }) {
   const initialValues = {
     title: '',
     description: '',
-    priority: 'medium',
+    priority: 'amarillo',
     assignedTo: '',
   }
 
@@ -76,9 +76,9 @@ function NewTask({ areaId, onClose, users = [], fetchTasks }) {
                   name="priority"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
                 >
-                  <option value="low">Baja</option>
-                  <option value="medium">Normal</option>
-                  <option value="high">Urgente</option>
+                  <option value="verde">Pendiente</option>
+                  <option value="amarillo">Normal</option>
+                  <option value="rojo">Urgente</option>
                 </Field>
                 <ErrorMessage
                   name="priority"
