@@ -4,6 +4,7 @@ import  Layout  from "../../components/Layout";
 import axios from "axios";
 import { UsuariosTab } from "../../components/UsuariosTab";
 import { AreasTab } from "../../components/AreasTab";
+import { SubAreasTab } from "../../components/SubAreasTab";
 
 const Admin = () => {
     const [ activeTab, setActiveTab] = useState('usuarios');
@@ -45,64 +46,11 @@ const Admin = () => {
         </button>
     );
 
-
-    const PermisosTab = () => (
-        <div className="flex flex-col gap-3 pb-5">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Gestión de Permisos</h2>
-                    <p className="text-gray-600 mt-1">Administra la jerarquía y permisos del hospital</p>
-                </div>
-                <button className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">
-                    <Shield size={20} className="mr-2" />
-                    Configurar Permisos
-                </button>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-                <h3 className="text-xl font-semibold text-gray-800 mb-8 text-center">Jerarquía Organizacional</h3>
-                
-                <div className="flex flex-col items-center space-y-6">
-                    {jerarquia.map((nivel) => (
-                        <div key={nivel.nivel} className="flex flex-col items-center">
-                            <div className={`${nivel.color} text-white px-8 py-4 rounded-lg shadow-md min-w-64 text-center`}>
-                                <h4 className="font-semibold text-lg">{nivel.cargo}</h4>
-                                <div className="mt-2 space-y-1">
-                                    {nivel.personas.map((persona, index) => (
-                                        <div key={index} className="text-sm opacity-90 flex items-center justify-center">
-                                            <UserCheck size={14} className="mr-1" />
-                                            {persona}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            {nivel.nivel < jerarquia.length && (
-                                <div className="w-px h-8 bg-gray-300 relative">
-                                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-8 border-transparent border-t-gray-300"></div>
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-
-                <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="flex items-center">
-                        <AlertTriangle className="text-yellow-600 mr-2" size={20} />
-                        <p className="text-sm text-yellow-800">
-                            Los permisos se heredan hacia abajo en la jerarquía. Los cambios en niveles superiores afectan a los subordinados.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-
     const renderContent = () => {
         switch(activeTab) {
             // case 'usuarios': return <UsuariosTab />;
             case 'areas': return <AreasTab users={users}/>;
-            case 'permisos': return <PermisosTab />;
+            case 'subareas': return <SubAreasTab />;
             default: return <UsuariosTab users={users} setUsers={setUsers} fetchUsers={fetchUsers} />;
         }
     };
@@ -129,10 +77,10 @@ const Admin = () => {
                         onClick={setActiveTab} 
                     />
                     <TabButton 
-                        id="permisos" 
-                        label="Permisos" 
+                        id="subareas" 
+                        label="Necesidades" 
                         icon={Shield}
-                        isActive={activeTab === 'permisos'} 
+                        isActive={activeTab === 'subareas'} 
                         onClick={setActiveTab} 
                     />
                 </div>

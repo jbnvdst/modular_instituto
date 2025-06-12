@@ -12,7 +12,7 @@ const Semaphores = () => {
 
 
     const tasksCount = areas.reduce((acc, area) => {
-        console.log(areas);
+        // console.log(areas);
         const urgentTasks = area.tasks.filter(task => task.priority === 'rojo').length;
         const attentionTasks = area.tasks.filter(task => task.priority === 'amarillo').length;
         const pendingTasks = area.tasks.filter(task => task.priority === 'verde').length;

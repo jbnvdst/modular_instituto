@@ -23,7 +23,7 @@ const SemaphoreCard = ({ semaphore, setSelectedArea }) => {
         let value = calculateOrder();
         setOrder(value);
         setAverage(value < 0 ? 100 - (value * -1 / semaphore.tasks.length) : 100);
-        console.log(`Order: ${value}, Average: ${100 - (value * -1 / semaphore.tasks.length)}`);
+        // console.log(`Order: ${value}, Average: ${100 - (value * -1 / semaphore.tasks.length)}`);
     }, [semaphore.tasks]);
 
     // const getStatusColor = (status) => {
@@ -95,7 +95,7 @@ const SemaphoreCard = ({ semaphore, setSelectedArea }) => {
             <div className="flex flex-col justify-between h-full gap-2">
                 <div className="flex justify-between w-full px-4 py-3" style={{ backgroundColor: getColor(order) }}>
                     <h2 className="text-2xl text-white font-semibold">{name}</h2>
-                    <h1 className="text-4xl text-white font-semibold">{average}</h1>
+                    <h1 className="text-4xl text-white font-semibold">{Math.floor(average)}</h1>
                 </div>
                 <div className="flex flex-col h-full justify-between gap-2 px-4 pb-4">
                     <p className="text-sm">{description}</p>
