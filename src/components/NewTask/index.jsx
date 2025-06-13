@@ -1,33 +1,51 @@
 import React from 'react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
+import { useAreas } from '../../utils/context/AreasContext'
 import * as Yup from 'yup'
 import axios from 'axios'
 
-function NewTask({ areaId, onClose, users = [], fetchTasks }) {
+function NewTask({ areaId, onClose, users = [] }) {
+  const { subAreas, fetchAreas } = useAreas();
+  
+  const getIdFromToken = () => {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.id || null;
+    } catch {
+        return null;
+    }
+  }
+
   const initialValues = {
     title: '',
     description: '',
-    priority: 'amarillo',
-    assignedTo: '',
+    priority: 'default',
+    subAreaId: 'default',
+    createdBy: getIdFromToken(),
+    areaId: areaId,
   }
 
   const validationSchema = Yup.object({
     title: Yup.string().required('El título es obligatorio'),
-    priority: Yup.string().required('Selecciona una prioridad'),
-    assignedTo: Yup.string().required('Selecciona un responsable'),
+    priority: Yup.string().notOneOf(["default"], "Debes seleccionar una opción válida").required('La prioridade es obligatoria'),
+    subAreaId: Yup.string().notOneOf(["default"], "Debes seleccionar una opción válida").required('El area de necesidad es obligatoria'),
     description: Yup.string(),
   })
 
   const handleSubmit = async (values, { resetForm }) => {
+    // console.log('Valores enviados:', values);
     try {
       // Ajusta la URL según tu API real
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/area/${areaId}/tasks`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/tasks`,
         values,
         { headers: { 'Content-Type': 'application/json' } }
       );
+      console.log('Respuesta del servidor:', response);
       if (response.status === 201) {
-        if (fetchTasks) await fetchTasks();
+        await fetchAreas();
         onClose();
         resetForm();
       } else {
@@ -44,7 +62,7 @@ function NewTask({ areaId, onClose, users = [], fetchTasks }) {
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-6">
-            Nueva tarea
+            Crear nueva tarea
           </h2>
           <Formik
             initialValues={initialValues}
@@ -76,8 +94,9 @@ function NewTask({ areaId, onClose, users = [], fetchTasks }) {
                   name="priority"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
                 >
+                  <option value="default">Seleccione una prioridad</option>
                   <option value="verde">Pendiente</option>
-                  <option value="amarillo">Normal</option>
+                  <option value="amarillo">Atención</option>
                   <option value="rojo">Urgente</option>
                 </Field>
                 <ErrorMessage
@@ -88,22 +107,22 @@ function NewTask({ areaId, onClose, users = [], fetchTasks }) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-500 mb-2">
-                  Asignar a
+                  Área de necesidad
                 </label>
                 <Field
                   as="select"
-                  name="assignedTo"
+                  name="subAreaId"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
                 >
-                  <option value="">Seleccione una persona</option>
-                  {users.map(user => (
-                    <option key={user.id} value={user.name}>
-                      {user.name}
+                  <option value="default">Seleccione un área</option>
+                  {subAreas.map(sub => (
+                    <option key={sub.id} value={sub.id}>
+                      {sub.name}
                     </option>
                   ))}
                 </Field>
                 <ErrorMessage
-                  name="assignedTo"
+                  name="subAreaId"
                   component="div"
                   className="text-red-500 text-sm mt-1"
                 />

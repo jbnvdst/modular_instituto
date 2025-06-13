@@ -224,12 +224,12 @@ function Areas() {
 
             Modal Nueva Tarea
             {showNewTaskModal && (
-            <NewTask
-              areaId={selectedArea}
-              onClose={() => setShowNewTaskModal(false)}
-              users={areaData.staff}
-              // fetchTasks={fetchTasks} // si tienes una función para refrescar tareas
-            />
+              <NewTask
+                areaId={selectedArea}
+                onClose={() => setShowNewTaskModal(false)}
+                users={areaData.staff}
+                // fetchTasks={fetchTasks} // si tienes una función para refrescar tareas
+              />
             )}
         </div>
         </div>
