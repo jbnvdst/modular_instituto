@@ -80,7 +80,7 @@ const Layout = ({ children }) => {
                         onCancel={() => setShowModal(false)}
                         onConfirm={() => {
                             localStorage.removeItem("token");
-                            window.location.href = "/login";
+                            window.location.href = "/";
                         }}
                     />
                 )}

@@ -1,22 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Activity, User, Lock, Eye, EyeOff } from 'lucide-react';
 import docImage from '../../assets/img/doc.svg'; // Asegúrate de que la ruta sea correcta
 import { useAuth } from '../../utils/context/AuthContext'; // Asegúrate de que la ruta sea correcta
+import { useNavigate } from 'react-router-dom'; // <-- Agrega esto
+
 const Login = () => {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
+  const navigate = useNavigate(); // <-- Agrega esto
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    if (user) {
+      navigate('/home');
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     setIsLoading(true);
     try {
-      const user = await login(email, password); // <-- tu función login debe retornar el usuario
+      const user = await login(email, password);
       if (user && user.name) {
-        localStorage.setItem("userName", user.name); // Guarda el nombre
+        localStorage.setItem("userName", user.name);
       }
+      navigate('/home'); 
       alert('Login exitoso!');
     } catch {
       alert('Credenciales incorrectas');
