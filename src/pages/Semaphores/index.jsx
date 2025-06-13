@@ -3,12 +3,14 @@ import  Layout  from "../../components/Layout";
 import { Card } from "../../components/Card";
 import { SemaphoreCard } from "../../components/SemaphoreCard";
 import { SemaphoreDetail } from "../../components/SemaphoreDetail";
+import { LuArrowDownNarrowWide } from "react-icons/lu";
 // import { areas } from "../../utils/data/areas";
 import { useAreas } from "../../utils/context/AreasContext";
 
 const Semaphores = () => {
     const [selectedArea, setSelectedArea] = React.useState(null);
     const { areas, loadingAreas } = useAreas();
+    const [orderByQualification, setOrderByQualification] = React.useState(false);
 
 
     const tasksCount = areas.reduce((acc, area) => {
@@ -52,9 +54,13 @@ const Semaphores = () => {
                     </Card>
                 </div>
                 <h2 className="text-sm text-gray-500">Áreas</h2>
+                <button onClick={() => setOrderByQualification(!orderByQualification)} className="flex items-center gap-2 w-max bg-gray-100 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer">
+                    <LuArrowDownNarrowWide />
+                    <span>Ordenar por {orderByQualification ? 'Urgentes' : 'Calificación'}</span>
+                </button>
                 <div className="flex flex-wrap gap-4">
                     {areas.map((area) => (
-                        <SemaphoreCard key={area.id} semaphore={area} setSelectedArea={setSelectedArea}/>
+                        <SemaphoreCard key={area.id} semaphore={area} setSelectedArea={setSelectedArea} orderByQualification={orderByQualification}/>
                     ))}
                 </div>
             </div>}

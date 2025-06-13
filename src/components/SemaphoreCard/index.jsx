@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-const SemaphoreCard = ({ semaphore, setSelectedArea }) => {
+const SemaphoreCard = ({ semaphore, setSelectedArea, orderByQualification }) => {
     const [order, setOrder] = React.useState(0);
     const [average, setAverage] = React.useState(0);
     const { id, name, description, ownerUser } = semaphore;
@@ -91,7 +91,7 @@ const SemaphoreCard = ({ semaphore, setSelectedArea }) => {
     }
 
     return (
-        <div className={`flex flex-col overflow-hidden justify-between rounded-[32px] w-64 shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] hover:-translate-y-1 duration-200 bg-white`} style={{ order: order }}>
+        <div className={`flex flex-col overflow-hidden justify-between rounded-[32px] w-64 shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] hover:-translate-y-1 duration-200 bg-white`} style={{ order: orderByQualification ? Math.floor(average) : order }}>
             <div className="flex flex-col justify-between h-full gap-2">
                 <div className="flex justify-between w-full px-4 py-3" style={{ backgroundColor: getColor(order) }}>
                     <h2 className="text-2xl text-white font-semibold">{name}</h2>
