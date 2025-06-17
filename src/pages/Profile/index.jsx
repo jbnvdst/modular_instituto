@@ -41,6 +41,17 @@ const Profile = () => {
 
     // Actividad reciente
     const [actividadReciente, setActividadReciente] = useState([]);
+    
+    const getProfilePictureByToken = () => {
+        const token = localStorage.getItem("token");
+        if (!token) return profilePic; // Retorna imagen por defecto si no hay token
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.profilePicture ? `http://localhost:4000/${payload.profilePicture}` : profilePic; // Retorna la imagen del perfil si existe, o la imagen por defecto
+        } catch {
+            return profilePic; // Retorna imagen por defecto si hay un error al decodificar el token
+        }
+    };
 
     useEffect(() => {
         const id = getIdFromToken();
@@ -278,9 +289,9 @@ const Profile = () => {
                 <div className="bg-gradient-to-r from-teal-600 to-teal-700 rounded-lg p-8 mb-8 text-white">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                            <div className="relative">
-                                <div className="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-3xl font-bold">
-                                    {(profileData.nombre?.charAt(0) || "") + (profileData.apellido?.charAt(0) || "")}
+                            <div className="relative" style={{ backgroundImage: `url(${getProfilePictureByToken()})`, backgroundSize: 'cover', width: '96px', height: '96px', borderRadius: '50%', backgroundPosition: 'center' }}>
+                                <div className="w-24 h-24 bg-opacity-20 rounded-full flex items-center justify-center text-3xl font-bold">
+                                    {/* {(profileData.nombre?.charAt(0) || "") + (profileData.apellido?.charAt(0) || "")} */}
                                 </div>
                                 <button className="absolute bottom-0 right-0 bg-white text-teal-600 p-2 rounded-full shadow-lg hover:bg-gray-50 transition-colors">
                                     <Camera size={16} />

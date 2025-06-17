@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("token", data.token);
     // Decodifica el token para obtener el usuario
     const payload = JSON.parse(atob(data.token.split('.')[1]));
-    setUser({ id: payload.id, role: payload.role, name: payload.name });
+    setUser({ id: payload.id, role: payload.role, name: payload.name, profilePicture: payload.profilePicture });
     return data;
   };
 

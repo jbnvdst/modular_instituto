@@ -23,11 +23,15 @@ const Login = () => {
     setIsLoading(true);
     try {
       const user = await login(email, password);
-      if (user && user.name) {
-        localStorage.setItem("userName", user.name);
+      if (user) {
+        localStorage.setItem("user", JSON.stringify({
+          name: user.name,
+          email: user.email,
+          profilePicture: user.profilePicture || null,
+        }));
       }
       navigate('/home'); 
-      alert('Login exitoso!');
+      // alert('Login exitoso!');
     } catch {
       alert('Credenciales incorrectas');
     }

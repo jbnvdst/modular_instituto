@@ -5,11 +5,23 @@ import bellIcon from "../../assets/icons/bell.png";
 import logoutIcon from "../../assets/icons/exit.png";
 import profilePic from "../../assets/img/default_profile.jpg";
 import { ModalAlert } from "../../components/ModalAlert";
+import { useAuth } from "../../utils/context/AuthContext";
 
 const Layout = ({ children }) => {
     const [showModal, setShowModal] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const location = useLocation(); // Usar hook de react-router
+
+    const getProfilePictureByToken = () => {
+        const token = localStorage.getItem("token");
+        if (!token) return profilePic; // Retorna imagen por defecto si no hay token
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.profilePicture ? `http://localhost:4000/${payload.profilePicture}` : profilePic; // Retorna la imagen del perfil si existe, o la imagen por defecto
+        } catch {
+            return profilePic; // Retorna imagen por defecto si hay un error al decodificar el token
+        }
+    };
 
     // Definir los títulos según la ruta
     let pageTitle = "App";
@@ -58,7 +70,7 @@ const Layout = ({ children }) => {
                             <img src={bellIcon} alt="Notifications" className="w-4 h-4" />
                         </NavLink>
                         <NavLink to="/profile">
-                            <img src={profilePic} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
+                            <img src={`${getProfilePictureByToken()}`} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
                         </NavLink>
                         <button
                             className="bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200"
