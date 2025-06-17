@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, use } from "react";
 import axios from "axios";
 import Layout from "../../components/Layout";
 import { CountingCard } from "../../components/CountingCard";
@@ -9,7 +9,8 @@ import { PiUsersThreeFill } from "react-icons/pi";
 import { BiSolidReport } from "react-icons/bi";
 import { lastNotifications } from "../../utils/data/lastNotifications";
 import * as Chart from "chart.js/auto";
-import { areas } from "../../utils/data/areas";
+import { useAreas } from '../../utils/context/AreasContext';
+
 
 
     function getEmailFromToken() {
@@ -41,21 +42,11 @@ const Home = () => {
     const chartInstance = useRef(null);
     const lineChartRef = useRef(null);
     const lineChartInstance = useRef(null);
-
-    
-    useEffect(() => {
-        const id = getIdFromToken();
-        axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/get/`)
-            .then(res => {
-                const usuario = res.data.find(
-                    u => u.id === id
-                );
-                setNombre(usuario ? usuario.name : "Usuario");
-            })
-            .catch(() => setNombre("Usuario"));
-    }, []);
+    const { areas } = useAreas();
+    const [ lastTasks , setLastTasks ] = useState([]);
 
     useEffect(() => {
+        fetchLastTasks();
         Chart.Chart.register(
         Chart.CategoryScale,
         Chart.LinearScale,
@@ -66,6 +57,15 @@ const Home = () => {
         Chart.Tooltip,
         Chart.Legend
         );
+        const id = getIdFromToken();
+        axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/get/`)
+            .then(res => {
+                const usuario = res.data.find(
+                    u => u.id === id
+                );
+                setNombre(usuario ? usuario.name : "Usuario");
+            })
+            .catch(() => setNombre("Usuario"));
     }, []);
 
     useEffect(() => {
@@ -192,7 +192,24 @@ const Home = () => {
             chartInstance.current.destroy();
         }
         };
+
     }, []);
+
+
+    const fetchLastTasks = async () => {
+        try{
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/tasks/last5/${getIdFromToken()}`);
+            if (response.status === 200) {
+                setLastTasks(response.data);
+            }
+            else {
+                console.error("Error fetching last tasks:", response.statusText);
+            }
+        }
+        catch(error) {
+            console.error("Error fetching Last tasks:", error);
+        }
+    };
 
     const lineDatasets = [
         {
@@ -250,7 +267,7 @@ const Home = () => {
                     y: {
                         beginAtZero: true,
                         min: 0,
-                        max: 10
+                        max: 8
                     }
                 }
             }
@@ -276,10 +293,10 @@ const Home = () => {
                 <p className="text-white text-xs mt-4">Última actualización: 2025-05-20</p>
             </div>
             <div className="flex gap-4 py-5">
-                <CountingCard title="Pacientes Atendidos" count={156} icon="FaUsers" />
-                <CountingCard title="Pacientes Atendidos" count={23} icon="IoBed" />
-                <CountingCard title="Pacientes Atendidos" count={48} icon="FaUserDoctor" />
-                <CountingCard title="Pacientes Atendidos" count={94} icon="IoBarChart" />
+                <CountingCard title="Miembros en el sistema" count={150} icon="FaUsers" />
+                <CountingCard title="Areas en total" count={23} icon="IoBed" />
+                <CountingCard title="Tareas en el sistema" count={48} icon="FaUserDoctor" />
+                <CountingCard title="Promedio de Tareas" count={94} icon="IoBarChart" />
             </div>
             <div className="grid grid-cols-[60%_1fr] gap-4">
                 <div className="flex flex-col gap-4">
@@ -295,14 +312,14 @@ const Home = () => {
                         </div>
                         <div className="mt-4">
                             <div className="divide-y divide-gray-200">
-                                {lastNotifications.map((notification) => (
-                                <div key={notification.id} className="flex items-center py-2">
-                                    <PiSirenDuotone className={`${notification.type === "critical" ? "text-red-500" : notification.type === "emergency" ? "text-yellow-500" : "text-green-500"}  mr-3 mt-1`} size={24} />
+                                {lastTasks.map((task) => (
+                                <div key={task.id} className="flex items-center py-2">
+                                    <PiSirenDuotone className={`${task.priority === "rojo" ? "text-red-500" : task.priority === "amarillo" ? "text-yellow-500" : "text-green-500"}  mr-3 mt-1`} size={24} />
                                     <div className="flex flex-col flex-1">
-                                        <p className="text-gray-800">{notification.title}</p>
-                                        <b className="text-xs font-semibold text-gray-800">{notification.area}</b>
+                                        <p className="text-gray-800">{task.title}</p>
+                                        <b className="text-xs font-semibold text-gray-800">{task.area}</b>
                                     </div>
-                                    <span className="text-gray-500 text-sm ml-4 whitespace-nowrap">{notification.time}</span>
+                                    <span className="text-gray-500 text-sm ml-4 whitespace-nowrap">{task.time}</span>
                                 </div>
                                 ))}
                             </div>
@@ -311,14 +328,14 @@ const Home = () => {
                 </div>
                 <div className="flex flex-col bg-white shadow-md rounded-2xl p-4 gap-2">
                     <h1 className="text-gray-800 font-bold text-lg">Acciones Rapidas</h1>
-                        <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
+                        {/* <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
                             <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
                                 <PiSirenDuotone className="text-white" size={20} />
                             </div>
                             <div>
                                 <h1 className="text-gray-800 font-semibold text-sm ">Gestionar emergencias</h1>
                             </div>
-                        </div>
+                        </div> */}
                     <NavLink to="/admin">
                         <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
                             <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
@@ -337,16 +354,16 @@ const Home = () => {
                             <h1 className="text-gray-800 font-semibold text-sm ">Descargar reporte del ultimo mes</h1>
                         </div>
                     </div>
-                    <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
-                        <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
-                            <IoSettingsSharp className="text-white" size={20} />
-                        </div>
-                        <NavLink to="/profile">
-                            <div>
-                                <h1 className="text-gray-800 font-semibold text-sm ">Configuración</h1>
+                    <NavLink to="/profile">
+                        <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
+                            <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
+                                <IoSettingsSharp className="text-white" size={20} />
                             </div>
-                        </NavLink>
-                    </div>
+                                <div>
+                                    <h1 className="text-gray-800 font-semibold text-sm ">Configuración</h1>
+                                </div>
+                        </div>
+                    </NavLink>
                     <div className="mt-4">
                         {/* Aquí iría el gráfico */}
                     </div>

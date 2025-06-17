@@ -1,64 +1,144 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
-import { ChevronDown, Plus, Users, FileText, Download, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { ChevronDown, Plus, Users, Bell, AlertCircle, CheckCircle, Clock, Activity} from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { NewTask } from '../../components/NewTask';
+import { ResolvedTask } from '../../components/ResolvedTask';
 import { useAreas } from '../../utils/context/AreasContext';
 import { useAuth } from '../../utils/context/AuthContext';
+import { ToggleSwitch } from '../../components/ToggleSwitch';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 function Areas() {
-  const [selectedArea, setSelectedArea] = useState('');
+  const { id } = useParams();
+  const [selectedArea, setSelectedArea] = useState(id || "");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+  const [resolvedTaskModal, setResolvedTaskModal] = useState(null);
   const [newTask, setNewTask] = useState({ title: '', priority: 'medium', assignedTo: '' });
   const { areas, loadingAreas } = useAreas();
-  const { user } = useAuth();
-  
-  // Ajusta el filtro para usar ownerId
-  const userAreas = areas.filter(area => area.ownerId === user?.id);
-
-  // Obtén los datos del área seleccionada
+  const [ personal, setPersonal ] = useState([]);
+  const { user, getDate } = useAuth();
+  const [ resolved, setResolved] = useState(false);
+  const [ userAreas, setUserAreas ] = useState([]);
   const areaData = userAreas.find(area => area.id === selectedArea);
+  const [tasksCount, setTasksCount] = useState({ urgent: 0, attention: 0, pending: 0 });
+  const [days, setDays] = useState({
+    lunes: 0,
+    martes: 0,
+    miercoles: 0,
+    jueves: 0,
+    viernes: 0,
+    sabado: 0,
+    domingo: 0
+  });
+  
+  useEffect(() => {
+    setUserAreas(areas.filter(area => area.ownerId === user?.id));
+    fetchPersonal();
+    setTasksCount(userAreas.filter(area => area.id === selectedArea).reduce((acc, area) => {
+      area.tasks.forEach(task => {
+        if (!task.resolvedAt) {
+          if (task.priority === 'rojo') {
+            acc.urgent += 1;
+          } else if (task.priority === 'amarillo') {
+            acc.attention += 1;
+          } else if (task.priority === 'verde') {
+            acc.pending += 1;
+          }
+        }
+      });
+      return acc;
+    }, { urgent: 0, attention: 0, pending: 0 }));
+
+    setDays(userAreas.filter(area => area.id === selectedArea).reduce((acc, area) => {
+      area.tasks.forEach(task => {
+        if (task.resolvedAt) {
+          const resolvedDate = new Date(task.resolvedAt);
+          const now = new Date();
+          const diffDays = (now - resolvedDate) / (1000 * 60 * 60 * 24);
+
+          if (diffDays <= 7) {
+            const dayIndex = resolvedDate.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+            const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+            const dayName = dayNames[dayIndex];
+
+            acc[dayName] = (acc[dayName] || 0) + 1;
+          }
+        }
+      });
+      return acc;
+    }, {
+      lunes: 0,
+      martes: 0,
+      miercoles: 0,
+      jueves: 0,
+      viernes: 0,
+      sabado: 0,
+      domingo: 0
+    }));
+  }, [selectedArea, areas]);
+
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return 'text-red-600 bg-red-100';
-      case 'medium': return 'text-yellow-600 bg-yellow-100';
-      case 'low': return 'text-green-600 bg-green-100';
+      case 'rojo': return 'text-red-600 bg-red-100';
+      case 'amarillo': return 'text-yellow-600 bg-yellow-100';
+      case 'verde': return 'text-green-600 bg-green-100';
       default: return 'text-gray-600 bg-gray-100';
     }
   };
 
   const getPriorityIcon = (priority) => {
     switch (priority) {
-      case 'high': return <AlertCircle className="w-4 h-4" />;
-      case 'medium': return <Clock className="w-4 h-4" />;
-      case 'low': return <CheckCircle className="w-4 h-4" />;
+      case 'rojo': return <AlertCircle className="w-4 h-4" />;
+      case 'amarillo': return <Clock className="w-4 h-4" />;
+      case 'verde': return <CheckCircle className="w-4 h-4" />;
       default: return <Clock className="w-4 h-4" />;
     }
   };
 
+   const fetchPersonal = async () => {
+        if (!selectedArea) return;
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/user-areas/getUsers/${selectedArea}`);
+            setPersonal(response.data);
+            // console.log("Personal fetched:", response.data);
+        } catch (error) {
+            console.error("Error fetching personal in area:", error);
+        }
+    };
+
   const chartData = {
-    labels: ['Tareas Urgentes', 'Tareas Normales', 'Tareas Completadas'],
+    labels: ['Urgentes', 'Atención', 'Pendientes'],
     datasets: [{
-      data: [8, 15, 32],
+      data: [tasksCount.urgent, tasksCount.attention, tasksCount.pending],
       backgroundColor: ['#ef444490', '#f59e0b70', '#10b98190'],
       borderWidth: 0
     }]
   };
 
   const barChartData = {
-    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-    datasets: [{
-      label: 'Tareas Completadas',
-      data: [12, 15, 8, 20, 18, 6, 4],
-      backgroundColor: '#10b98190',
-      borderRadius: 4
-    }]
-  };
+  labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+  datasets: [{
+    label: 'Completadas',
+    data: [
+      days.lunes,
+      days.martes,
+      days.miércoles,
+      days.jueves,
+      days.viernes,
+      days.sábado,
+      days.domingo
+    ],
+    backgroundColor: '#10b98190',
+    borderRadius: 4
+  }]
+};
 
   const handleCreateTask = () => {
     if (newTask.title.trim()) {
@@ -86,7 +166,7 @@ function Areas() {
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-sm text-gray-500">Áreas</h1>
+                    <h1 onClick={() => console.log(userAreas)} className="text-sm text-gray-500">Áreas</h1>
                 </div>
             </div>
 
@@ -133,44 +213,129 @@ function Areas() {
             {selectedArea && (
             <>
                 {/* Semáforos de Tareas */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Tareas del Área</h3>
-                    <button
-                      onClick={() => setShowNewTaskModal(true)}
-                      className="flex items-center space-x-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Nueva Tarea</span>
-                    </button>
-                </div>
-                <div className="space-y-3">
-                    {areaData?.tasks?.length > 0 ? (
-                      areaData.tasks.map(task => (
-                        <div key={task.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                          <div className="flex items-center space-x-3">
-                            <div className={`p-2 rounded-full ${getPriorityColor(task.priority)}`}>
-                              {getPriorityIcon(task.priority)}
+                <div className='grid grid-cols-[70%_1fr] gap-6'>
+                  <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900">Tareas del Área</h3>
+                    </div>
+                    <div className="mt-4 block text-sm text-gray-700">
+                          {resolved ? (
+                            <div className="flex flex-col max-h-92 gap-1.5 overflow-y-auto scrollbar-hide">
+                              {areaData?.tasks?.filter(task => task.resolvedAt !== null).length > 0 ? (
+                                areaData.tasks
+                                  .filter(task => task.resolvedAt !== null)
+                                  .map(task => (
+                                    <div
+                                      key={task.id}
+                                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                                    >
+                                      <div className="flex items-center space-x-3">
+                                        <div className={`p-2 rounded-full bg-gray-200`}>
+                                          {getPriorityIcon(task.priority)}
+                                        </div>
+                                        <div>
+                                          <h4
+                                            onClick={() => console.log(task)}
+                                            className="font-medium text-gray-900"
+                                          >
+                                            <b>{task.subArea.name}</b> | {task.title}
+                                          </h4>
+                                          <p className="text-sm text-gray-500">
+                                            Resuelto por: {task.resolver.name}
+                                          </p>
+                                          <p className="text-sm text-gray-500">
+                                            {task.comment ? `Comentario: ${task.comment}` : 'Sin comentario'}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="text-xs text-gray-500 mt-1">
+                                          Creado {getDate(task.createdAt)}
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                          Resuelto {getDate(task.resolvedAt)}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ))
+                              ) : (
+                                <div className="text-gray-500">No hay tareas resueltas en esta área.</div>
+                              )}
                             </div>
-                            <div>
-                              <h4 className="font-medium text-gray-900">{task.title}</h4>
-                              <p className="text-sm text-gray-500">
-                                Asignado por: {task.assignedBy} | Para: {task.assignedTo}
-                              </p>
+                          ) : (
+                            <div className="flex flex-col max-h-92 gap-1.5 overflow-y-auto scrollbar-hide">
+                              {areaData?.tasks?.filter(task => task.resolvedAt === null).length > 0 ? (
+                                areaData.tasks
+                                  .filter(task => task.resolvedAt === null)
+                                  .map(task => (
+                                    <div
+                                      key={task.id}
+                                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                                    >
+                                      <div className="flex items-center space-x-3">
+                                        <div className={`p-2 rounded-full ${getPriorityColor(task.priority)}`}>
+                                          {getPriorityIcon(task.priority)}
+                                        </div>
+                                        <div>
+                                          <h4
+                                            onClick={() => console.log(task)}
+                                            className="font-medium text-gray-900"
+                                          ><b>{task.subArea?.name}</b> | {task.title}
+                                          </h4>
+                                          <p className="text-sm text-gray-500">
+                                            Creado por: {task.creator.name}
+                                          </p>
+                                          <p className="text-sm text-gray-500">
+                                            {task.description && `Descripción: ${task.description}`}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="text-xs text-gray-500 mb-2">
+                                          Creado {getDate(task.createdAt)}
+                                        </p>
+                                        <span
+                                          onClick={() => setResolvedTaskModal(task.id)}
+                                          className="cursor-pointer inline-flex px-2 py-1 text-sm text-white font-medium rounded-full bg-teal-600/80"
+                                        >
+                                          Resolver
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))
+                              ) : (
+                                <div className="text-gray-500">No hay tareas pendientes en esta área.</div>
+                              )}
                             </div>
-                          </div>
-                          <div className="text-right">
-                            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(task.priority)}`}>
-                              {task.priority === 'high' ? 'Urgente' : task.priority === 'medium' ? 'Normal' : 'Baja'}
-                            </span>
-                            <p className="text-xs text-gray-500 mt-1">{task.createdAt}</p>
-                          </div>
+                          )}
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-gray-500">No hay tareas en esta área.</div>
-                    )}
-                </div>
+                    
+                  </div>
+                  <div className="bg-white rounded-lg shadow-sm p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
+                      <div className="space-y-3">
+                          <button onClick={() => setShowNewTaskModal(true)}  
+                              className="w-full cursor-pointer flex items-center p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                              >
+                              <Bell className="w-5 h-5 text-teal-600 mr-3" />
+                              <span className="text-sm font-medium text-teal-800">Crear Tarea</span>
+                          </button>
+                          {/* <button className="w-full flex cursor-pointer items-center p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                              <Users className="w-5 h-5 text-gray-600 mr-3" />
+                              <span className="text-sm font-medium text-gray-700">Mensaje a Área</span>
+                          </button> */}
+                          <button className="w-full flex cursor-pointer items-center p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                              <Activity className="w-5 h-5 text-gray-600 mr-3" />
+                              <span className="text-sm font-medium text-gray-700">Descargar Reporte</span>
+                          </button>
+                          <ToggleSwitch
+                            word1="Sin Resolver"
+                            word2="Resueltas"
+                            value={resolved}
+                            onChange={setResolved}
+                          />
+                      </div>
+                  </div>
                 </div>
 
                 {/* Personal Asignado y Gráficas */}
@@ -179,23 +344,26 @@ function Areas() {
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="flex items-center space-x-2 mb-4">
                     <Users className="w-5 h-5 text-teal-600" />
-                    <h3 className="text-lg font-semibold text-gray-900">Personal Asignado</h3>
+                    <h3 onClick={() => console.log(personal)} className="text-lg font-semibold text-gray-900">Personal Asignado</h3>
                     </div>
                     <div className="space-y-3">
-                    {areaData?.staff?.length > 0 ? (
-                      areaData.staff.map(person => (
-                        <div key={person.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                          <div>
-                            <h4 className="font-medium text-gray-900">{person.name}</h4>
-                            <p className="text-sm text-gray-500">{person.role}</p>
-                          </div>
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              person.status === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {person.status}
-                          </span>
-                        </div>
-                      ))
+                    {personal?.length > 0 ? (
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                  {personal.map((user) => (
+                                      <tr key={user.id} className="hover:bg-gray-50">
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                              <div>
+                                                  <div onClick={() => console.log(user)} className="text-sm font-medium text-gray-900">{user.name}</div>                                                  
+                                              </div>
+                                          </td>                                          
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.areas[0].UserArea.role}</td>                                                                  
+                                      </tr>
+                                  ))}
+                              </tbody>
+                          </table>
+                      </div>
                     ) : (
                       <div className="text-gray-500">No hay personal asignado a esta área.</div>
                     )}
@@ -207,27 +375,33 @@ function Areas() {
                     <div className="bg-white rounded-lg shadow-sm p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribución de Tareas</h3>
                     <div className="h-48">
-                        <Doughnut data={chartData} options={{ maintainAspectRatio: false }} />
+                      {areaData && areaData.tasks.length > 0 ? <Doughnut data={chartData} options={{ maintainAspectRatio: false }} /> : "No hay datos que graficar"}
                     </div>
                     </div>
                     
                     <div className="bg-white rounded-lg shadow-sm p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Actividad Semanal</h3>
                     <div className="h-48">
-                        <Bar data={barChartData} options={{ maintainAspectRatio: false }} />
+                        {(areaData && Object.keys(days).some(day => days[day] > 0)) ?
+                          <Bar data={barChartData} options={{ maintainAspectRatio: false }} /> : "No hay datos que graficar"}
                     </div>
                     </div>
                 </div>
                 </div>
             </>
             )}
-
-            Modal Nueva Tarea
             {showNewTaskModal && (
               <NewTask
                 areaId={selectedArea}
                 onClose={() => setShowNewTaskModal(false)}
                 users={areaData.staff}
+                // fetchTasks={fetchTasks} // si tienes una función para refrescar tareas
+              />
+            )}
+            {resolvedTaskModal && (
+              <ResolvedTask
+                taskId={resolvedTaskModal}
+                onClose={() => setResolvedTaskModal(false)}
                 // fetchTasks={fetchTasks} // si tienes una función para refrescar tareas
               />
             )}

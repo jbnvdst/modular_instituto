@@ -20,6 +20,7 @@ const AppRoutes = () => {
     { path: '/admin', element: user ? <Admin /> : <Navigate to="/" replace /> },
     { path: '/notification', element: user ? <Notifications /> : <Navigate to="/" replace /> },
     { path: '/areas', element: user ? <Areas /> : <Navigate to="/" replace /> },
+    { path: '/areas/:id', element: user ? <Areas /> : <Navigate to="/" replace /> },
     ])
 
   return routes

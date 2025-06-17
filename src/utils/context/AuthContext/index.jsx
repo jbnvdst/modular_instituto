@@ -46,8 +46,42 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const getDate = (dateString) => {
+    const inputDate = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - inputDate;
+    
+
+    const oneMinute = 60 * 1000;
+    const oneHour = 60 * oneMinute;
+    const oneDay = 24 * oneHour;
+    const thirtyDays = 30 * oneDay;
+
+    if (diffMs < oneDay) {
+      const hours = Math.floor(diffMs / oneHour);
+      const minutes = Math.floor((diffMs % oneHour) / oneMinute);
+
+      if (hours > 0 && minutes > 0) {
+        return `hace ${hours} h ${minutes} m`;
+      } else if (hours > 0) {
+        return `hace ${hours} h ${hours > 1 ? 's' : ''}`;
+      } else {
+        return `hace ${minutes} m`;
+      }
+    } else if (diffMs < thirtyDays) {
+      const days = Math.floor(diffMs / oneDay);
+      return `hace ${days} día${days > 1 ? 's' : ''}`;
+    } else {
+      // Mostrar fecha en formato dd/mm/yyyy
+      const day = inputDate.getDate().toString().padStart(2, '0');
+      const month = (inputDate.getMonth() + 1).toString().padStart(2, '0');
+      const year = inputDate.getFullYear();
+      return `el ${day}/${month}/${year}`;
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, getDate }}>
       {children}
     </AuthContext.Provider>
   );

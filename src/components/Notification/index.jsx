@@ -1,11 +1,15 @@
 import React, { useState } from 'react'
 import { Bell } from "lucide-react";
 import axios from 'axios';
+import { useAuth } from '../../utils/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function Notification({ notification , setNotifications }) {
     const redNotificationTypes = ['critical_task']
     const yellowNotificationTypes = ['solved_task', 'area_created']
     const [ loading , setLoading ] = useState(false);
+    const { getDate } = useAuth();
+    const navigate = useNavigate();
 
     const handleMarkAsRead = async () => {
         try {
@@ -48,7 +52,7 @@ function Notification({ notification , setNotifications }) {
   return (
         <div key={notification.id} className={`p-6 ${config.bgColor} border-l-4`} style={{ borderColor: config.borderColor }}>
             <div className="flex items-start space-x-4">
-                <div className={`p-2 rounded-full ${config.iconBg}`}>
+                <div onClick={() => console.log(notification)} className={`p-2 rounded-full ${config.iconBg}`}>
                     <Bell className={`w-6 h-6 ${config.iconColor}`} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -57,7 +61,7 @@ function Notification({ notification , setNotifications }) {
                             {notification.message}
                         </h3>
                         <span className="text-xs text-gray-500">
-                            hace {notification.time}
+                            {getDate(notification.createdAt)}
                         </span>
                     </div>
                     <p className="text-sm font-medium text-gray-700 mt-1">
@@ -67,10 +71,10 @@ function Notification({ notification , setNotifications }) {
                         {notification.description}
                     </p>
                     <div className="flex items-center mt-3 space-x-3">
-                        <button className="text-xs font-medium text-teal-600 hover:text-teal-800">
-                            Ver detalles
+                        <button onClick={() => navigate(`/areas/${notification.relatedArea.id}`)} className="cursor-pointer text-xs font-medium text-teal-600 hover:text-teal-800">
+                            Ir al área
                         </button>
-                        <button onClick={ () => handleMarkAsRead(notification.id) } disabled={loading} className="text-xs font-medium text-gray-500 hover:text-gray-700">
+                        <button onClick={ () => handleMarkAsRead(notification.id) } disabled={loading} className="cursor-pointer text-xs font-medium text-gray-500 hover:text-gray-700">
                             {loading ? "Cargando..." : notification.read ? "Marcar como no leída" : "Marcar como leída"}
                         </button>
                     </div>

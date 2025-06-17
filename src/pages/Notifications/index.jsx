@@ -5,15 +5,18 @@ import axios from "axios";
 import { useAuth } from "../../utils/context/AuthContext"; // Assuming you have an AuthContext for user authentication
 import { Notification } from "../../components/Notification";
 import { AddTask } from "../../components/AddTask";
+import { useAreas } from "../../utils/context/AreasContext";
 
 const Notifications = () => {
     const [notifications , setNotifications ] = useState([]);
     const [filter, setFilter] = useState('todas');
     const { user } = useAuth(); 
+    const { areas } = useAreas();
     const redNotificationTypes = ['critical_task']
     const yellowNotificationTypes = ['solved_task', 'area_created']
     const greenNotificationTypes = ['user_added_to_area', 'user_removed_from_area', 'welcome']
     const [showAddTask, setShowAddTask] = useState(false);
+
 
 
     useEffect(() => {
@@ -41,6 +44,53 @@ const Notifications = () => {
         return notifications;
     };
 
+
+     const getColor = (tasks) => {
+         if(tasks.length === 0) return 0;
+         let order = 0;
+        tasks.forEach((task) => {
+            if (task.priority === 'rojo') {
+                order += 100;
+            }
+            if (task.priority === 'amarillo') {
+                order += 10;
+            }
+            if (task.priority === 'verde') {
+                order += 1;
+            }
+        }); 
+        order = order * -1;
+
+        let avg = order < 0 ? 100 - (order * -1 / tasks.length) : 100;
+        // Asegura que el valor esté entre 0 y 100
+        // Clamp entre 0 y 100
+        avg = Math.max(0, Math.min(100, avg));
+
+        // Define los colores como objetos RGBA
+        const red =    { r: 255, g: 0,   b: 0,   a: 112 }; // #FF000070
+        const yellow = { r: 245, g: 158, b: 11,  a: 112 }; // #F59E0B70
+        const green =  { r: 22,  g: 163, b: 74,  a: 112 }; // #16A34A70
+
+        let start, end, ratio;
+
+        if (avg <= 50) {
+            ratio = avg / 50;
+            start = red;
+            end = yellow;
+        } else {
+            ratio = (avg - 50) / 50;
+            start = yellow;
+            end = green;
+        }
+
+        const r = Math.round(start.r + (end.r - start.r) * ratio);
+        const g = Math.round(start.g + (end.g - start.g) * ratio);
+        const b = Math.round(start.b + (end.b - start.b) * ratio);
+        const a = Math.round(start.a + (end.a - start.a) * ratio);
+
+        const toHex = (c) => c.toString(16).padStart(2, '0');
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}${toHex(a)}`;
+    }
     
 
     const filteredNotifications = filter === 'todas' 
@@ -132,7 +182,6 @@ const Notifications = () => {
                                 <div className="p-6 border-b border-gray-200">
                                     <div className="flex items-center justify-between mb-4">
                                         <h2 onClick={ () => console.log(notifications)} className="text-lg font-semibold text-gray-900">Notificaciones Recientes</h2>
-                                        <span className="text-sm text-gray-500">Últimas 24 horas</span>
                                     </div>
                                     
                                     {/* Filter Buttons */}
@@ -190,7 +239,7 @@ const Notifications = () => {
                                     </div>
                                 </div>
 
-                                <div className="divide-y divide-gray-200">
+                                <div className="flex flex-col max-h-[50svh] overflow-y-auto scrollbar-hide  divide-y divide-gray-200">
                                     {getFilteredNotifications().map((notification) => 
                                         <Notification key={notification.id} notification={notification} setNotifications={setNotifications} />
                                     )}
@@ -201,16 +250,9 @@ const Notifications = () => {
                         {/* Sidebar */}
                         <div className="space-y-6">
                             {/* Quick Actions */}
-                            <div className="bg-white rounded-lg shadow-sm p-6">
+                            {/* <div className="bg-white rounded-lg shadow-sm p-6">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
                                 <div className="space-y-3">
-                                    <button 
-                                        onClick={() => setShowAddTask(true)}
-                                        className="w-full flex items-center p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
-                                        >
-                                        <Bell className="w-5 h-5 text-teal-600 mr-3" />
-                                        <span className="text-sm font-medium text-teal-800">Crear Alerta</span>
-                                    </button>
                                     <button className="w-full flex items-center p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
                                         <Users className="w-5 h-5 text-gray-600 mr-3" />
                                         <span className="text-sm font-medium text-gray-700">Contactar Área</span>
@@ -220,36 +262,18 @@ const Notifications = () => {
                                         <span className="text-sm font-medium text-gray-700">Ver Reportes</span>
                                     </button>
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Status by relatedArea.name */}
                             <div className="bg-white rounded-lg shadow-sm p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Estado por Área</h3>
+                                <h3 onClick={() => console.log(areas)} className="text-lg font-semibold text-gray-900 mb-4">Estado por Área</h3>
                                 <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700">UCI</span>
-                                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700">Emergencias</span>
-                                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700">Cardiología</span>
-                                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700">Quirófanos</span>
-                                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700">Pediatría</span>
-                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700">Recursos Humanos</span>
-                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                    </div>
+                                    {areas.map((area) => (
+                                        <div key={area.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                            <span className="text-sm font-medium text-gray-700">{area.name}</span>
+                                            <div className={`w-3 h-3 rounded-full`} style={{backgroundColor: getColor(area.tasks)}}></div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
