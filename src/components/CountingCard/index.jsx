@@ -12,7 +12,7 @@ return (
             {icon === "FaUserDoctor" ? <FaUserDoctor className='text-4xl text-[#0f787195]' /> : null}
             {icon === "IoBarChart" ? <IoBarChart className='text-4xl text-[#0f787195]' /> : null}
             <h1 className=' mt-2 text-2xl font-bold text-gray-800'>
-                {count}{icon === "IoBarChart" ? " %" : ""}
+                {count}{icon === "IoBarChart" ? "+" : ""}
             </h1>
             <p className='text-sm text-gray-500'>{title}</p>
     </div>

@@ -10,6 +10,8 @@ import { BiSolidReport } from "react-icons/bi";
 import { lastNotifications } from "../../utils/data/lastNotifications";
 import * as Chart from "chart.js/auto";
 import { useAreas } from '../../utils/context/AreasContext';
+import { useAuth } from "../../utils/context/AuthContext";
+
 
 
 
@@ -36,6 +38,8 @@ import { useAreas } from '../../utils/context/AreasContext';
         }
     }
 
+    
+
 const Home = () => {
     const [nombre, setNombre] = useState("");
     const chartRef = useRef(null);
@@ -44,6 +48,19 @@ const Home = () => {
     const lineChartInstance = useRef(null);
     const { areas } = useAreas();
     const [ lastTasks , setLastTasks ] = useState([]);
+    const [ allTasks, setAllTasks ] = useState([]);
+    const { getDate } = useAuth();
+
+    
+    const fetchAllTasks = async () => {
+        try {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/tasks`,);
+        if (response.status === 200) {
+            setAllTasks(response.data);
+        }
+        } catch (error) {
+        console.error('Error al enviar los datos:', error);
+        }};
 
     useEffect(() => {
         fetchLastTasks();
@@ -69,6 +86,9 @@ const Home = () => {
     }, []);
 
     useEffect(() => {
+
+        fetchAllTasks();
+
         if (!chartRef.current) return;
 
         // Destruir gráfica anterior si existe
@@ -193,6 +213,7 @@ const Home = () => {
         }
         };
 
+
     }, []);
 
 
@@ -293,10 +314,10 @@ const Home = () => {
                 <p className="text-white text-xs mt-4">Última actualización: 2025-05-20</p>
             </div>
             <div className="flex gap-4 py-5">
-                <CountingCard title="Miembros en el sistema" count={150} icon="FaUsers" />
-                <CountingCard title="Areas en total" count={23} icon="IoBed" />
-                <CountingCard title="Tareas en el sistema" count={48} icon="FaUserDoctor" />
-                <CountingCard title="Promedio de Tareas" count={94} icon="IoBarChart" />
+                {/* <CountingCard title="Miembros en el sistema" count={150} icon="FaUsers" /> */}
+                <CountingCard title="Areas en total" count={areas.length} icon="IoBed" />
+                <CountingCard title="Tareas en el sistema" count={allTasks.length} icon="FaUserDoctor" />
+                <CountingCard title="Tareas resueltas" count={5} icon="IoBarChart" />
             </div>
             <div className="grid grid-cols-[60%_1fr] gap-4">
                 <div className="flex flex-col gap-4">
@@ -316,10 +337,10 @@ const Home = () => {
                                 <div key={task.id} className="flex items-center py-2">
                                     <PiSirenDuotone className={`${task.priority === "rojo" ? "text-red-500" : task.priority === "amarillo" ? "text-yellow-500" : "text-green-500"}  mr-3 mt-1`} size={24} />
                                     <div className="flex flex-col flex-1">
-                                        <p className="text-gray-800">{task.title}</p>
-                                        <b className="text-xs font-semibold text-gray-800">{task.area}</b>
+                                        <b className="text-gray-800">{task.Area.name} | <b className="text-xs font-semibold text-gray-800">{task.subArea.name}</b></b>
+                                        <p onClick={() => console.log(task)} className="text-gray-800">{task.title}</p>
                                     </div>
-                                    <span className="text-gray-500 text-sm ml-4 whitespace-nowrap">{task.time}</span>
+                                    <span className="text-gray-500 text-sm ml-4 whitespace-nowrap">{getDate(task.createdAt)}</span>
                                 </div>
                                 ))}
                             </div>
@@ -336,7 +357,7 @@ const Home = () => {
                                 <h1 className="text-gray-800 font-semibold text-sm ">Gestionar emergencias</h1>
                             </div>
                         </div> */}
-                    <NavLink to="/admin">
+                    {/* <NavLink to="/admin">
                         <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
                             <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
                                 <PiUsersThreeFill className="text-white" size={20} />
@@ -345,7 +366,7 @@ const Home = () => {
                                 <h1 className="text-gray-800 font-semibold text-sm ">Gestion de personal</h1>
                             </div>
                         </div>
-                    </NavLink>
+                    </NavLink> */}
                     <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
                         <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
                             <BiSolidReport className="text-white" size={20} />
