@@ -20,7 +20,7 @@ import { useAuth } from "../../utils/context/AuthContext";
         if (!token) return null;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            console.log("Payload del token:", payload); // <-- Agrega esto
+            // console.log("Payload del token:", payload); // <-- Agrega esto
             return payload.email || null;
         } catch {
             return null;

@@ -37,7 +37,7 @@ function ResolvedTask({ taskId, onClose = [] }) {
         values,
         { headers: { 'Content-Type': 'application/json' } }
       );
-      console.log('Respuesta del servidor:', response);
+      // console.log('Respuesta del servidor:', response);
       if (response.status === 200) {
         await fetchAreas();
         onClose();
