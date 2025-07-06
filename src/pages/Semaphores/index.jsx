@@ -4,7 +4,6 @@ import { Card } from "../../components/Card";
 import { SemaphoreCard } from "../../components/SemaphoreCard";
 import { SemaphoreDetail } from "../../components/SemaphoreDetail";
 import { LuArrowDownNarrowWide } from "react-icons/lu";
-// import { areas } from "../../utils/data/areas";
 import { useAreas } from "../../utils/context/AreasContext";
 
 const Semaphores = () => {

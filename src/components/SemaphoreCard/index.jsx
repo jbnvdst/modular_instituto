@@ -94,13 +94,13 @@ const SemaphoreCard = ({ semaphore, setSelectedArea, orderByQualification }) => 
         <div className={`flex flex-col overflow-hidden justify-between rounded-[32px] w-64 shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] hover:-translate-y-1 duration-200 bg-white`} style={{ order: orderByQualification ? Math.floor(average) : order }}>
             <div className="flex flex-col justify-between h-full gap-2">
                 <div className="flex justify-between w-full px-4 py-3" style={{ backgroundColor: getColor(order) }}>
-                    <h2 className="text-2xl text-white font-semibold">{name}</h2>
+                    <h2 onClick={() => console.log(semaphore)} className="text-2xl text-white font-semibold">{name}</h2>
                     <h1 className="text-4xl text-white font-semibold">{Math.floor(average)}</h1>
                 </div>
                 <div className="flex flex-col h-full justify-between gap-2 px-4 pb-4">
                     <p className="text-sm">{description}</p>
                     <b className="text-sm">Encargado: {ownerUser.name}</b>
-                    <button onClick={() => setSelectedArea(semaphore)} className="px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">View Details</button>
+                    <button onClick={() => setSelectedArea(semaphore)} className="px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">Ver detalles</button>
                 </div>
             </div>
             <div className="w-full bg-gray-200 grid grid-cols-3 p-2 rounded-b-[32px]">
