@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "../../utils/context/AuthContext";
 import Layout from "../../components/Layout";
+import { FaPlus } from "react-icons/fa6";
 
 const RecurringTasks = () => {
     const { recurringTasks, fetchRecurringTasks } = useAuth();
+    const [selectedTask, setSelectedTask] = useState(null);
     
     // React.useEffect(() => {
     //     fetchRecurringTasks();
@@ -11,15 +13,16 @@ const RecurringTasks = () => {
     
     return (
         <Layout>
-            <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-6">Tareas Recurrentes</h2>
-                <div className="space-y-4">
-                    {/* {recurringTasks.map((task) => (
-                    <div key={task.id} className="p-4 bg-white rounded-lg shadow-md">
-                        <h3 className="text-lg font-medium text-gray-900">{task.title}</h3>
-                        <p className="text-gray-600">{task.description}</p>
+            <div className="bg-gray-50 w-full min-h-screen py-6">
+                <div className="space-y-6 w-full">
+                    <div className="flex justify-between items-center">
+                        <h1 onClick={() => console.log(recurringTasks)} className="text-sm text-gray-500">Mis tareas</h1>
+                        <button onClick={() => setSelectedTask('new')} className="flex gap-2 items-center px-4 py-2 bg-teal-500 text-white rounded-lg cursor-pointer hover:bg-teal-600 transition duration-200">
+                            <FaPlus />
+                            <span className="ml-2">Nueva plantilla</span>
+                        </button>
                     </div>
-                    ))} */}
+                    <hr className="my-4 border-gray-200"/>
                 </div>
             </div>
         </Layout>

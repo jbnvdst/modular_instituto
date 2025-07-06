@@ -43,7 +43,7 @@ function NewTask({ areaId, onClose, users = [] }) {
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
   try {
     // Simular espera de 5 segundos (por ejemplo, procesamiento en backend)
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    // await new Promise(resolve => setTimeout(resolve, 5000));
 
     const response = await axios.post(
       `${import.meta.env.VITE_API_BASE_URL}/api/tasks`,
