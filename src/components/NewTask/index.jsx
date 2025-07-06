@@ -1,11 +1,14 @@
 import React from 'react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { useAreas } from '../../utils/context/AreasContext'
+import { TabButton } from '../TabButton'
+import { ClipboardPlus, ClipboardList } from 'lucide-react'
 import * as Yup from 'yup'
 import axios from 'axios'
 
 function NewTask({ areaId, onClose, users = [] }) {
   const { subAreas, fetchAreas } = useAreas();
+  const [activeTab, setActiveTab] = React.useState('new');
   
   const getIdFromToken = () => {
     const token = localStorage.getItem("token");
@@ -61,6 +64,22 @@ function NewTask({ areaId, onClose, users = [] }) {
     <div className="fixed inset-0 bg-[#000000A8] bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="p-6">
+          <div className="flex space-x-1 mb-2 bg-gray-100 p-1 rounded-lg w-fit">
+            <TabButton 
+                id="new" 
+                label="Nueva Tarea" 
+                icon={ClipboardPlus}
+                isActive={activeTab === 'new'} 
+                onClick={() => setActiveTab('new')} 
+            />
+            <TabButton 
+                id="recurrent" 
+                label="Recurrente" 
+                icon={ClipboardList}
+                isActive={activeTab === 'recurrent'} 
+                onClick={() => setActiveTab('recurrent')} 
+            />
+          </div>
           <h2 className="text-xl font-semibold text-gray-800 mb-6">
             Crear nueva tarea
           </h2>

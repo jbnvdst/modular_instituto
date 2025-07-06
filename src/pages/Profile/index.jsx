@@ -47,9 +47,9 @@ const Profile = () => {
         if (!token) return profilePic; // Retorna imagen por defecto si no hay token
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload.profilePicture ? `http://localhost:4000/${payload.profilePicture}` : profilePic; // Retorna la imagen del perfil si existe, o la imagen por defecto
+            return payload.profilePicture ? `http://localhost:4000/${payload.profilePicture}` : null; // Retorna la imagen del perfil si existe, o la imagen por defecto
         } catch {
-            return profilePic; // Retorna imagen por defecto si hay un error al decodificar el token
+            return null; // Retorna imagen por defecto si hay un error al decodificar el token
         }
     };
 
