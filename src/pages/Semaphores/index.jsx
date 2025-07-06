@@ -1,10 +1,8 @@
 import React from "react";
-import  Layout  from "../../components/Layout";
-import { Card } from "../../components/Card";
-import { SemaphoreCard } from "../../components/SemaphoreCard";
-import { SemaphoreDetail } from "../../components/SemaphoreDetail";
 import { LuArrowDownNarrowWide } from "react-icons/lu";
 import { useAreas } from "../../utils/context/AreasContext";
+import { Layout, Card, SemaphoreCard, SemaphoreDetail } from '../../components';
+
 
 const Semaphores = () => {
     const [selectedArea, setSelectedArea] = React.useState(null);

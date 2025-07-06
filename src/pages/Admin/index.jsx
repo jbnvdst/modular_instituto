@@ -1,11 +1,7 @@
 import React, { useContext, useState, useEffect, use } from "react";
 import { Users, Building2, Shield, Plus, Edit2, Trash2, Search, UserCheck, AlertTriangle } from "lucide-react";
-import  Layout  from "../../components/Layout";
 import axios from "axios";
-import { UsuariosTab } from "../../components/UsuariosTab";
-import { AreasTab } from "../../components/AreasTab";
-import { SubAreasTab } from "../../components/SubAreasTab";
-import { TabButton } from "../../components/TabButton";
+import { Layout, UsuariosTab, AreasTab, SubAreasTab, TabButton } from '../../components';
 
 const Admin = () => {
     const [ activeTab, setActiveTab] = useState('usuarios');

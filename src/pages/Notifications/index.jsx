@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Bell, AlertTriangle, Clock, CheckCircle, Users, Activity, Thermometer, Stethoscope, Heart, Brain } from "lucide-react";
-import Layout from "../../components/Layout"; 
 import axios from "axios";
 import { useAuth } from "../../utils/context/AuthContext"; // Assuming you have an AuthContext for user authentication
-import { Notification } from "../../components/Notification";
-import { AddTask } from "../../components/AddTask";
 import { useAreas } from "../../utils/context/AreasContext";
+import { Layout, AddTask, Notification } from '../../components';
 
 const Notifications = () => {
     const [notifications , setNotifications ] = useState([]);
