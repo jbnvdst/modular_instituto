@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-const SemaphoreCard = ({ semaphore, setSelectedArea, orderByQualification }) => {
+const SemaphoreCard = ({ semaphore, setSelectedArea, orderByQualification }) => { 
     const [order, setOrder] = React.useState(0);
     const [average, setAverage] = React.useState(0);
     const { id, name, description, ownerUser } = semaphore;
