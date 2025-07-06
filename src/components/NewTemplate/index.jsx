@@ -10,7 +10,6 @@ import axios from 'axios'
 function NewTemplate({ template, onClose }) {
   const { subAreas, fetchAreas } = useAreas();
   const { fetchTemplates } = useAuth();
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
   
   const getIdFromToken = () => {
     const token = localStorage.getItem("token");
