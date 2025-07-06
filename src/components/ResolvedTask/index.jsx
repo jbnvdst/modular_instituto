@@ -63,6 +63,7 @@ function ResolvedTask({ taskId, onClose = [] }) {
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
+            {({ isSubmitting }) => (
             <Form className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-500 mb-2">
@@ -78,19 +79,22 @@ function ResolvedTask({ taskId, onClose = [] }) {
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="bg-teal-600 cursor-pointer hover:bg-teal-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
                 >
-                  Guardar
+                  {isSubmitting ? "Guardando..." : "Guardar"}
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
+                  disabled={isSubmitting}
                   className="bg-gray-300 cursor-pointer hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors"
                 >
                   Cancelar
                 </button>
               </div>
             </Form>
+            )}
           </Formik>
         </div>
       </div>

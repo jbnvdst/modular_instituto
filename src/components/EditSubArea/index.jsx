@@ -16,7 +16,7 @@ function EditSubArea({ subArea, setSubAreas, onClick, fetchSubAreas }) {
     description: Yup.string().required('La descripción es obligatoria'),
   })
 
-  const handleSubmit = async (values, { resetForm }) => {
+  const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     const body = {
       name: values.name,
       description: values.description,
@@ -55,6 +55,8 @@ function EditSubArea({ subArea, setSubAreas, onClick, fetchSubAreas }) {
     } catch (error) {
       alert('Error al guardar el subarea. Por favor, inténtalo de nuevo.');
       console.error(error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -72,54 +74,60 @@ function EditSubArea({ subArea, setSubAreas, onClick, fetchSubAreas }) {
             onSubmit={handleSubmit}
             enableReinitialize
           >
-            <Form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-500 mb-2">
-                  Nombre
-                </label>
-                <Field 
-                  name="name" 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
-                  placeholder="Ingresa tu nombre"
-                />
-                <ErrorMessage 
-                  name="name" 
-                  component="div" 
-                  className="text-red-500 text-sm mt-1" 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-500 mb-2">
-                  descripción
-                </label>
-                <Field 
-                  name="description" 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
-                  placeholder="Ingresa tu nombre"
-                />
-                <ErrorMessage 
-                  name="description" 
-                  component="div" 
-                  className="text-red-500 text-sm mt-1" 
-                />
-              </div>
+            {({ isSubmitting }) => (
+              <Form className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">
+                    Nombre
+                  </label>
+                  <Field 
+                    name="name" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                    placeholder="Ingresa el nombre"
+                  />
+                  <ErrorMessage 
+                    name="name" 
+                    component="div" 
+                    className="text-red-500 text-sm mt-1" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">
+                    Descripción
+                  </label>
+                  <Field 
+                    name="description" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                    placeholder="Ingresa la descripción"
+                  />
+                  <ErrorMessage 
+                    name="description" 
+                    component="div" 
+                    className="text-red-500 text-sm mt-1" 
+                  />
+                </div>
 
-              <div className="flex gap-3 pt-4">
-                <button 
-                  type="submit" 
-                  className="bg-teal-600 cursor-pointer hover:bg-teal-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
-                >
-                  Guardar
-                </button>
-                <button 
-                  type="button" 
-                  onClick={onClick} 
-                  className="bg-gray-300 cursor-pointer hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </Form>
+                <div className="flex gap-3 pt-4">
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className={`bg-teal-600 text-white px-4 py-2 rounded-md font-medium transition-colors
+                      ${isSubmitting ? 'cursor-not-allowed opacity-50' : 'hover:bg-teal-700 cursor-pointer'}`}
+                  >
+                    {isSubmitting ? 'Guardando...' : 'Guardar'}
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={onClick} 
+                    disabled={isSubmitting}
+                    className={`bg-gray-300 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors
+                      ${isSubmitting ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-400 cursor-pointer'}`}
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </Form>
+            )}
           </Formik>
         </div>
       </div>

@@ -214,8 +214,12 @@ const AreasTab = ({ users}) => {
                                 name: userToEdit?.name || '',
                                 role: userToEdit?.role || '',
                             }}
-                            onSubmit={async (values, { resetForm }) => {
+                            onSubmit={async (values, { resetForm, setSubmitting }) => {
+                                setSubmitting(true);
                                 try {
+
+                                    await new Promise(resolve => setTimeout(resolve, 5000));
+
                                 if (userToEdit?.id) {
                                     // 🛠 Modo edición
                                     const response = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/user-areas`, {
@@ -260,7 +264,7 @@ const AreasTab = ({ users}) => {
                                         {
                                             id: selectedArea.id,
                                             UserArea: {
-                                            role: values.role,
+                                                role: values.role,
                                             },
                                         },
                                         ],
@@ -271,13 +275,16 @@ const AreasTab = ({ users}) => {
                                 } catch (error) {
                                 console.error("Error al guardar usuario:", error);
                                 }
+                                finally{
+                                    setSubmitting(false);
+                                }
 
                                 resetForm();
                                 setUserToEdit(null);
                                 setIsEditingPersonal(false);
                             }}
                             >
-                            {({ resetForm }) => (
+                            {({ resetForm, isSubmitting }) => (
                                 <Form>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {!userToEdit?.id && (
@@ -323,14 +330,16 @@ const AreasTab = ({ users}) => {
                                         setUserToEdit(null);
                                     }}
                                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                    disabled={isSubmitting}
                                     >
                                     Cancelar
                                     </button>
                                     <button
                                     type="submit"
+                                    disabled={isSubmitting}
                                     className="px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-transparent rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                     >
-                                    {userToEdit?.id ? "Guardar cambios" : "Agregar"}
+                                     {userToEdit?.id ? (isSubmitting ? "Guardando..." : "Guardar cambios") : (isSubmitting ? "Agregando..." : "Agregar")}
                                     </button>
                                 </div>
                                 </Form>
