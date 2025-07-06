@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../../utils/context/AuthContext";
-import Layout from "../../components/Layout";
 import { FaPlus } from "react-icons/fa6";
-import { NewTemplate } from "../../components/NewTemplate";
-import { ModalAlert } from "../../components/ModalAlert";
+import { Layout, NewTemplate, ModalAlert } from '../../components';
 import axios from "axios";
 
 const TaskTemplates = () => {

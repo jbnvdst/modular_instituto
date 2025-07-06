@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '../../components/Layout';
 import { ChevronDown, Plus, Users, Bell, AlertCircle, CheckCircle, Clock, Activity, Trash2} from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
-import { NewTask } from '../../components/NewTask';
-import { ResolvedTask } from '../../components/ResolvedTask';
 import { useAreas } from '../../utils/context/AreasContext';
 import { useAuth } from '../../utils/context/AuthContext';
-import { ToggleSwitch } from '../../components/ToggleSwitch';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { Layout, NewTask, ResolvedTask, ToggleSwitch } from '../../components';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 

@@ -1,17 +1,13 @@
 import React, { useRef, useEffect, useState, use } from "react";
 import axios from "axios";
-import Layout from "../../components/Layout";
-import { CountingCard } from "../../components/CountingCard";
 import { NavLink } from "react-router-dom";
-import { PiNotificationDuotone, PiSirenDuotone } from "react-icons/pi";
+import { PiSirenDuotone } from "react-icons/pi";
 import { IoSettingsSharp } from "react-icons/io5";
-import { PiUsersThreeFill } from "react-icons/pi";
 import { BiSolidReport } from "react-icons/bi";
-import { lastNotifications } from "../../utils/data/lastNotifications";
 import * as Chart from "chart.js/auto";
 import { useAreas } from '../../utils/context/AreasContext';
-import { ExportReporteTareas } from '../../components/ExportarReporteButton'
 import { useAuth } from "../../utils/context/AuthContext";
+import { Layout, CountingCard, ExportReporteTareas } from '../../components';
 
 
     function getEmailFromToken() {
