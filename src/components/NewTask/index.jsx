@@ -40,28 +40,31 @@ function NewTask({ areaId, onClose, users = [] }) {
     description: Yup.string(),
   })
 
-  const handleSubmit = async (values, { resetForm }) => {
-    // console.log('Valores enviados:', values);
-    try {
-      // Ajusta la URL según tu API real
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/tasks`,
-        values,
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-      console.log('Respuesta del servidor:', response);
-      if (response.status === 201) {
-        await fetchAreas();
-        onClose();
-        resetForm();
-      } else {
-        alert('Error al crear la tarea. Por favor, inténtalo de nuevo.');
-      }
-    } catch (error) {
-      alert('Error al guardar la tarea. Por favor, inténtalo de nuevo.');
-      console.error(error);
+  const handleSubmit = async (values, { resetForm, setSubmitting }) => {
+  try {
+    // Simular espera de 5 segundos (por ejemplo, procesamiento en backend)
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/api/tasks`,
+      values,
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+
+    if (response.status === 201) {
+      await fetchAreas();
+      onClose();
+      resetForm();
+    } else {
+      alert('Error al crear la tarea. Por favor, inténtalo de nuevo.');
     }
-  };
+  } catch (error) {
+    alert('Error al guardar la tarea. Por favor, inténtalo de nuevo.');
+    console.error(error);
+  } finally {
+    setSubmitting(false); // Reactiva el botón al terminar
+  }
+};
 
   return (
     <div className="fixed inset-0 bg-[#000000A8] bg-opacity-50 flex items-center justify-center z-50">
@@ -101,7 +104,7 @@ function NewTask({ areaId, onClose, users = [] }) {
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
-            {({ setValues, values }) => {
+            {({ setValues, values, isSubmitting }) => {
               useEffect(() => {
                 if (selectedTemplate !== null) {
                   setValues({
@@ -189,9 +192,10 @@ function NewTask({ areaId, onClose, users = [] }) {
                   <div className="flex gap-3 pt-4">
                     <button
                       type="submit"
+                      disabled={isSubmitting}
                       className="bg-teal-600 cursor-pointer hover:bg-teal-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
                     >
-                      Guardar
+                      {isSubmitting ? 'Guardando...' : 'Guardar'}
                     </button>
                     <button
                       type="button"

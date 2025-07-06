@@ -10,9 +10,8 @@ import { BiSolidReport } from "react-icons/bi";
 import { lastNotifications } from "../../utils/data/lastNotifications";
 import * as Chart from "chart.js/auto";
 import { useAreas } from '../../utils/context/AreasContext';
+import { ExportReporteTareas } from '../../components/ExportarReporteButton'
 import { useAuth } from "../../utils/context/AuthContext";
-
-
 
 
     function getEmailFromToken() {
@@ -20,7 +19,7 @@ import { useAuth } from "../../utils/context/AuthContext";
         if (!token) return null;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            console.log("Payload del token:", payload); // <-- Agrega esto
+            // console.log("Payload del token:", payload); // <-- Agrega esto
             return payload.email || null;
         } catch {
             return null;
@@ -50,7 +49,20 @@ const Home = () => {
     const [ lastTasks , setLastTasks ] = useState([]);
     const [ allTasks, setAllTasks ] = useState([]);
     const { getDate } = useAuth();
+    const [tasks, setTasks] = useState([])
 
+    useEffect(() => {
+            const fetchTasks = async () => {
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/tasks/last-30-days`)
+                setTasks(res.data)
+            } catch (err) {
+                console.error('Error al obtener tareas:', err)
+            }
+            }
+
+            fetchTasks()
+    }, [])
     
     const fetchAllTasks = async () => {
         try {
@@ -367,7 +379,10 @@ const Home = () => {
                             </div>
                         </div>
                     </NavLink> */}
-                    <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
+                    <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer"
+                     onClick={() => {
+                        ExportReporteTareas(tasks)}}
+                    >
                         <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
                             <BiSolidReport className="text-white" size={20} />
                         </div>

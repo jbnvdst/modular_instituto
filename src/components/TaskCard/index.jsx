@@ -5,7 +5,7 @@ import { useAuth } from "../../utils/context/AuthContext";
 const TaskCard = ({ task }) => {
     const color = task.priority === 'rojo' ? 'text-rose-700' : task.priority === 'amarillo' ? 'text-amber-500' : 'text-teal-500';
     const { getDate } = useAuth();
-    console.log(task);
+    // console.log(task);
 
     return (
         <div key={task.id} className={`flex items-center py-2 border-l-4 pl-3 border-b ${task.priority === "rojo" ? " border-[#ef444490]" : task.priority === "amarillo" ? "border-[#f59e0b90]" : "border-[#10b98190]"} `}>
