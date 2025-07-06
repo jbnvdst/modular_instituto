@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
-import { ChevronDown, Plus, Users, Bell, AlertCircle, CheckCircle, Clock, Activity} from 'lucide-react';
+import { ChevronDown, Plus, Users, Bell, AlertCircle, CheckCircle, Clock, Activity, Trash2} from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { NewTask } from '../../components/NewTask';
@@ -138,6 +138,24 @@ function Areas() {
     backgroundColor: '#10b98190',
     borderRadius: 4
   }]
+};
+
+  const handleDeleteTask = async (taskId) => {
+  if (!selectedArea || !taskId) return;
+  try {
+    await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/tasks/${taskId}`);
+    // Opcional: Actualiza el estado local para quitar la tarea borrada
+    setUserAreas(prev =>
+      prev.map(area =>
+        area.id === selectedArea
+          ? { ...area, tasks: area.tasks.filter(task => task.id !== taskId) }
+          : area
+      )
+    );
+  } catch (error) {
+    console.error("Error al borrar la tarea:", error);
+    alert("No se pudo borrar la tarea.");
+  }
 };
 
   const handleCreateTask = () => {
@@ -294,12 +312,17 @@ function Areas() {
                                         <p className="text-xs text-gray-500 mb-2">
                                           Creado {getDate(task.createdAt)}
                                         </p>
-                                        <span
-                                          onClick={() => setResolvedTaskModal(task.id)}
-                                          className="cursor-pointer inline-flex px-2 py-1 text-sm text-white font-medium rounded-full bg-teal-600/80"
-                                        >
-                                          Resolver
-                                        </span>
+                                        <div className='flex justify-end'>
+                                          <div onClick={() => handleDeleteTask(task.id)} className='flex justify-center items-center px-2 text-red-600 cursor-pointer'>
+                                            <Trash2 size={17}/>
+                                          </div>
+                                          <span
+                                            onClick={() => setResolvedTaskModal(task.id)}
+                                            className="cursor-pointer inline-flex px-2 py-1 text-sm text-white font-medium rounded-full bg-teal-600/80"
+                                          >
+                                            Resolver
+                                          </span>
+                                        </div>
                                       </div>
                                     </div>
                                   ))
