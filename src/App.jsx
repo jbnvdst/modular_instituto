@@ -6,6 +6,8 @@ import Login from './pages/Login'
 import Admin from './pages/Admin'
 import Notifications from './pages/Notifications'
 import Areas from './pages/Areas'
+import TaskTemplates from './pages/TaskTemplates'
+import RecurringTasks from './pages/RecurringTasks'
 import { AreasProvider } from "./utils/context/AreasContext";
 import { useAuth } from './utils/context/AuthContext';
 
@@ -21,6 +23,8 @@ const AppRoutes = () => {
     { path: '/notification', element: user ? <Notifications /> : <Navigate to="/" replace /> },
     { path: '/areas', element: user ? <Areas /> : <Navigate to="/" replace /> },
     { path: '/areas/:id', element: user ? <Areas /> : <Navigate to="/" replace /> },
+    { path: '/tasktemplates', element: user ? <TaskTemplates /> : <Navigate to="/" replace /> },
+    { path: '/recurringtasks', element: user ? <RecurringTasks /> : <Navigate to="/" replace /> },
     ])
 
   return routes

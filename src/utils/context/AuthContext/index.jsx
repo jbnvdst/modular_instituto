@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useContext } from "react";
+import axios from "axios";
 
 // Crea el contexto
 const AuthContext = createContext();
@@ -7,6 +8,8 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // Aquí podrías guardar el user ID, role, etc.
   const [token, setToken] = useState(null);
+  const [taskTemplates, setTaskTemplates] = useState([]);
+  const [recurringTasks, setRecurringTasks] = useState([]);
 
   const login = async (email, password) => {
     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login/`, {
@@ -36,6 +39,29 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
   };
 
+  const fetchTemplates = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/task-template/${user.id}`);
+      // console.log("Response:", response);
+      if (response.status === 200) {
+        setTaskTemplates(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching task templates:", error);
+    }
+  };
+
+  const fetchRecurringTasks = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/recurring-tasks/${user.id}`);
+      if (response.status === 200) {
+        setRecurringTasks(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching recurring tasks:", error);
+    }
+  };
+
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
@@ -45,6 +71,14 @@ export const AuthProvider = ({ children }) => {
       setToken(storedToken);
     }
   }, []);
+
+  useEffect(() => {
+    // console.log("User:", user);
+    if (!user) return;
+    // console.log("Fetching templates and recurring tasks for user:", user.id);
+    fetchTemplates();
+    fetchRecurringTasks();
+  }, [user]);
 
   const getDate = (dateString) => {
     const inputDate = new Date(dateString);
@@ -81,7 +115,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, getDate }}>
+    <AuthContext.Provider value={{ user, token, login, logout, getDate, taskTemplates, fetchTemplates, recurringTasks, fetchRecurringTasks }}>
       {children}
     </AuthContext.Provider>
   );

@@ -37,6 +37,10 @@ const Layout = ({ children }) => {
         pageTitle = "Notificaciones";
     } else if (location.pathname.startsWith("/areas")) {
         pageTitle = "Gestión de Áreas Asignadas";
+    } else if (location.pathname.startsWith("/tasktemplates")) {
+        pageTitle = "Plantillas de Tareas";
+    } else if (location.pathname.startsWith("/recurringtasks")) {
+        pageTitle = "Tareas Recurrentes";
     }
 
     // Limpiar el input de búsqueda al cambiar de ruta

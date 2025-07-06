@@ -1,9 +1,10 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { GoHome } from "react-icons/go";
-import { Activity } from 'lucide-react';
+import { Activity, CalendarClock } from 'lucide-react';
 import { BsStoplights } from "react-icons/bs";
-import { LuUserRoundCog } from "react-icons/lu";
+import { LuUserRoundCog, LuCalendarClock  } from "react-icons/lu";
+import { CgTemplate } from "react-icons/cg";
 import { IoLayersOutline } from "react-icons/io5";
 
 const Sidebar = () => {
@@ -34,6 +35,16 @@ const Sidebar = () => {
                     <li className="w-full">
                         <NavLink to="/areas" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
                             <IoLayersOutline  className={({ isActive }) => ` ${isActive ? activeStyle : unactiveStyle}`} size={22} /><span className="font-medium">Areas</span>
+                        </NavLink>
+                    </li>
+                    <li className="w-full">
+                        <NavLink to="/tasktemplates" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
+                            <CgTemplate className={({ isActive }) => ` ${isActive ? activeStyle : unactiveStyle}`} size={22} /><span className="font-medium">Plantillas de Tareas</span>
+                        </NavLink>
+                    </li>
+                    <li className="w-full">
+                        <NavLink to="/recurringtasks" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
+                            <LuCalendarClock className={({ isActive }) => ` ${isActive ? activeStyle : unactiveStyle}`} size={22} /><span className="font-medium">Tareas recurrentes</span>
                         </NavLink>
                     </li>
                     <li className="w-full">

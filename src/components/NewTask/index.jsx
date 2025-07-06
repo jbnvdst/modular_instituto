@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { useAreas } from '../../utils/context/AreasContext'
+import { useAuth } from '../../utils/context/AuthContext'
 import { TabButton } from '../TabButton'
 import { ClipboardPlus, ClipboardList } from 'lucide-react'
 import * as Yup from 'yup'
@@ -8,7 +9,9 @@ import axios from 'axios'
 
 function NewTask({ areaId, onClose, users = [] }) {
   const { subAreas, fetchAreas } = useAreas();
+  const { taskTemplates } = useAuth();
   const [activeTab, setActiveTab] = React.useState('new');
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   
   const getIdFromToken = () => {
     const token = localStorage.getItem("token");
@@ -80,6 +83,16 @@ function NewTask({ areaId, onClose, users = [] }) {
                 onClick={() => setActiveTab('recurrent')} 
             />
           </div>
+          {activeTab === 'recurrent' && (
+            <select onChange={(e) => setSelectedTemplate(e.target.value === 'default' ? null : JSON.parse(e.target.value))} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors mb-4">
+              <option value="default">Selecciona una plantilla</option>
+              {taskTemplates.map(template => (
+                <option key={template.id} value={JSON.stringify(template)}>
+                  {template.title}
+                </option>
+              ))}
+            </select>
+          )}
           <h2 className="text-xl font-semibold text-gray-800 mb-6">
             Crear nueva tarea
           </h2>
@@ -88,91 +101,109 @@ function NewTask({ areaId, onClose, users = [] }) {
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
-            <Form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-500 mb-2">
-                  Título de la tarea
-                </label>
-                <Field
-                  name="title"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
-                  placeholder="Título de la tarea"
-                />
-                <ErrorMessage
-                  name="title"
-                  component="div"
-                  className="text-red-500 text-sm mt-1"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-500 mb-2">
-                  Prioridad
-                </label>
-                <Field
-                  as="select"
-                  name="priority"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
-                >
-                  <option value="default">Seleccione una prioridad</option>
-                  <option value="verde">Pendiente</option>
-                  <option value="amarillo">Atención</option>
-                  <option value="rojo">Urgente</option>
-                </Field>
-                <ErrorMessage
-                  name="priority"
-                  component="div"
-                  className="text-red-500 text-sm mt-1"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-500 mb-2">
-                  Área de necesidad
-                </label>
-                <Field
-                  as="select"
-                  name="subAreaId"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
-                >
-                  <option value="default">Seleccione un área</option>
-                  {subAreas.map(sub => (
-                    <option key={sub.id} value={sub.id}>
-                      {sub.name}
-                    </option>
-                  ))}
-                </Field>
-                <ErrorMessage
-                  name="subAreaId"
-                  component="div"
-                  className="text-red-500 text-sm mt-1"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-500 mb-2">
-                  Descripción (opcional)
-                </label>
-                <Field
-                  name="description"
-                  as="textarea"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
-                  placeholder="Descripción de la tarea"
-                />
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  className="bg-teal-600 cursor-pointer hover:bg-teal-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
-                >
-                  Guardar
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="bg-gray-300 cursor-pointer hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </Form>
+            {({ setValues, values }) => {
+              useEffect(() => {
+                if (selectedTemplate !== null) {
+                  setValues({
+                    ...values,
+                    title: selectedTemplate.title,
+                    description: selectedTemplate.description,
+                    priority: selectedTemplate.priority,
+                    subAreaId: selectedTemplate.subAreaId || 'default',
+                  });
+                } else {
+                  setValues(initialValues);
+                }
+              }, [selectedTemplate]);
+
+              return (
+                <Form className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                      Título de la tarea
+                    </label>
+                    <Field
+                      name="title"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                      placeholder="Título de la tarea"
+                    />
+                    <ErrorMessage
+                      name="title"
+                      component="div"
+                      className="text-red-500 text-sm mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                      Prioridad
+                    </label>
+                    <Field
+                      as="select"
+                      name="priority"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                    >
+                      <option value="default">Seleccione una prioridad</option>
+                      <option value="verde">Pendiente</option>
+                      <option value="amarillo">Atención</option>
+                      <option value="rojo">Urgente</option>
+                    </Field>
+                    <ErrorMessage
+                      name="priority"
+                      component="div"
+                      className="text-red-500 text-sm mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                      Área de necesidad
+                    </label>
+                    <Field
+                      as="select"
+                      name="subAreaId"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                    >
+                      <option value="default">Seleccione un área</option>
+                      {subAreas.map(sub => (
+                        <option key={sub.id} value={sub.id}>
+                          {sub.name}
+                        </option>
+                      ))}
+                    </Field>
+                    <ErrorMessage
+                      name="subAreaId"
+                      component="div"
+                      className="text-red-500 text-sm mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                      Descripción (opcional)
+                    </label>
+                    <Field
+                      name="description"
+                      as="textarea"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                      placeholder="Descripción de la tarea"
+                    />
+                  </div>
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      type="submit"
+                      className="bg-teal-600 cursor-pointer hover:bg-teal-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="bg-gray-300 cursor-pointer hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors"
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                </Form>
+              )
+            }}
           </Formik>
         </div>
       </div>
