@@ -3,7 +3,8 @@ import { Bell, AlertTriangle, Clock, CheckCircle, Users, Activity, Thermometer, 
 import axios from "axios";
 import { useAuth } from "../../utils/context/AuthContext"; // Assuming you have an AuthContext for user authentication
 import { useAreas } from "../../utils/context/AreasContext";
-import { Layout, AddTask, Notification } from '../../components';
+import { AddTask, Notification } from '../../components';
+import Layout from "../../components/Layout";
 
 const Notifications = () => {
     const [notifications , setNotifications ] = useState([]);

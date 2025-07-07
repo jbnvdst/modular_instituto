@@ -6,7 +6,8 @@ import { useAreas } from '../../utils/context/AreasContext';
 import { useAuth } from '../../utils/context/AuthContext';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Layout, NewTask, ResolvedTask, ToggleSwitch } from '../../components';
+import { NewTask, ResolvedTask, ToggleSwitch } from '../../components';
+import Layout from '../../components/Layout';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 

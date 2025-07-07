@@ -68,7 +68,7 @@ const RecurringTasks = () => {
                     </div>
                     <hr className="my-4 border-gray-200"/>
                 </div>
-                <div className="overflow-x-auto">
+                {recurringTasks.length > 0 ? <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50">
                             <tr>
@@ -118,6 +118,11 @@ const RecurringTasks = () => {
                         </tbody>
                     </table>
                 </div>
+                :
+                <div className="p-4 bg-white rounded-lg shadow-md">
+                    <p className="text-gray-500">No tienes tareas recurrentes disponibles.</p>
+                </div>
+                }
             </div>
         </Layout>
     );

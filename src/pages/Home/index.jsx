@@ -7,8 +7,8 @@ import { BiSolidReport } from "react-icons/bi";
 import * as Chart from "chart.js/auto";
 import { useAreas } from '../../utils/context/AreasContext';
 import { useAuth } from "../../utils/context/AuthContext";
-import { Layout, CountingCard, ExportReporteTareas } from '../../components';
-
+import { CountingCard, ExportReporteTareas } from '../../components';
+import Layout from "../../components/Layout";
 
     function getEmailFromToken() {
         const token = localStorage.getItem("token");

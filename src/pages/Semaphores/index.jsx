@@ -1,7 +1,8 @@
 import React from "react";
 import { LuArrowDownNarrowWide } from "react-icons/lu";
 import { useAreas } from "../../utils/context/AreasContext";
-import { Layout, Card, SemaphoreCard, SemaphoreDetail } from '../../components';
+import { Card, SemaphoreCard, SemaphoreDetail } from '../../components';
+import Layout from "../../components/Layout";
 
 
 const Semaphores = () => {
