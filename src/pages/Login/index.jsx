@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, User, Lock, Eye, EyeOff } from 'lucide-react';
+import { NavLink, useLocation } from "react-router-dom";
 import docImage from '../../assets/img/doc.svg'; // Asegúrate de que la ruta sea correcta
 import { useAuth } from '../../utils/context/AuthContext'; // Asegúrate de que la ruta sea correcta
 import { useNavigate } from 'react-router-dom'; // <-- Agrega esto
@@ -201,9 +202,9 @@ const Login = () => {
               <p className="text-sm text-gray-500 mb-4">
                 ¿Necesitas acceso al sistema?
               </p>
-              <button className="text-sm cursor-pointer font-medium text-teal-600 hover:text-teal-700 transition-colors">
-                Contacta al administrador del sistema
-              </button>
+                <button  className="text-sm underline cursor-pointer font-medium text-teal-600 hover:text-teal-900 transition-colors">
+                  Registrate aquí
+                </button>
             </div>
 
             {/* Información de seguridad */}
