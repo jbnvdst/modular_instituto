@@ -6,20 +6,40 @@ import logoutIcon from "../../assets/icons/exit.png";
 import profilePic from "../../assets/img/default_profile.jpg";
 import { ModalAlert } from "../../components/ModalAlert";
 import { useAuth } from "../../utils/context/AuthContext";
+import axios from "axios";
 
 const Layout = ({ children }) => {
     const [showModal, setShowModal] = useState(false);
     const [searchValue, setSearchValue] = useState("");
-    const location = useLocation(); // Usar hook de react-router
+    const [notifications, setNotifications] = useState([]);
+    const location = useLocation();
+
+    // Obtener notificaciones al montar el componente
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/notification`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setNotifications(res.data || []);
+            } catch (error) {
+                setNotifications([]);
+            }
+        };
+        fetchNotifications();
+    }, []);
+
+    const hasUnread = notifications.some(n => !n.read);
 
     const getProfilePictureByToken = () => {
         const token = localStorage.getItem("token");
-        if (!token) return profilePic; // Retorna imagen por defecto si no hay token
+        if (!token) return profilePic;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload.profilePicture ? `http://localhost:4000/${payload.profilePicture}` : profilePic; // Retorna la imagen del perfil si existe, o la imagen por defecto
+            return payload.profilePicture ? `http://localhost:4000/${payload.profilePicture}` : profilePic;
         } catch {
-            return profilePic; // Retorna imagen por defecto si hay un error al decodificar el token
+            return profilePic;
         }
     };
 
@@ -69,9 +89,13 @@ const Layout = ({ children }) => {
                         />
                         <NavLink
                             to="/notification"
-                            className="bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200"
+                            className="bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200 relative"
                         >
                             <img src={bellIcon} alt="Notifications" className="w-4 h-4" />
+                            {hasUnread && (
+                                <span className="absolute w-3 h-3 bg-red-400 rounded-full border border-white" 
+                                      style={{ top: '-4px', right: '-4px' }}></span>
+                            )}
                         </NavLink>
                         <NavLink to="/profile">
                             <img src={`${getProfilePictureByToken()}`} alt="Profile" className="w-10 h-10 rounded-full object-cover" />

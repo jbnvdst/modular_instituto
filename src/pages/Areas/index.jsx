@@ -6,8 +6,9 @@ import { useAreas } from '../../utils/context/AreasContext';
 import { useAuth } from '../../utils/context/AuthContext';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { NewTask, ResolvedTask, ToggleSwitch } from '../../components';
+import { NewTask, ResolvedTask, ToggleSwitch, NewNote } from '../../components';
 import Layout from '../../components/Layout';
+import { FaRegStickyNote } from "react-icons/fa";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -16,6 +17,7 @@ function Areas() {
   const [selectedArea, setSelectedArea] = useState(id || "");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+  const [ showNoteModal, setShowNoteModal ] = useState(false);
   const [resolvedTaskModal, setResolvedTaskModal] = useState(null);
   const [newTask, setNewTask] = useState({ title: '', priority: 'medium', assignedTo: '' });
   const { areas, loadingAreas } = useAreas();
@@ -341,6 +343,12 @@ function Areas() {
                               <Bell className="w-5 h-5 text-teal-600 mr-3" />
                               <span className="text-sm font-medium text-teal-800">Crear Tarea</span>
                           </button>
+                          <button onClick={() => (setShowNoteModal(true))}  
+                              className="w-full cursor-pointer flex items-center p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                              >
+                              <FaRegStickyNote className="w-5 h-5 text-teal-600 mr-3" />
+                              <span className="text-sm font-medium text-teal-800">Crear Nota</span>
+                          </button>
                           {/* <button className="w-full flex cursor-pointer items-center p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
                               <Users className="w-5 h-5 text-gray-600 mr-3" />
                               <span className="text-sm font-medium text-gray-700">Mensaje a Área</span>
@@ -417,6 +425,13 @@ function Areas() {
                 onClose={() => setShowNewTaskModal(false)}
                 users={areaData.staff}
                 // fetchTasks={fetchTasks} // si tienes una función para refrescar tareas
+              />
+            )}
+            {showNoteModal && (
+              <NewNote
+                areaId={selectedArea}
+                onClose={() => setShowNoteModal(false)}
+                users={areaData.staff}
               />
             )}
             {resolvedTaskModal && (
