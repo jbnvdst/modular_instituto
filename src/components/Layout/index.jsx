@@ -13,6 +13,7 @@ const Layout = ({ children }) => {
     const [searchValue, setSearchValue] = useState("");
     const [notifications, setNotifications] = useState([]);
     const location = useLocation();
+    const { user } = useAuth(); // Asegúrate de tener el usuario actual
 
     // Obtener notificaciones al montar el componente
     useEffect(() => {
@@ -30,7 +31,11 @@ const Layout = ({ children }) => {
         fetchNotifications();
     }, []);
 
-    const hasUnread = notifications.some(n => !n.read);
+    // Filtra las notificaciones del usuario logueado
+    const userNotifications = notifications.filter(n => n.userId === user?.id);
+
+    // Calcula si hay no leídas solo para el usuario actual
+    const hasUnread = userNotifications.some(n => !n.read);
 
     const getProfilePictureByToken = () => {
         const token = localStorage.getItem("token");
