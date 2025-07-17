@@ -6,14 +6,17 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../utils/context/AuthContext';
 import * as Yup from 'yup';
 import axios from 'axios';
+import { useAreas } from '../../utils/context/AreasContext';
 
 const SignupForm = ({ setShowRegister }) => {
     const { signup } = useAuth();
+    const { areas } = useAreas();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [tokenValid, setTokenValid] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
+    const [selectedAreas, setSelectedAreas] = useState([]);
 
     const SignupSchema = Yup.object().shape({
         name: Yup.string().required('El nombre es requerido'),
@@ -36,6 +39,18 @@ const SignupForm = ({ setShowRegister }) => {
         } else {
             setTokenValid(false);
         }
+    };
+
+    const toggleArea = (areaId) => {
+        setSelectedAreas((prev) => {
+            const updated = prev.includes(areaId)
+            ? prev.filter((id) => id !== areaId)
+            : [...prev, areaId];
+
+            // Actualiza el campo oculto de Formik
+            setFieldValue('area', updated.join(','));
+            return updated;
+        });
     };
 
     return (
@@ -78,7 +93,15 @@ const SignupForm = ({ setShowRegister }) => {
                 setSubmitting(false);
             }}
             >
-            {({ values, handleChange }) => (
+            {({ values, handleChange, setFieldValue }) => {
+                const toggleArea = (id) => {
+                    const current = values.area ? values.area.split(',') : [];
+                    const exists = current.includes(id);
+                    const updated = exists ? current.filter((a) => a !== id) : [...current, id];
+                    setFieldValue('area', updated.join(','));
+                    setSelectedAreas(updated);
+                };
+            return (
                 <Form className="space-y-2 sm:space-y-2">
                 {/* Campo Nombre */}
                 <div className="space-y-1">
@@ -142,12 +165,12 @@ const SignupForm = ({ setShowRegister }) => {
                         <Field name="token">
                             {({ field, form }) => (
                                 <input
-                                {...field}
-                                id="token"
-                                type="password"
-                                onChange={(e) => handleChangeToken(e, form.handleChange)}
-                                className="w-full pl-8 sm:pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
-                                placeholder="Token de acceso"
+                                    {...field}
+                                    id="token"
+                                    type="password"
+                                    onChange={(e) => handleChangeToken(e, form.handleChange)}
+                                    className="w-full pl-8 sm:pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
+                                    placeholder="Token de acceso"
                                 />
                             )}
                         </Field>
@@ -215,6 +238,40 @@ const SignupForm = ({ setShowRegister }) => {
                     />
                 </div>
 
+                {/* Areas */}
+                <div className="space-y-1">
+                    <label htmlFor="area" className="block text-xs font-medium text-gray-700">
+                        Áreas de interes
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                        {areas.map((area) => {
+                            const isSelected = selectedAreas.includes(area.id);
+                            return (
+                                <div
+                                key={area.id}
+                                onClick={() => toggleArea(area.id)}
+                                className={`cursor-pointer p-2 text-xs rounded-lg transition-all
+                                    ${isSelected ? 'bg-teal-700 text-white' : 'bg-gray-200 text-gray-700'}`}
+                                >
+                                {area.name}
+                                </div>
+                            );
+                        })}
+                        <Field
+                            id="area"
+                            name="area"
+                            type="hidden"
+                            className="w-full pl-8 sm:pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
+                            placeholder="Áreas de interes"
+                        />
+                    </div>
+                    <ErrorMessage
+                        name="area"
+                        component="div"
+                        className="text-red-500 text-xs mt-1"
+                    />
+                </div>
+
                 {/* Botón de envío */}
                 <button
                     type="submit"
@@ -256,7 +313,7 @@ const SignupForm = ({ setShowRegister }) => {
                 }
                 </Form>
 
-            )}
+            )}}
         </Formik>
     );
 };
