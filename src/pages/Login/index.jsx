@@ -5,14 +5,14 @@ import { NavLink, useLocation } from "react-router-dom";
 import docImage from '../../assets/img/doc.svg'; // Asegúrate de que la ruta sea correcta
 import { useAuth } from '../../utils/context/AuthContext'; // Asegúrate de que la ruta sea correcta
 import { useNavigate } from 'react-router-dom'; // <-- Agrega esto
+import { LoginForm } from './LoginForm';
+import { SignupForm } from './SignupForm';
 
 const Login = () => {
   const { login, user } = useAuth();
   const navigate = useNavigate(); // <-- Agrega esto
-  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
@@ -21,25 +21,25 @@ const Login = () => {
     }
   }, [user, navigate]);
 
-  const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
-    setIsLoading(true);
-    try {
-      const user = await login(email, password);
-      if (user) {
-        localStorage.setItem("user", JSON.stringify({
-          name: user.name,
-          email: user.email,
-          profilePicture: user.profilePicture || null,
-        }));
-      }
-      navigate('/home'); 
-      // alert('Login exitoso!');
-    } catch {
-      alert('Credenciales incorrectas');
-    }
-    setIsLoading(false);
-  };
+  // const handleSubmit = async (e) => {
+  //   if (e) e.preventDefault();
+  //   setIsLoading(true);
+  //   try {
+  //     const user = await login(email, password);
+  //     if (user) {
+  //       localStorage.setItem("user", JSON.stringify({
+  //         name: user.name,
+  //         email: user.email,
+  //         profilePicture: user.profilePicture || null,
+  //       }));
+  //     }
+  //     navigate('/home'); 
+  //     // alert('Login exitoso!');
+  //   } catch {
+  //     alert('Credenciales incorrectas');
+  //   }
+  //   setIsLoading(false);
+  // };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -90,208 +90,7 @@ const Login = () => {
             </div>
 
             {/* Formulario Login o Registro */}
-            {!showRegister ? (
-              <Formik
-                initialValues={{ email: '', password: '', remember: false }}
-                onSubmit={async (values, { setSubmitting }) => {
-                  setIsLoading(true);
-                  try {
-                    const user = await login(values.email, values.password);
-                    if (user) {
-                      localStorage.setItem("user", JSON.stringify({
-                        name: user.name,
-                        email: user.email,
-                        profilePicture: user.profilePicture || null,
-                      }));
-                      navigate('/home');
-                    }
-                  } catch {
-                    alert('Credenciales incorrectas');
-                  }
-                  setIsLoading(false);
-                  setSubmitting(false);
-                }}
-              >
-                {({ values, handleChange }) => (
-                  <Form className="space-y-3 sm:space-y-3">
-
-                    {/* Campo Usuario */}
-                    <div className="space-y-1">
-                      <label htmlFor="email" className="block text-xs font-medium text-gray-700">
-                        Usuario
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <User className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-                        </div>
-                        <Field
-                          id="email"
-                          name="email"
-                          type="text"
-                          className="w-full pl-8 sm:pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
-                          placeholder="Usuario"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Campo Contraseña */}
-                    <div className="space-y-1">
-                      <label htmlFor="password" className="block text-xs font-medium text-gray-700">
-                        Contraseña
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Lock className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-                        </div>
-                        <Field
-                          id="password"
-                          name="password"
-                          type={showPassword ? 'text' : 'password'}
-                          className="w-full pl-8 sm:pl-10 pr-10 sm:pr-12 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
-                          placeholder="Contraseña"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 transition-colors"
-                        >
-                          <span className="text-gray-400 cursor-pointer">
-                            {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Recordar sesión y recuperar contraseña */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-x-12 sm:space-y-0">
-                      <label className="flex items-center space-x-2 cursor-pointer">
-                        <Field
-                          type="checkbox"
-                          name="remember"
-                          className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500 focus:ring-2"
-                        />
-                        <span className="text-xs sm:text-xs text-gray-600">Recordar sesión</span>
-                      </label>
-                      <button
-                        type="button"
-                        className="text-xs sm:text-xs cursor-pointer text-teal-600 hover:text-teal-700 transition-colors font-medium text-left sm:text-right"
-                      >
-                        ¿Olvidaste tu contraseña?
-                      </button>
-                    </div>
-
-                    {/* Botón de envío */}
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full bg-teal-600 mt-3 cursor-pointer text-white py-1 sm:py-1 px-4 rounded-lg font-medium hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg text-sm sm:text-base"
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center justify-center space-x-2">
-                          <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                          <span>Iniciando sesión...</span>
-                        </div>
-                      ) : (
-                        'Iniciar Sesión'
-                      )}
-                    </button>
-                  </Form>
-                )}
-              </Formik>
-            ) : (
-              <Formik
-                initialValues={{ name: '', email: '', password: '' }}
-                onSubmit={async (values, { setSubmitting }) => {
-                  setIsLoading(true);
-                  // Aquí iría la lógica de registro
-                  alert(`Registrado: ${values.name}, ${values.email}`);
-                  setIsLoading(false);
-                  setSubmitting(false);
-                }}
-              >
-                {({ values, handleChange }) => (
-                  <Form className="space-y-2 sm:space-y-2">
-                    {/* Campo Nombre */}
-                    <div className="space-y-1">
-                      <label htmlFor="name" className="block text-xs font-medium text-gray-700">
-                        Nombre
-                      </label>
-                      <Field
-                        id="name"
-                        name="name"
-                        type="text"
-                        className="w-full pl-8 sm:pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
-                        placeholder="Nombre completo"
-                        required
-                      />
-                    </div>
-
-                    {/* Campo Email */}
-                    <div className="space-y-1">
-                      <label htmlFor="email" className="block text-xs font-medium text-gray-700">
-                        Email
-                      </label>
-                      <Field
-                        id="email"
-                        name="email"
-                        type="email"
-                        className="w-full pl-8 sm:pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
-                        placeholder="Correo electrónico"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label htmlFor="token" className="block text-xs font-medium text-gray-700">
-                        Token de registro
-                      </label>
-                      <Field
-                        id="token"
-                        name="token"
-                        type="text"
-                        className="w-full pl-4 sm:pl-6 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
-                        placeholder="Dame el token para registrarte"
-                        required
-                      />
-                    </div>
-
-                    {/* Campo Contraseña */}
-                    <div className="space-y-1">
-                      <label htmlFor="password" className="block text-xs font-medium text-gray-700">
-                        Contraseña
-                      </label>
-                      <Field
-                        id="password"
-                        name="password"
-                        type="password"
-                        className="w-full pl-8 sm:pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
-                        placeholder="Contraseña"
-                        required
-                      />
-                    </div>
-
-                    {/* Botón de envío */}
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full bg-teal-600 mt-3 cursor-pointer text-white py-1 sm:py-1 px-4 rounded-lg font-medium hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg text-sm sm:text-base"
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center justify-center space-x-2">
-                          <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                          <span>Registrando...</span>
-                        </div>
-                      ) : (
-                        'Registrarse'
-                      )}
-                    </button>
-                  </Form>
-
-                )}
-              </Formik>
-            )}
+            {!showRegister ? <LoginForm /> : <SignupForm setShowRegister={setShowRegister} />}
 
             {/* Footer */}
             <div className="mt-3 lg:mt-4 text-center">
