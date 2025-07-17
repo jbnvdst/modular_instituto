@@ -11,6 +11,17 @@ export const AuthProvider = ({ children }) => {
   const [taskTemplates, setTaskTemplates] = useState([]);
   const [recurringTasks, setRecurringTasks] = useState([]);
 
+  const getRoleFromToken = () => {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.role || null;
+    } catch {
+        return null;
+    }
+  }
+
   const login = async (email, password) => {
     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login/`, {
       method: 'POST',
@@ -115,7 +126,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, getDate, taskTemplates, fetchTemplates, recurringTasks, fetchRecurringTasks }}>
+    <AuthContext.Provider value={{ user, token, login, logout, getDate, taskTemplates, fetchTemplates, recurringTasks, fetchRecurringTasks, getRoleFromToken }}>
       {children}
     </AuthContext.Provider>
   );

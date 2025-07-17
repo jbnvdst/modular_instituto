@@ -44,7 +44,7 @@ const Home = () => {
     const { areas } = useAreas();
     const [ lastTasks , setLastTasks ] = useState([]);
     const [ allTasks, setAllTasks ] = useState([]);
-    const { getDate } = useAuth();
+    const { getDate, getRoleFromToken } = useAuth();
     const [tasks, setTasks] = useState([])
 
     useEffect(() => {
@@ -316,7 +316,7 @@ const Home = () => {
             <hr className="my-4 border-gray-200"/>
             <div className="flex flex-col gap-2 shadow-md bg-gradient-to-tr from-[#0f7871] to-[#13b2a0] rounded-2xl p-6">
                 <h1 className="text-white font-bold text-2xl">
-                    Hola {nombre}
+                    Hola {nombre} {getRoleFromToken()}
                 </h1>
                 <p className="text-white text-xs">Sistema de gestión hospitalaria operando correctamente</p>
                 <p className="text-white text-xs mt-4">Última actualización: 2025-05-20</p>
