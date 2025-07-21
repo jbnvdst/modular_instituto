@@ -23,18 +23,21 @@ const Profile = () => {
 
     // Estado del perfil
     const [profileData, setProfileData] = useState({
-        nombre: "",
-        apellido: "",
+        name: "",
         email: "",
-        telefono: "",
-        especialidad: "",
-        cedula: "",
-        fechaIngreso: "",
+        phone: "",
+        specialty: "",
+        professionalLicense: "",
+        inscribedAt: "",
         direccion: "",
-        fechaNacimiento: "",
-        cargo: "",
-        departamento: ""
+        birthDate: "",
+        role: "",
+        department: ""
     });
+
+    const updateProfileData = async (data) => {
+        const response = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/auth/update/${id}`, data);
+    } 
 
     // Estadísticas del doctor
     const [stats, setStats] = useState([]);
@@ -64,33 +67,31 @@ const Profile = () => {
                 const usuario = res.data.find(u => u.id === id);
                 if (usuario) {
                     setProfileData({
-                        nombre: usuario.name || "",
-                        apellido: "", // No viene en la API
+                        name: usuario.name || "",
                         email: usuario.email || "",
-                        telefono: "",
-                        especialidad: "",
-                        cedula: "",
-                        fechaIngreso: "",
-                        direccion: "",
-                        fechaNacimiento: "",
-                        cargo: usuario.role || "",
-                        departamento: ""
+                        phone: usuario.phone || "",
+                        specialty: usuario.specialty || "",
+                        professionalLicense: usuario.professionalLicense || "",
+                        inscribedAt: usuario.inscribedAt || "",
+                        direccion: usuario.direccion || "",
+                        birthDate: usuario.birthDate || "",
+                        role: usuario.role || "",
+                        department: usuario.department || ""
                     });
                 }
             })
             .catch(() => {
                 setProfileData({
-                    nombre: "",
-                    apellido: "",
+                    name: "",
                     email: "",
-                    telefono: "",
-                    especialidad: "",
-                    cedula: "",
-                    fechaIngreso: "",
+                    phone: "",
+                    specialty: "",
+                    professionalLicense: "",
+                    inscribedAt: "",
                     direccion: "",
-                    fechaNacimiento: "",
-                    cargo: "",
-                    departamento: ""
+                    birthDate: "",
+                    role: "",
+                    department: ""
                 });
             })
             .finally(() => setLoading(false));
@@ -141,13 +142,12 @@ const Profile = () => {
 
     const PersonalTab = () => (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InfoField label="Nombre" value={profileData.nombre} field="nombre" icon={User} />
-                <InfoField label="Apellido" value={profileData.apellido} field="apellido" icon={User} />
+            <div onClick={() => console.log(profileData)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InfoField label="name" value={profileData.name} field="name" icon={User} />
                 <InfoField label="Email" value={profileData.email} field="email" type="email" icon={Mail} name="profile-email" autoComplete="email" />
-                <InfoField label="Teléfono" value={profileData.telefono} field="telefono" icon={Phone} />
-                <InfoField label="Fecha de Nacimiento" value={profileData.fechaNacimiento} field="fechaNacimiento" type="date" icon={Calendar} />
-                <InfoField label="Especialidad" value={profileData.especialidad} field="especialidad" icon={Stethoscope} />
+                <InfoField label="Teléfono" value={profileData.phone} field="phone" icon={Phone} />
+                <InfoField label="Fecha de Nacimiento" value={profileData.birthDate} field="birthDate" type="date" icon={Calendar} />
+                <InfoField label="specialty" value={profileData.specialty} field="specialty" icon={Stethoscope} />
             </div>
             
             <div className="grid grid-cols-1 gap-6">
@@ -159,10 +159,10 @@ const Profile = () => {
     const ProfesionalTab = () => (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InfoField label="Cédula Profesional" value={profileData.cedula} field="cedula" icon={Shield} />
-                <InfoField label="Cargo" value={profileData.cargo} field="cargo" icon={Award} />
-                <InfoField label="Departamento" value={profileData.departamento} field="departamento" icon={Building2} />
-                <InfoField label="Fecha de Ingreso" value={profileData.fechaIngreso} field="fechaIngreso" type="date" icon={Calendar} />
+                <InfoField label="Cédula Profesional" value={profileData.professionalLicense} field="professionalLicense" icon={Shield} />
+                <InfoField label="role" value={profileData.role} field="role" icon={Award} />
+                <InfoField label="department" value={profileData.department} field="department" icon={Building2} />
+                <InfoField label="Fecha de Ingreso" value={profileData.inscribedAt} field="inscribedAt" type="date" icon={Calendar} />
             </div>
 
             {/* Estadísticas */}
@@ -291,7 +291,7 @@ const Profile = () => {
                         <div className="flex items-center">
                             <div className="relative" style={{ backgroundImage: `url(${getProfilePictureByToken()})`, backgroundSize: 'cover', width: '96px', height: '96px', borderRadius: '50%', backgroundPosition: 'center' }}>
                                 <div className="w-24 h-24 bg-opacity-20 rounded-full flex items-center justify-center text-3xl font-bold">
-                                    {/* {(profileData.nombre?.charAt(0) || "") + (profileData.apellido?.charAt(0) || "")} */}
+                                    {/* {(profileData.name?.charAt(0) || "") + (profileData.apellido?.charAt(0) || "")} */}
                                 </div>
                                 <button className="absolute bottom-0 right-0 bg-white text-teal-600 p-2 rounded-full shadow-lg hover:bg-gray-50 transition-colors">
                                     <Camera size={16} />
@@ -299,11 +299,11 @@ const Profile = () => {
                             </div>
                             <div className="ml-6">
                                 <h1 className="text-3xl font-bold">
-                                    {profileData.nombre || "No especificado"} {profileData.apellido || ""}
+                                    {profileData.name || "No especificado"} 
                                 </h1>
-                                <p className="text-xl opacity-90">{profileData.cargo || "No especificado"}</p>
+                                <p className="text-xl opacity-90">{profileData.role || "No especificado"}</p>
                                 <p className="text-lg opacity-75">
-                                    {profileData.especialidad || "No especificado"} • {profileData.departamento || "No especificado"}
+                                    {profileData.specialty || "No especificado"} • {profileData.department || "No especificado"}
                                 </p>
                             </div>
                         </div>
