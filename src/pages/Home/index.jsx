@@ -10,29 +10,6 @@ import { useAuth } from "../../utils/context/AuthContext";
 import { CountingCard, ExportReporteTareas } from '../../components';
 import Layout from "../../components/Layout";
 
-    function getEmailFromToken() {
-        const token = localStorage.getItem("token");
-        if (!token) return null;
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            // console.log("Payload del token:", payload); // <-- Agrega esto
-            return payload.email || null;
-        } catch {
-            return null;
-        }
-    }
-
-    function getIdFromToken() {
-        const token = localStorage.getItem("token");
-        if (!token) return null;
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload.id || null;
-        } catch {
-            return null;
-        }
-    }
-
     
 
 const Home = () => {
@@ -44,7 +21,7 @@ const Home = () => {
     const { areas } = useAreas();
     const [ lastTasks , setLastTasks ] = useState([]);
     const [ allTasks, setAllTasks ] = useState([]);
-    const { getDate, getRoleFromToken } = useAuth();
+    const { getDate, getRoleFromToken, user } = useAuth();
     const [tasks, setTasks] = useState([])
 
     useEffect(() => {
@@ -82,7 +59,7 @@ const Home = () => {
         Chart.Tooltip,
         Chart.Legend
         );
-        const id = getIdFromToken();
+        const id = user?.id;
         axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/get/`)
             .then(res => {
                 const usuario = res.data.find(
@@ -227,7 +204,7 @@ const Home = () => {
 
     const fetchLastTasks = async () => {
         try{
-            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/tasks/last5/${getIdFromToken()}`);
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/tasks/last5/${user?.id}`);
             if (response.status === 200) {
                 setLastTasks(response.data);
             }
@@ -316,10 +293,9 @@ const Home = () => {
             <hr className="my-4 border-gray-200"/>
             <div className="flex flex-col gap-2 shadow-md bg-gradient-to-tr from-[#0f7871] to-[#13b2a0] rounded-2xl p-6">
                 <h1 className="text-white font-bold text-2xl">
-                    Hola {nombre} {getRoleFromToken()}
+                    Hola {nombre}
                 </h1>
-                <p className="text-white text-xs">Sistema de gestión hospitalaria operando correctamente</p>
-                <p className="text-white text-xs mt-4">Última actualización: 2025-05-20</p>
+                <p className="text-white text-xs">Sistema de gestión hospitalaria operando como {getRoleFromToken()}</p>
             </div>
             <div className="flex gap-4 py-5">
                 {/* <CountingCard title="Miembros en el sistema" count={150} icon="FaUsers" /> */}

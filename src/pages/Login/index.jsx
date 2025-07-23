@@ -21,26 +21,7 @@ const Login = () => {
     }
   }, [user, navigate]);
 
-  // const handleSubmit = async (e) => {
-  //   if (e) e.preventDefault();
-  //   setIsLoading(true);
-  //   try {
-  //     const user = await login(email, password);
-  //     if (user) {
-  //       localStorage.setItem("user", JSON.stringify({
-  //         name: user.name,
-  //         email: user.email,
-  //         profilePicture: user.profilePicture || null,
-  //       }));
-  //     }
-  //     navigate('/home'); 
-  //     // alert('Login exitoso!');
-  //   } catch {
-  //     alert('Credenciales incorrectas');
-  //   }
-  //   setIsLoading(false);
-  // };
-
+  
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       
@@ -88,7 +69,7 @@ const Login = () => {
                 Portal Médico
               </h1>
             </div>
-
+ 
             {/* Formulario Login o Registro */}
             {!showRegister ? <LoginForm /> : <SignupForm setShowRegister={setShowRegister} />}
 

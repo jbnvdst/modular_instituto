@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("token", data.token);
     // Decodifica el token para obtener el usuario
     const payload = JSON.parse(atob(data.token.split('.')[1]));
-    setUser({ id: payload.id, role: payload.role, name: payload.name, profilePicture: payload.profilePicture });
+    setUser({ id: payload.id, role: payload.role, name: payload.name, profilePicture: payload.profilePicture, email: payload.email  });
     return data;
   };
 
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
       const payload = JSON.parse(atob(storedToken.split('.')[1]));
-      setUser({ id: payload.id, role: payload.role, name: payload.name });
+      setUser({ id: payload.id, role: payload.role, name: payload.name, email: payload.email });
       // console.log(payload);
       setToken(storedToken);
     }
