@@ -11,6 +11,7 @@ const AreasTab = ({ users}) => {
     const [ isEditingPersonal, setIsEditingPersonal ] = useState(false);
     const [ selectedPersonal , setSelectedPersonal ] = useState({});
     const [ selectedArea, setSelectedArea ] = useState(null);
+    const [ directions, setDirections ] = useState([]);
     const { areas, setAreas, fetchAreas } = useAreas(); 
     const [ personalInArea, setPersonalInArea ] = useState([]);
     const [ areaToEdit, setAreaToEdit] = useState(null);
@@ -20,7 +21,10 @@ const AreasTab = ({ users}) => {
     const isEditMode = !!userToEdit?.id;
     const [ confirmationDeletePersonal , setConfirmationDeletePersonal] = useState(null);
     
-    
+    useEffect(() => {
+        fetchDirections();
+    }, []);
+
     useEffect(() => {
         fetchPersonal();
     }, [selectedArea]);
@@ -59,6 +63,18 @@ const AreasTab = ({ users}) => {
         }
     };
 
+    const fetchDirections = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/area/getDirections`);
+            if (response.status === 200) {
+                setDirections(response.data);
+            } else {
+                console.error("Error fetching directions:", response.data);
+            }
+        } catch (error) {
+            console.error("Error fetching directions:", error);
+        }
+    };
 
     const filterPersonal = () => {
         const personalInAreaIds = new Set(personalInArea.map(user => user.id));
@@ -135,8 +151,8 @@ const AreasTab = ({ users}) => {
                 className={`h-full flex flex-col bg-white justify-between ${area.color} rounded-2xl border-2 border-gray-100 hover:shadow-lg transition-shadow`}
                 >
                 <div className="flex items-center justify-between mb-4 rounded-t-2xl px-4 py-3 bg-gradient-to-tr from-emerald-500 to-teal-600">
-                    <div className="flex items-center">
-                    <h3 className="text-lg font-semibold text-white">{area.name}</h3>
+                    <div className="flex flex-col">
+                        <h2 className="text-lg font-semibold text-white">{area.name}</h2>
                     </div>
                     <div className="flex space-x-1">
                     <button
@@ -158,9 +174,10 @@ const AreasTab = ({ users}) => {
                 </div>
 
                 <div className="flex flex-col justify-between items-start px-4 pb-4 gap-2">
-                    <span className="text-sm text-gray-600">{area.description}</span>
-                    <span className="text-sm font-semibold text-gray-800">
-                    Encargado: {area.ownerUser.name}
+                    <span className=""><b>Dirección:</b> {area.direction}</span>
+                    <p className="text-sm text-gray-600"><b>Descripción:</b> {area.description}</p>
+                    <span className="text-sm text-gray-800">
+                    <b>Encargado:</b> {area.ownerUser.name}
                     </span>
                 </div>
 
@@ -395,7 +412,8 @@ const AreasTab = ({ users}) => {
                 }}
                 isCreating={isCreatingArea}
                 fetchAreas={fetchAreas}
-                users={users} 
+                users={users}
+                directions={directions}
             />
         )}
         {/* Confirmation Area Modal */}
