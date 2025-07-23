@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { User, Mail, Phone, MapPin, Calendar, Shield, Edit2, Save, X, Eye, EyeOff, Camera, Bell, Lock, Activity, Clock, Award, Stethoscope, Building2 } from "lucide-react";
-import  Layout  from "../../components/Layout";
+import Layout from "../../components/Layout";
 
 // Funciones para extraer datos del token
 function getIdFromToken() {
@@ -13,6 +13,21 @@ function getIdFromToken() {
     } catch {
         return null;
     }
+}
+
+function formatDate(dateString) {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+}
+
+// Utilidad para extraer solo la fecha para inputs tipo date
+function getDateInputValue(dateString) {
+    if (!dateString) return "";
+    return dateString.split("T")[0];
 }
 
 const Profile = () => {
@@ -29,30 +44,26 @@ const Profile = () => {
         specialty: "",
         professionalLicense: "",
         inscribedAt: "",
-        direccion: "",
+        address: "",
         birthDate: "",
         role: "",
         department: ""
     });
-
-    const updateProfileData = async (data) => {
-        const response = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/auth/update/${id}`, data);
-    } 
 
     // Estadísticas del doctor
     const [stats, setStats] = useState([]);
 
     // Actividad reciente
     const [actividadReciente, setActividadReciente] = useState([]);
-    
+
     const getProfilePictureByToken = () => {
         const token = localStorage.getItem("token");
-        if (!token) return profilePic; // Retorna imagen por defecto si no hay token
+        if (!token) return null;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload.profilePicture ? `http://localhost:4000/${payload.profilePicture}` : null; // Retorna la imagen del perfil si existe, o la imagen por defecto
+            return payload.profilePicture ? `http://localhost:4000/${payload.profilePicture}` : null;
         } catch {
-            return null; // Retorna imagen por defecto si hay un error al decodificar el token
+            return null;
         }
     };
 
@@ -73,7 +84,7 @@ const Profile = () => {
                         specialty: usuario.specialty || "",
                         professionalLicense: usuario.professionalLicense || "",
                         inscribedAt: usuario.inscribedAt || "",
-                        direccion: usuario.direccion || "",
+                        address: usuario.address || "",
                         birthDate: usuario.birthDate || "",
                         role: usuario.role || "",
                         department: usuario.department || ""
@@ -88,21 +99,33 @@ const Profile = () => {
                     specialty: "",
                     professionalLicense: "",
                     inscribedAt: "",
-                    direccion: "",
+                    address: "",
                     birthDate: "",
                     role: "",
                     department: ""
                 });
             })
             .finally(() => setLoading(false));
-    }, []);
+    }, []); // <--- SOLO al montar, NO dependas de isEditing
 
     const handleInputChange = (field, value) => {
-        setProfileData({ ...profileData, [field]: value });
+        setProfileData(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleSave = () => {
-        setIsEditing(false);
+    const handleSave = async () => {
+        try {
+            const id = getIdFromToken();
+            if (!id) return;
+            await axios.put(
+                `${import.meta.env.VITE_API_BASE_URL}/api/auth/update/${id}`,
+                profileData
+            );
+            setIsEditing(false);
+            // Recarga los datos aquí si quieres
+            // fetchProfileData();
+        } catch (error) {
+            alert("Error al actualizar el perfil");
+        }
     };
 
     const TabButton = ({ id, label, icon: Icon, isActive, onClick }) => (
@@ -119,22 +142,26 @@ const Profile = () => {
         </button>
     );
 
+    // Corrige el value para los inputs tipo date cuando se edita
     const InfoField = ({ label, value, field, type = "text", icon: Icon }) => (
         <div className="space-y-2">
-            <label className="flex items-center text-sm font-medium text-gray-700">
+            <label className="flex items-center text-sm font-medium text-gray-700" htmlFor={field}>
                 <Icon size={16} className="mr-2 text-gray-500" />
                 {label}
             </label>
             {isEditing ? (
                 <input
+                    id={field}
+                    name={field}
                     type={type}
-                    value={value}
+                    value={type === "date" ? getDateInputValue(value) : value}
                     onChange={(e) => handleInputChange(field, e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    autoComplete="off"
                 />
             ) : (
                 <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
-                    {value && value !== "" ? value : "No especificado"}
+                    {value && value !== "" ? (type === "date" ? formatDate(value) : value) : "No especificado"}
                 </p>
             )}
         </div>
@@ -142,16 +169,21 @@ const Profile = () => {
 
     const PersonalTab = () => (
         <div className="space-y-6">
-            <div onClick={() => console.log(profileData)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InfoField label="name" value={profileData.name} field="name" icon={User} />
                 <InfoField label="Email" value={profileData.email} field="email" type="email" icon={Mail} name="profile-email" autoComplete="email" />
                 <InfoField label="Teléfono" value={profileData.phone} field="phone" icon={Phone} />
-                <InfoField label="Fecha de Nacimiento" value={profileData.birthDate} field="birthDate" type="date" icon={Calendar} />
+                <InfoField
+                    label="Fecha de Nacimiento"
+                    value={profileData.birthDate}
+                    field="birthDate"
+                    type="date"
+                    icon={Calendar}
+                />
                 <InfoField label="specialty" value={profileData.specialty} field="specialty" icon={Stethoscope} />
             </div>
-            
             <div className="grid grid-cols-1 gap-6">
-                <InfoField label="Dirección" value={profileData.direccion} field="direccion" icon={MapPin} />
+                <InfoField label="dirección" value={profileData.address} field="address" icon={MapPin} />
             </div>
         </div>
     );
@@ -162,9 +194,14 @@ const Profile = () => {
                 <InfoField label="Cédula Profesional" value={profileData.professionalLicense} field="professionalLicense" icon={Shield} />
                 <InfoField label="role" value={profileData.role} field="role" icon={Award} />
                 <InfoField label="department" value={profileData.department} field="department" icon={Building2} />
-                <InfoField label="Fecha de Ingreso" value={profileData.inscribedAt} field="inscribedAt" type="date" icon={Calendar} />
+                <InfoField
+                    label="Fecha de Ingreso"
+                    value={profileData.inscribedAt}
+                    field="inscribedAt"
+                    type="date"
+                    icon={Calendar}
+                />
             </div>
-
             {/* Estadísticas */}
             <div className="mt-8">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Estadísticas</h3>
@@ -241,7 +278,6 @@ const Profile = () => {
                     </div>
                 </div>
             </div>
-
             <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Notificaciones</h3>
                 <div className="space-y-3">
@@ -307,7 +343,6 @@ const Profile = () => {
                                 </p>
                             </div>
                         </div>
-                        
                         <div className="flex items-center space-x-3">
                             {isEditing ? (
                                 <>
