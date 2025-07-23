@@ -42,27 +42,38 @@ function NewTask({ areaId, onClose, users = [] }) {
 
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
   try {
-    // Simular espera de 5 segundos (por ejemplo, procesamiento en backend)
-    // await new Promise(resolve => setTimeout(resolve, 5000));
+    const payload = {
+      ...values,
+      resolvedAt: null
+    };
+
+    const token = localStorage.getItem("token");
 
     const response = await axios.post(
       `${import.meta.env.VITE_API_BASE_URL}/api/tasks`,
-      values,
-      { headers: { 'Content-Type': 'application/json' } }
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      }
     );
 
-    if (response.status === 201) {
-      await fetchAreas();
-      onClose();
+    console.log("✅ Tarea creada:", response.data);
+
+    if (response.status === 200 || response.status === 201) {
       resetForm();
+      onClose();
+      location.reload(); // o mejor: actualizar tareas desde contexto
     } else {
-      alert('Error al crear la tarea. Por favor, inténtalo de nuevo.');
+      alert('La tarea no se pudo crear correctamente.');
     }
   } catch (error) {
-    alert('Error al guardar la tarea. Por favor, inténtalo de nuevo.');
-    console.error(error);
+    console.error("❌ Error al crear la tarea:", error.response?.data || error);
+    alert('Error al crear la tarea.');
   } finally {
-    setSubmitting(false); // Reactiva el botón al terminar
+    setSubmitting(false);
   }
 };
 

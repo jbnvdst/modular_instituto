@@ -8,14 +8,13 @@ export const AreasProvider = ({ children }) => {
   const [subAreas, setSubAreas] = useState([]);
   const [loadingAreas , setLoadingAreas] = useState(true);
 
-
   const fetchAreas = async () => {
     setLoadingAreas(true);
     try {
-        const reponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/area/tasksByArea`);
-        setAreas(reponse.data);
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/area/tasksByArea`);
+      setAreas(response.data);
     } catch (error) {
-        console.error("Error fetching areas:", error);
+      console.error("Error fetching areas:", error);
     }
     setLoadingAreas(false);
   };
@@ -29,7 +28,6 @@ export const AreasProvider = ({ children }) => {
     }
   };
 
-  // Crear área (POST)
   const createArea = async (area) => {
     const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/area/`, {
       method: "POST",
@@ -40,19 +38,25 @@ export const AreasProvider = ({ children }) => {
     setAreas((prev) => [...prev, newArea]);
   };
 
-  // <--- AGREGA ESTE useEffect
   useEffect(() => {
     fetchAreas();
     fetchSubAreas();
   }, []);
-  // --->
 
   return (
-    <AreasContext.Provider value={{ areas, setAreas, loadingAreas, fetchAreas, subAreas, setSubAreas, fetchSubAreas, createArea }}>
+    <AreasContext.Provider value={{
+      areas,
+      setAreas,
+      loadingAreas,
+      fetchAreas,
+      subAreas,
+      setSubAreas,
+      fetchSubAreas,
+      createArea
+    }}>
       {children}
     </AreasContext.Provider>
   );
 };
-
 
 export const useAreas = () => useContext(AreasContext);
