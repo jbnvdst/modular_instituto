@@ -119,15 +119,15 @@ const AreasTab = ({ users}) => {
             ) : (
             <div className="flex w-full justify-between items-center">
                 <div>
-                <h2
-                    onClick={() => console.log(areas)}
-                    className="text-2xl font-bold text-gray-800"
-                >
-                    Gestión de Áreas
-                </h2>
-                <p className="text-gray-600 mt-1">
-                    Administra las áreas médicas del hospital
-                </p>
+                    <h2
+                        onClick={() => console.log(areas)}
+                        className="text-2xl font-bold text-gray-800"
+                    >
+                        Gestión de Áreas
+                    </h2>
+                    <p className="text-gray-600 mt-1">
+                        Administra las áreas médicas del hospital
+                    </p>
                 </div>
                 <button
                 onClick={() => {
@@ -174,11 +174,9 @@ const AreasTab = ({ users}) => {
                 </div>
 
                 <div className="flex flex-col justify-between items-start px-4 pb-4 gap-2">
-                    <span className=""><b>Dirección:</b> {area.direction}</span>
-                    <p className="text-sm text-gray-600"><b>Descripción:</b> {area.description}</p>
-                    <span className="text-sm text-gray-800">
-                    <b>Encargado:</b> {area.ownerUser.name}
-                    </span>
+                    <span className="text-sm text-gray-800"><b>Dirección:</b> {area.direction}</span>
+                    <span className="text-sm text-gray-800"><b>Encargado:</b> {area.ownerUser.name}</span>
+                    <p className="text-sm text-gray-800">{area.description}</p>
                 </div>
 
                 <div className="flex flex-col items-end px-4 gap-4 pb-4">
