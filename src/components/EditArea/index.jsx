@@ -4,7 +4,7 @@ import * as Yup from 'yup'
 import axios from 'axios'
 import { useAreas } from '../../utils/context/AreasContext'
 
-function EditArea({ area, onClick, isCreating, users = [], fetchAreas }) {
+function EditArea({ area, onClick, isCreating, users = [], fetchAreas, directions = [] }) {
   const isEdit = !!area && !!area.id;
   const { areas, setAreas } = useAreas();
 
@@ -12,12 +12,14 @@ function EditArea({ area, onClick, isCreating, users = [], fetchAreas }) {
     name: area?.name || '',
     description: area?.description || '',
     ownerId: area?.ownerId || '',
+    direction: area?.direction || '',
   }
 
   const validationSchema = Yup.object({
     name: Yup.string().required('El nombre es obligatorio'),
     description: Yup.string().required('La descripción es obligatoria'),
     ownerId: Yup.string().required('Selecciona un encargado'),
+    direction: Yup.string().required('La dirección es obligatoria'),
   })
 
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
@@ -91,7 +93,28 @@ function EditArea({ area, onClick, isCreating, users = [], fetchAreas }) {
                     className="text-red-500 text-sm mt-1" 
                   />
                 </div>
-
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">
+                    Dirección médica
+                  </label>
+                  <Field 
+                    as="select"
+                    name="direction"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                  >
+                    <option value="">Selecciona una dirección</option>
+                    {directions.map(dir => (
+                      <option key={dir}>
+                        {dir}
+                      </option>
+                    ))}
+                  </Field>
+                  <ErrorMessage 
+                    name="direction" 
+                    component="div" 
+                    className="text-red-500 text-sm mt-1" 
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-2">
                     Descripción
