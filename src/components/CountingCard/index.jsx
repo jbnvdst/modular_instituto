@@ -3,6 +3,8 @@ import { FaUsers } from "react-icons/fa";
 import { IoBed } from "react-icons/io5";
 import { FaUserDoctor } from "react-icons/fa6";
 import { IoBarChart } from "react-icons/io5";
+import { ClipboardCheck, ClipboardX } from "lucide-react";
+
 
 function CountingCard({ title, count, icon }) {
 return (
@@ -11,6 +13,8 @@ return (
             {icon === "IoBed" ? <IoBed className='text-4xl text-[#0f787195]' /> : null}
             {icon === "FaUserDoctor" ? <FaUserDoctor className='text-4xl text-[#0f787195]' /> : null}
             {icon === "IoBarChart" ? <IoBarChart className='text-4xl text-[#0f787195]' /> : null}
+            {icon === "ClipboardCheck" ? <ClipboardCheck className='text-4xl text-[#0f787195]' /> : null}
+            {icon === "ClipboardX" ? <ClipboardX className='text-4xl text-[#0f787195]' /> : null}
             <h1 className=' mt-2 text-2xl font-bold text-gray-800'>
                 {count}{icon === "IoBarChart" ? "+" : ""}
             </h1>

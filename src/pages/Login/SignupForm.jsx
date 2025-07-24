@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { User, Lock, Eye, EyeOff, AtSign, Hash } from 'lucide-react';
 import { ModalAlert } from '../../components';
@@ -11,6 +11,7 @@ import { useAreas } from '../../utils/context/AreasContext';
 const SignupForm = ({ setShowRegister }) => {
     const { signup } = useAuth();
     const { areas } = useAreas();
+    const [areasByDirection, setAreasByDirection] = useState({});
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [tokenValid, setTokenValid] = useState(false);
@@ -53,6 +54,17 @@ const SignupForm = ({ setShowRegister }) => {
         });
     };
 
+    useEffect(() => {
+        const groupedAreas = areas.reduce((acc, area) => {
+            if (!acc[area.direction]) {
+                acc[area.direction] = [];
+            }
+            acc[area.direction].push(area);
+            return acc;
+        }, {});
+        setAreasByDirection(groupedAreas);
+    }, [areas]);
+
     return (
         <Formik
             initialValues={{ 
@@ -93,13 +105,13 @@ const SignupForm = ({ setShowRegister }) => {
                 setSubmitting(false);
             }}
             >
-            {({ values, handleChange, setFieldValue }) => {
+            {({ setFieldValue }) => {
                 const toggleArea = (id) => {
-                    const current = values.area ? values.area.split(',') : [];
-                    const exists = current.includes(id);
-                    const updated = exists ? current.filter((a) => a !== id) : [...current, id];
-                    setFieldValue('area', updated.join(','));
-                    setSelectedAreas(updated);
+                    // const current = values.area ? values.area.split(',') : [];
+                    // const exists = current.includes(id);
+                    // const updated = exists ? current.filter((a) => a !== id) : [...current, id];
+                    setFieldValue('area', id);
+                    setSelectedAreas(id);
                 };
             return (
                 <Form className="space-y-2 sm:space-y-2">
@@ -240,29 +252,36 @@ const SignupForm = ({ setShowRegister }) => {
 
                 {/* Areas */}
                 <div className="space-y-1">
-                    <label htmlFor="area" className="block text-xs font-medium text-gray-700">
-                        Áreas de interes
+                    <label htmlFor="area" onClick={() => console.log(areasByDirection)} className="block text-xs font-medium text-gray-700">
+                        Área de interes
                     </label>
-                    <div className="flex flex-wrap gap-2">
-                        {areas.map((area) => {
-                            const isSelected = selectedAreas.includes(area.id);
-                            return (
-                                <div
-                                key={area.id}
-                                onClick={() => toggleArea(area.id)}
-                                className={`cursor-pointer p-2 text-xs rounded-lg transition-all
-                                    ${isSelected ? 'bg-teal-700 text-white' : 'bg-gray-200 text-gray-700'}`}
-                                >
-                                {area.name}
+                    <div className="flex flex-wrap gap-2 max-h-64 overflow-y-auto">
+                        {areasByDirection && Object.entries(areasByDirection).map(([direction, areas]) => (
+                            <div key={direction} className="flex flex-col w-full p-2 bg-gray-100 rounded-lg">
+                                <h3 className="w-full text-xs text-center font-medium text-gray-800 mb-1">{direction}</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {areas.map((area) => {
+                                        const isSelected = selectedAreas.includes(area.id);
+                                        return (
+                                            <div
+                                                key={area.id}
+                                                onClick={() => toggleArea(area.id)}
+                                                className={`cursor-pointer p-2 text-xs rounded-lg transition-all
+                                                    ${isSelected ? 'bg-teal-700 text-white' : 'bg-gray-200 text-gray-700'}`}
+                                            >
+                                                {area.name}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                            );
-                        })}
+                            </div>
+                        ))}
                         <Field
                             id="area"
                             name="area"
                             type="hidden"
                             className="w-full pl-8 sm:pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
-                            placeholder="Áreas de interes"
+                            placeholder="Área de interes"
                         />
                     </div>
                     <ErrorMessage

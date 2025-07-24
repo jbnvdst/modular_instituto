@@ -21,3 +21,4 @@ export * from './TaskCard';
 export * from './ToggleSwitch';
 export * from './UsuariosTab';
 export * from './NewNote';
+export * from './GenerateReport';

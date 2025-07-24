@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect, use } from "react";
-import { Users, Building2, Shield, Plus, Edit2, Trash2, Search, UserCheck, AlertTriangle } from "lucide-react";
+import { Users, Building2, Shield, NotebookPen } from "lucide-react";
 import axios from "axios";
-import { UsuariosTab, AreasTab, SubAreasTab, TabButton } from '../../components';
+import { UsuariosTab, AreasTab, SubAreasTab, TabButton, GenerateReport } from '../../components';
 import Layout from "../../components/Layout";
 
 const Admin = () => {
@@ -35,7 +35,8 @@ const Admin = () => {
             // case 'usuarios': return <UsuariosTab />;
             case 'areas': return <AreasTab users={users}/>;
             case 'subareas': return <SubAreasTab />;
-            default: return <UsuariosTab users={users} setUsers={setUsers} fetchUsers={fetchUsers} />;
+            case 'usuarios': return <UsuariosTab users={users} setUsers={setUsers} fetchUsers={fetchUsers} />;
+            default: return <GenerateReport />;
         }
     };
 
@@ -44,7 +45,6 @@ const Admin = () => {
             <h1 className="text-sm text-gray-500">Gestiona usuarios, áreas y permisos del sistema hospitalario</h1>
             <hr className="my-4 border-gray-200"/>
             <div className=" max-w-7xl mx-auto">
-                   
                 <div className="flex space-x-1 mb-8 bg-gray-100 p-1 rounded-lg w-fit">
                     <TabButton 
                         id="usuarios" 
@@ -65,6 +65,13 @@ const Admin = () => {
                         label="Necesidades" 
                         icon={Shield}
                         isActive={activeTab === 'subareas'} 
+                        onClick={setActiveTab} 
+                    />
+                    <TabButton 
+                        id="report" 
+                        label="Reporte mensual" 
+                        icon={NotebookPen}
+                        isActive={activeTab === 'report'} 
                         onClick={setActiveTab} 
                     />
                 </div>

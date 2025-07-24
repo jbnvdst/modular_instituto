@@ -4,13 +4,13 @@ import { NavLink } from "react-router-dom";
 import { PiSirenDuotone } from "react-icons/pi";
 import { IoSettingsSharp } from "react-icons/io5";
 import { BiSolidReport } from "react-icons/bi";
+import { TbReport } from "react-icons/tb";
 import * as Chart from "chart.js/auto";
 import { useAreas } from '../../utils/context/AreasContext';
 import { useAuth } from "../../utils/context/AuthContext";
 import { CountingCard, ExportReporteTareas } from '../../components';
 import Layout from "../../components/Layout";
-
-    
+import { MonthlyReport } from "../../components/MonthlyReport";
 
 const Home = () => {
     const [nombre, setNombre] = useState("");
@@ -21,20 +21,49 @@ const Home = () => {
     const { areas } = useAreas();
     const [ lastTasks , setLastTasks ] = useState([]);
     const [ allTasks, setAllTasks ] = useState([]);
-    const { getDate, getRoleFromToken, user } = useAuth();
+    const { getDate, getRoleFromToken, getEmailFromToken, user } = useAuth();
     const [tasks, setTasks] = useState([])
+    const [userHasArea, setUserHasArea] = useState(false);
+    const [report, setReport] = useState(null);
+
+    const fetchReport = async () => {
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/monthly-reports/monthlyReportByUser/${user?.id}`);
+            // console.log("Reporte obtenido:", res);
+            if (res.status === 200) {
+                if(res.data.hasArea === false) {
+                    setUserHasArea(false);
+                    return;
+                } else {
+                    setUserHasArea(res.data.hasArea);
+                    if(res.data.report){
+                        // console.log("Reporte:", res.data.report);
+                        setReport(res.data.report);
+                    } else {
+                        // console.log("No hay reporte disponible");
+                        setReport(null);
+                    }
+                }
+            } else {
+                console.error("Error al obtener reporte:", res.statusText);
+            }
+        } catch (err) {
+            console.error('Error al obtener reporte:', err)
+        }
+    }
 
     useEffect(() => {
-            const fetchTasks = async () => {
+        const fetchTasks = async () => {
             try {
                 const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/tasks/last-30-days`)
                 setTasks(res.data)
             } catch (err) {
                 console.error('Error al obtener tareas:', err)
             }
-            }
+        }
 
-            fetchTasks()
+        fetchTasks();
+        fetchReport();
     }, [])
     
     const fetchAllTasks = async () => {
@@ -45,7 +74,7 @@ const Home = () => {
         }
         } catch (error) {
         console.error('Error al enviar los datos:', error);
-        }};
+    }};
 
     useEffect(() => {
         fetchLastTasks();
@@ -286,7 +315,6 @@ const Home = () => {
         };
     }, []);
 
-
     return ( 
         <Layout>
             <h1 className="text-sm text-gray-500">Home</h1>
@@ -305,7 +333,7 @@ const Home = () => {
             </div>
             <div className="grid grid-cols-[60%_1fr] gap-4">
                 <div className="flex flex-col gap-4">
-                    <div className="bg-white shadow-md rounded-2xl p-4">
+                    <div className="bg-white shadow-md rounded-2xl p-4 h-full">
                         <div className="flex w-full justify-between items-center">
                             <div>
                                 <h1 className="text-gray-800 font-bold text-lg">Actividad Reciente</h1>
@@ -331,49 +359,54 @@ const Home = () => {
                         </div>
                     </div>
                 </div>
-                <div className="flex flex-col bg-white shadow-md rounded-2xl p-4 gap-2">
-                    <h1 className="text-gray-800 font-bold text-lg">Acciones Rapidas</h1>
-                        {/* <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
-                            <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
-                                <PiSirenDuotone className="text-white" size={20} />
-                            </div>
-                            <div>
-                                <h1 className="text-gray-800 font-semibold text-sm ">Gestionar emergencias</h1>
-                            </div>
-                        </div> */}
-                    {/* <NavLink to="/admin">
-                        <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
-                            <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
-                                <PiUsersThreeFill className="text-white" size={20} />
-                            </div>
-                            <div>
-                                <h1 className="text-gray-800 font-semibold text-sm ">Gestion de personal</h1>
-                            </div>
-                        </div>
-                    </NavLink> */}
-                    <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer"
-                     onClick={() => {
-                        ExportReporteTareas(tasks)}}
-                    >
-                        <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
-                            <BiSolidReport className="text-white" size={20} />
-                        </div>
-                        <div>
-                            <h1 className="text-gray-800 font-semibold text-sm ">Descargar reporte del ultimo mes</h1>
-                        </div>
-                    </div>
-                    <NavLink to="/profile">
-                        <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
-                            <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
-                                <IoSettingsSharp className="text-white" size={20} />
-                            </div>
-                                <div>
-                                    <h1 className="text-gray-800 font-semibold text-sm ">Configuración</h1>
+                <div className="flex flex-col gap-4 h-full">
+                    {userHasArea && (
+                        <MonthlyReport report={report} areaId={userHasArea} fetchReport={fetchReport}/>
+                    )}
+                    <div className="flex flex-1 flex-col bg-white shadow-md rounded-2xl p-4 gap-2">
+                        <h1 className="text-gray-800 font-bold text-lg">Acciones Rapidas</h1>
+                            {/* <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
+                                <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
+                                    <PiSirenDuotone className="text-white" size={20} />
                                 </div>
+                                <div>
+                                    <h1 className="text-gray-800 font-semibold text-sm ">Gestionar emergencias</h1>
+                                </div>
+                            </div> */}
+                        {/* <NavLink to="/admin">
+                            <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
+                                <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
+                                    <PiUsersThreeFill className="text-white" size={20} />
+                                </div>
+                                <div>
+                                    <h1 className="text-gray-800 font-semibold text-sm ">Gestion de personal</h1>
+                                </div>
+                            </div>
+                        </NavLink> */}
+                        <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer"
+                        onClick={() => {
+                            ExportReporteTareas(tasks)}}
+                        >
+                            <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
+                                <BiSolidReport className="text-white" size={20} />
+                            </div>
+                            <div>
+                                <h1 className="text-gray-800 font-semibold text-sm ">Descargar reporte del ultimo mes</h1>
+                            </div>
                         </div>
-                    </NavLink>
-                    <div className="mt-4">
-                        {/* Aquí iría el gráfico */}
+                        <NavLink to="/profile">
+                            <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
+                                <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">
+                                    <IoSettingsSharp className="text-white" size={20} />
+                                </div>
+                                    <div>
+                                        <h1 className="text-gray-800 font-semibold text-sm ">Configuración</h1>
+                                    </div>
+                            </div>
+                        </NavLink>
+                        <div className="mt-4">
+                            {/* Aquí iría el gráfico */}
+                        </div>
                     </div>
                 </div>
             </div>
