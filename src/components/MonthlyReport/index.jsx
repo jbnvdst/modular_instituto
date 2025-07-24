@@ -41,10 +41,10 @@ const MonthlyReport = ({ report, areaId, fetchReport }) => {
     }, []);
 
     const initialValues = {
-        answer1: report.answer1 || '',
-        answer2: report.answer2 || '',
-        answer3: report.answer3 || '',
-        responsible: report.responsible || '',
+        answer1: report?.answer1 || '',
+        answer2: report?.answer2 || '',
+        answer3: report?.answer3 || '',
+        responsible: report?.responsible || '',
     }
 
     const validationSchema = Yup.object({

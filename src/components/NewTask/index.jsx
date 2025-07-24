@@ -65,7 +65,7 @@ function NewTask({ areaId, onClose, users = [] }) {
     if (response.status === 200 || response.status === 201) {
       resetForm();
       onClose();
-      location.reload(); // o mejor: actualizar tareas desde contexto
+      fetchAreas(); // Refresh areas after creating a task
     } else {
       alert('La tarea no se pudo crear correctamente.');
     }
