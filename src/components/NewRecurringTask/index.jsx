@@ -103,7 +103,7 @@ function NewRecurringTask({ task, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-[#000000A8] bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         <div className="p-6">
             <div className="flex space-x-1 mb-2 bg-gray-100 p-1 rounded-lg w-fit">
                 <TabButton 

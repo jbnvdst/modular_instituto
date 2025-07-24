@@ -83,6 +83,13 @@ function Areas() {
     }));
   }, [selectedArea, areas]);
 
+  
+  useEffect(() => {
+    if(userAreas?.length === 1) {
+      setSelectedArea(userAreas[0]?.id);
+    }
+  }, [userAreas]);
+
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -208,14 +215,17 @@ function Areas() {
                 {isDropdownOpen && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
                     {userAreas.length === 0 && (
-                    <div className="px-4 py-3 text-gray-500">No tienes áreas asignadas como encargado.</div>
+                      <div className="px-4 py-3 text-gray-500">No tienes áreas asignadas como encargado.</div>
                     )}
-                    {userAreas.map(area => (
+                    {userAreas.length === 1 && (
+                      <div onClick={() => setIsDropdownOpen(false)} className="px-4 py-3 text-gray-500">Solo tienes un área asignada: {userAreas[0].name}</div>
+                    )}
+                    {userAreas.length > 1 &&userAreas.map(area => (
                     <button
                         key={area.id}
                         onClick={() => {
-                        setSelectedArea(area.id);
-                        setIsDropdownOpen(false);
+                          setSelectedArea(area.id);
+                          setIsDropdownOpen(false);
                         }}
                         className="w-full text-left px-4 py-3 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
                     >
