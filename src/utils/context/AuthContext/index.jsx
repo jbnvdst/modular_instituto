@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }) => {
     if (storedToken) {
       const payload = JSON.parse(atob(storedToken.split('.')[1]));
       setUser({ id: payload.id, role: payload.role, name: payload.name, email: payload.email });
-      // console.log(payload);
+       console.log(payload);
       setToken(storedToken);
     }
   }, []);
