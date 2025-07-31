@@ -40,10 +40,10 @@ function NewNote({ onClose, onSave }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-[#000000A8] bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-        <div className="p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6">
+    <div className="fixed inset-0 bg-[#000000A8] bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl max-h-[95vh] overflow-y-auto">
+        <div className="p-3 sm:p-6">
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-6">
             Crear nueva nota
           </h2>
           <Formik
@@ -52,47 +52,47 @@ function NewNote({ onClose, onSave }) {
             onSubmit={handleSubmit}
           >
             {({ isSubmitting }) => (
-              <Form className="space-y-4">
+              <Form className="space-y-2 sm:space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
                     Nombre de la nota
                   </label>
                   <Field
                     name="nombre"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                    className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
                     placeholder="Nombre de la nota"
                   />
                   <ErrorMessage
                     name="nombre"
                     component="div"
-                    className="text-red-500 text-sm mt-1"
+                    className="text-red-500 text-xs mt-1"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
                     Número de oficio
                   </label>
                   <Field
                     name="numeroOficio"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                    className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
                     placeholder="Número de oficio"
                   />
                   <ErrorMessage
                     name="numeroOficio"
                     component="div"
-                    className="text-red-500 text-sm mt-1"
+                    className="text-red-500 text-xs mt-1"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
                     Estatus
                   </label>
                   <Field
                     as="select"
                     name="estatus"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                    className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
                   >
                     <option value="default">Seleccione un estatus</option>
                     {statusOptions.map(option => (
@@ -104,40 +104,40 @@ function NewNote({ onClose, onSave }) {
                   <ErrorMessage
                     name="estatus"
                     component="div"
-                    className="text-red-500 text-sm mt-1"
+                    className="text-red-500 text-xs mt-1"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
                     Descripción del oficio
                   </label>
                   <Field
                     name="descripcion"
                     as="textarea"
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                    rows={2}
+                    className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors resize-none"
                     placeholder="Descripción del oficio"
                   />
                   <ErrorMessage
                     name="descripcion"
                     component="div"
-                    className="text-red-500 text-sm mt-1"
+                    className="text-red-500 text-xs mt-1"
                   />
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-teal-600 cursor-pointer hover:bg-teal-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+                    className="w-full sm:w-auto bg-teal-600 cursor-pointer hover:bg-teal-700 text-white px-3 sm:px-4 py-2 rounded-md text-xs sm:text-base font-medium transition-colors"
                   >
                     {isSubmitting ? 'Guardando...' : 'Guardar'}
                   </button>
                   <button
                     type="button"
                     onClick={onClose}
-                    className="bg-gray-300 cursor-pointer hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors"
+                    className="w-full sm:w-auto bg-gray-300 cursor-pointer hover:bg-gray-400 text-gray-700 px-3 sm:px-4 py-2 rounded-md text-xs sm:text-base font-medium transition-colors"
                   >
                     Cancelar
                   </button>

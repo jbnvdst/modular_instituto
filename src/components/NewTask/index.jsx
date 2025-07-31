@@ -78,10 +78,10 @@ function NewTask({ areaId, onClose, users = [] }) {
 };
 
   return (
-    <div className="fixed inset-0 bg-[#000000A8] bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-        <div className="p-6">
-          <div className="flex space-x-1 mb-2 bg-gray-100 p-1 rounded-lg w-fit">
+    <div className="fixed inset-0 bg-[#000000A8] bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl max-h-[95vh] overflow-y-auto">
+        <div className="p-3 sm:p-6">
+          <div className="flex space-x-1 mb-2 sm:mb-2 bg-gray-100 p-1 rounded-lg w-fit">
             <TabButton 
                 id="new" 
                 label="Nueva Tarea" 
@@ -98,7 +98,10 @@ function NewTask({ areaId, onClose, users = [] }) {
             />
           </div>
           {activeTab === 'recurrent' && (
-            <select onChange={(e) => setSelectedTemplate(e.target.value === 'default' ? null : JSON.parse(e.target.value))} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors mb-4">
+            <select 
+              onChange={(e) => setSelectedTemplate(e.target.value === 'default' ? null : JSON.parse(e.target.value))} 
+              className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors mb-2 sm:mb-4"
+            >
               <option value="default">Selecciona una plantilla</option>
               {taskTemplates.map(template => (
                 <option key={template.id} value={JSON.stringify(template)}>
@@ -107,7 +110,7 @@ function NewTask({ areaId, onClose, users = [] }) {
               ))}
             </select>
           )}
-          <h2 className="text-xl font-semibold text-gray-800 mb-6">
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-6">
             Crear nueva tarea
           </h2>
           <Formik
@@ -131,30 +134,30 @@ function NewTask({ areaId, onClose, users = [] }) {
               }, [selectedTemplate]);
 
               return (
-                <Form className="space-y-4">
+                <Form className="space-y-2 sm:space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
                       Título de la tarea
                     </label>
                     <Field
                       name="title"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                      className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
                       placeholder="Título de la tarea"
                     />
                     <ErrorMessage
                       name="title"
                       component="div"
-                      className="text-red-500 text-sm mt-1"
+                      className="text-red-500 text-xs mt-1"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
                       Prioridad
                     </label>
                     <Field
                       as="select"
                       name="priority"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                      className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
                     >
                       <option value="default">Seleccione una prioridad</option>
                       <option value="verde">Pendiente</option>
@@ -164,17 +167,17 @@ function NewTask({ areaId, onClose, users = [] }) {
                     <ErrorMessage
                       name="priority"
                       component="div"
-                      className="text-red-500 text-sm mt-1"
+                      className="text-red-500 text-xs mt-1"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
                       Área de necesidad
                     </label>
                     <Field
                       as="select"
                       name="subAreaId"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                      className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
                     >
                       <option value="default">Seleccione un área</option>
                       {subAreas.map(sub => (
@@ -186,32 +189,33 @@ function NewTask({ areaId, onClose, users = [] }) {
                     <ErrorMessage
                       name="subAreaId"
                       component="div"
-                      className="text-red-500 text-sm mt-1"
+                      className="text-red-500 text-xs mt-1"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
                       Descripción (opcional)
                     </label>
                     <Field
                       name="description"
                       as="textarea"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                      rows="2"
+                      className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors resize-none"
                       placeholder="Descripción de la tarea"
                     />
                   </div>
-                  <div className="flex gap-3 pt-4">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="bg-teal-600 cursor-pointer hover:bg-teal-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+                      className="w-full sm:w-auto bg-teal-600 cursor-pointer hover:bg-teal-700 text-white px-3 sm:px-4 py-2 rounded-md text-xs sm:text-base font-medium transition-colors"
                     >
                       {isSubmitting ? 'Guardando...' : 'Guardar'}
                     </button>
                     <button
                       type="button"
                       onClick={onClose}
-                      className="bg-gray-300 cursor-pointer hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors"
+                      className="w-full sm:w-auto bg-gray-300 cursor-pointer hover:bg-gray-400 text-gray-700 px-3 sm:px-4 py-2 rounded-md text-xs sm:text-base font-medium transition-colors"
                     >
                       Cerrar
                     </button>

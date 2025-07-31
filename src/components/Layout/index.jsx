@@ -80,18 +80,6 @@ const Layout = ({ children }) => {
                 <header className="flex justify-between items-center w-full px-5 pl-8 pt-8">
                     <h3 className="ml-[230px] text-3xl font-bold  text-gray-800">{pageTitle}</h3>
                     <div className="flex items-center gap-4">
-                        <input
-                            type="search"
-                            name="search-no-autofill"
-                            autoComplete="off"
-                            autoCorrect="off"
-                            autoCapitalize="off"
-                            spellCheck={false}
-                            placeholder="Search..."
-                            value={searchValue}
-                            onChange={e => setSearchValue(e.target.value)}
-                            className="text-gray-900 bg-white border border-gray-200 shadow-xs w-72 text-md rounded-sm px-2 py-1"
-                        />
                         <NavLink
                             to="/notification"
                             className="bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200 relative"

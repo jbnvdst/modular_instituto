@@ -107,110 +107,113 @@ const MonthlyReport = ({ report, areaId, fetchReport }) => {
                 <p className="text-center">Recuerda que tienes hasta el 5 de {monthNames[month - 1]} para generar el reporte mensual de tu área.</p>
             }
             {showReport && (
-                <div className="fixed inset-0 bg-[#000000A8] bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-                        <div className="p-6">
-                            <h2 className="text-xl font-semibold text-gray-800 mb-6">
-                                {report ? 'Modificar' : 'Crear'} reporte mensual
-                            </h2>
-                            <Formik
-                                initialValues={initialValues}
-                                validationSchema={validationSchema}
-                                onSubmit={handleSubmit}
-                                enableReinitialize
-                            >
-                            {({ isSubmitting }) => (
-                                <Form className="space-y-4">
-                                    <div>
-                                        <h1 className='text-gray-800 font-bold text-lg'>Problemáticas relevantes</h1>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-2">
-                                            ¿Cuál es el problema relevante?
-                                        </label>
-                                        <Field
-                                            name="answer1" 
-                                            as="textarea"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
-                                            placeholder="Escribe aqui tu respuesta"
-                                        />
-                                        <ErrorMessage 
-                                            name="answer1" 
-                                            component="div" 
-                                            className="text-red-500 text-sm mt-1" 
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-2">
-                                            ¿Qué originó el problema?
-                                        </label>
-                                        <Field
-                                            name="answer2" 
-                                            as="textarea"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
-                                            placeholder="Escribe aqui tu respuesta"
-                                        />
-                                        <ErrorMessage 
-                                            name="answer2" 
-                                            component="div" 
-                                            className="text-red-500 text-sm mt-1" 
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-2">
-                                            Propuesta y tiempo para solucionarlo
-                                        </label>
-                                        <Field
-                                            name="answer3" 
-                                            as="textarea"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
-                                            placeholder="Escribe aqui tu respuesta"
-                                        />
-                                        <ErrorMessage 
-                                            name="answer3" 
-                                            component="div" 
-                                            className="text-red-500 text-sm mt-1" 
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-2">
-                                            Responsable(s) de la solución
-                                        </label>
-                                        <Field
-                                            name="responsible"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
-                                            placeholder="Escribe aqui tu respuesta"
-                                        />
-                                        <ErrorMessage 
-                                            name="responsible" 
-                                            component="div" 
-                                            className="text-red-500 text-sm mt-1" 
-                                        />
-                                    </div>
-                                    <div className="flex gap-3 pt-4">
-                                        <button 
-                                            type="submit" 
-                                            disabled={isSubmitting}  // Desactiva mientras envía
-                                            className={`bg-teal-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-teal-700
-                                                ${isSubmitting ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-                                            `}
-                                        >
-                                            {isSubmitting ? (report ? 'Guardando...' : 'Guardando...') : 'Guardar'}
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            onClick={() => setShowReport(false)} 
-                                            className="bg-gray-300 cursor-pointer hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors"
-                                            disabled={isSubmitting} // Opcional: bloquear cerrar mientras envía
-                                        >
-                                            Cerrar
-                                        </button>
-                                    </div>
-                                </Form>
-                            )}
-                            </Formik>
-                        </div>
+                <div className="fixed inset-0 bg-[#000000A8] bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl max-h-[95vh] overflow-y-auto">
+                        <div className="p-3 sm:p-6">
+                        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-6">
+                            {report ? 'Modificar' : 'Crear'} reporte mensual
+                        </h2>
+                        <Formik
+                            initialValues={initialValues}
+                            validationSchema={validationSchema}
+                            onSubmit={handleSubmit}
+                            enableReinitialize
+                        >
+                        {({ isSubmitting }) => (
+                            <Form className="space-y-2 sm:space-y-4">
+                                <div>
+                                    <h1 className='text-gray-800 font-bold text-sm sm:text-lg'>Problemáticas relevantes</h1>
+                                </div>
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
+                                        ¿Cuál es el problema relevante?
+                                    </label>
+                                    <Field
+                                        name="answer1" 
+                                        as="textarea"
+                                        rows="2"
+                                        className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors resize-none"
+                                        placeholder="Escribe aquí tu respuesta"
+                                    />
+                                    <ErrorMessage 
+                                        name="answer1" 
+                                        component="div" 
+                                        className="text-red-500 text-xs mt-1" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
+                                        ¿Qué originó el problema?
+                                    </label>
+                                    <Field
+                                        name="answer2" 
+                                        as="textarea"
+                                        rows="2"
+                                        className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors resize-none"
+                                        placeholder="Escribe aquí tu respuesta"
+                                    />
+                                    <ErrorMessage 
+                                        name="answer2" 
+                                        component="div" 
+                                        className="text-red-500 text-xs mt-1" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
+                                        Propuesta y tiempo para solucionarlo
+                                    </label>
+                                    <Field
+                                        name="answer3" 
+                                        as="textarea"
+                                        rows="2"
+                                        className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors resize-none"
+                                        placeholder="Escribe aquí tu respuesta"
+                                    />
+                                    <ErrorMessage 
+                                        name="answer3" 
+                                        component="div" 
+                                        className="text-red-500 text-xs mt-1" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
+                                        Responsable(s) de la solución
+                                    </label>
+                                    <Field
+                                        name="responsible"
+                                        className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                                        placeholder="Escribe aquí tu respuesta"
+                                    />
+                                    <ErrorMessage 
+                                        name="responsible" 
+                                        component="div" 
+                                        className="text-red-500 text-xs mt-1" 
+                                    />
+                                </div>
+                                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
+                                    <button 
+                                        type="submit" 
+                                        disabled={isSubmitting}
+                                        className={`w-full sm:w-auto bg-teal-600 text-white px-3 sm:px-4 py-2 rounded-md text-xs sm:text-base font-medium transition-colors hover:bg-teal-700
+                                            ${isSubmitting ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+                                        `}
+                                    >
+                                        {isSubmitting ? (report ? 'Guardando...' : 'Guardando...') : 'Guardar'}
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowReport(false)} 
+                                        className="w-full sm:w-auto bg-gray-300 cursor-pointer hover:bg-gray-400 text-gray-700 px-3 sm:px-4 py-2 rounded-md text-xs sm:text-base font-medium transition-colors"
+                                        disabled={isSubmitting}
+                                    >
+                                        Cerrar
+                                    </button>
+                                </div>
+                            </Form>
+                        )}
+                        </Formik>
                     </div>
+                </div>
                 </div>
             )}
         </div>

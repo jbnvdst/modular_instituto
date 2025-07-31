@@ -170,8 +170,8 @@ const Profile = () => {
     const PersonalTab = () => (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InfoField label="name" value={profileData.name} field="name" icon={User} />
-                <InfoField label="Email" value={profileData.email} field="email" type="email" icon={Mail} name="profile-email" autoComplete="email" />
+                <InfoField label="Nombre" value={profileData.name} field="name" icon={User} />
+                <InfoField label="Correo" value={profileData.email} field="email" type="email" icon={Mail} name="profile-email" autoComplete="email" />
                 <InfoField label="Teléfono" value={profileData.phone} field="phone" icon={Phone} />
                 <InfoField
                     label="Fecha de Nacimiento"
@@ -180,10 +180,10 @@ const Profile = () => {
                     type="date"
                     icon={Calendar}
                 />
-                <InfoField label="specialty" value={profileData.specialty} field="specialty" icon={Stethoscope} />
+                <InfoField label="Especialidad" value={profileData.specialty} field="specialty" icon={Stethoscope} />
             </div>
             <div className="grid grid-cols-1 gap-6">
-                <InfoField label="dirección" value={profileData.address} field="address" icon={MapPin} />
+                <InfoField label="Dirección" value={profileData.address} field="address" icon={MapPin} />
             </div>
         </div>
     );
@@ -192,8 +192,7 @@ const Profile = () => {
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InfoField label="Cédula Profesional" value={profileData.professionalLicense} field="professionalLicense" icon={Shield} />
-                <InfoField label="role" value={profileData.role} field="role" icon={Award} />
-                <InfoField label="department" value={profileData.department} field="department" icon={Building2} />
+                <InfoField label="Departamento" value={profileData.department} field="department" icon={Building2} />
                 <InfoField
                     label="Fecha de Ingreso"
                     value={profileData.inscribedAt}
