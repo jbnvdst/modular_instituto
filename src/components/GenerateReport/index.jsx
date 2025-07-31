@@ -39,7 +39,7 @@ const GenerateReport = () => {
         if (month === null || year === null) return;
         try {
             const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/monthly-reports?month=${month}&year=${year}`);
-            console.log(response.data);
+            // console.log(response.data);
             if(response.status === 200) {
                 setReportsData(response.data.reports);
                 setUnreportedAreas(response.data.unreportedAreas);

@@ -36,7 +36,7 @@ function NewTemplate({ template, onClose }) {
   })
 
   const handleSubmit = async (values, { resetForm }) => {
-    // console.log('Valores enviados:', values);
+    console.log('Valores enviados:', values);
     try {
       // Ajusta la URL según tu API real
       const response = template === 'new' ? 

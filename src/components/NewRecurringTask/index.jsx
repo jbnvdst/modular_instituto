@@ -68,7 +68,7 @@ function NewRecurringTask({ task, onClose }) {
 
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     // console.log('Valores enviados:', values);
-    console.log('Valores enviados:', values);
+    // console.log('Valores enviados:', values);
     const dataToSend = {
         ...values,
         endDate: values.endDate === '' ? null : values.endDate

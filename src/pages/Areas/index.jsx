@@ -22,7 +22,7 @@ function Areas() {
   const [newTask, setNewTask] = useState({ title: '', priority: 'medium', assignedTo: '' });
   const { areas, loadingAreas } = useAreas();
   const [ personal, setPersonal ] = useState([]);
-  const { user, getDate } = useAuth();
+  const { user, getDate, userArea } = useAuth();
   const [ resolved, setResolved] = useState(false);
   const [ userAreas, setUserAreas ] = useState([]);
   const areaData = userAreas.find(area => area.id === selectedArea);
@@ -38,7 +38,7 @@ function Areas() {
   });
   
   useEffect(() => {
-    setUserAreas(areas.filter(area => area.ownerId === user?.id));
+    setUserAreas(areas.filter(area => area.id === userArea));
     fetchPersonal();
     setTasksCount(userAreas.filter(area => area.id === selectedArea).reduce((acc, area) => {
       area.tasks.forEach(task => {

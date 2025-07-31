@@ -52,22 +52,19 @@ const Home = () => {
         }
     }
 
-    function clasificarPorSubarea(tasks) {
-        // Mapeo de prioridad textual
+    const clasificarPorSubarea = (tasks) =>  {
         const priorityMap = {
             rojo: 'Urgente',
             amarillo: 'Atención',
             verde: 'Pendiente'
         };
 
-        // Objeto acumulador
         const resultado = {};
 
         tasks.forEach(task => {
             const subArea = task.subArea.name;
             const prioridad = priorityMap[task.priority];
 
-            // Si no existe el subArea en el resultado, inicializamos sus contadores
             if (!resultado[subArea]) {
             resultado[subArea] = {
                 'Urgente': 0,
@@ -76,19 +73,15 @@ const Home = () => {
             };
             }
 
-            // Incrementamos el contador correspondiente
             resultado[subArea][prioridad]++;
         });
 
-        // Convertimos a arreglo de objetos como pediste
-        return Object.entries(resultado).map(([key, value]) => ({
-            [key]: value
-        }));
+        return resultado; // <--- Ahora devuelve un objeto, no un array
         }
 
         // Ejemplo de uso
         const datosClasificados = clasificarPorSubarea(tasks.filter(task => task.areaId === userArea)); // donde tareas es tu array
-        console.log(datosClasificados);
+        // console.log(datosClasificados);
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -103,6 +96,18 @@ const Home = () => {
         fetchTasks();
         fetchReport();
     }, [])
+
+    const contarPorPrioridad = (tasks) => {
+        const counts = { Urgente: 0, Atención: 0, Pendiente: 0 };
+        const priorityMap = { rojo: "Urgente", amarillo: "Atención", verde: "Pendiente" };
+
+        tasks.forEach((task) => {
+            const key = priorityMap[task.priority];
+            counts[key]++;
+        });
+
+        return counts;
+    };
     
     const fetchAllTasks = async () => {
         try {
@@ -147,34 +152,12 @@ const Home = () => {
         if (chartInstance.current) {
         chartInstance.current.destroy();
         }
-
-        // Procesar datos
-        const processedData = areas.map(area => {
-        const statusCounts = {
-            'Urgente': 0,
-            'Atención': 0,
-            'Pendiente': 0
-        };
-
-        area.tasks.forEach(task => {
-            if (statusCounts.hasOwnProperty(task.status)) {
-            statusCounts[task.status]++;
-            }
-        });
-        
-        // console.log(task.status);
-
-        return {
-            name: area.name,
-            ...statusCounts
-        };
-        });
         
 
-        const labels = processedData.map(item => item.name);
-        const urgenteData = processedData.map(item => item.Urgente);
-        const atencionData = processedData.map(item => item.Atención);
-        const pendienteData = processedData.map(item => item.Pendiente);
+        const labels = Object.keys(datosClasificados);
+        const urgenteData = labels.map(subArea => datosClasificados[subArea].Urgente);
+        const atencionData = labels.map(subArea => datosClasificados[subArea].Atención);
+        const pendienteData = labels.map(subArea => datosClasificados[subArea].Pendiente);
 
 
         const ctx = chartRef.current.getContext('2d');
@@ -270,7 +253,7 @@ const Home = () => {
         };
 
 
-    }, []);
+    }, [tasks]);
 
 
     const fetchLastTasks = async () => {
@@ -287,7 +270,7 @@ const Home = () => {
             console.error("Error fetching Last tasks:", error);
         }
     };
-
+    
     const lineDatasets = [
         {
             label: 'Urgente',
@@ -314,7 +297,8 @@ const Home = () => {
             fill: false
         }
     ];
-
+    
+    
     useEffect(() => {
         if (!lineChartRef.current) return;
 
