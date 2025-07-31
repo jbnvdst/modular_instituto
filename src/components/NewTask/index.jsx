@@ -8,10 +8,11 @@ import * as Yup from 'yup'
 import axios from 'axios'
 
 function NewTask({ areaId, onClose, users = [] }) {
-  const { subAreas, fetchAreas } = useAreas();
+  const { subAreas, fetchAreas,areas } = useAreas();
   const { taskTemplates } = useAuth();
   const [activeTab, setActiveTab] = React.useState('new');
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  
   
   const getIdFromToken = () => {
     const token = localStorage.getItem("token");
@@ -61,21 +62,22 @@ function NewTask({ areaId, onClose, users = [] }) {
     );
 
     console.log("✅ Tarea creada:", response.data);
+    
 
     if (response.status === 200 || response.status === 201) {
-      resetForm();
-      onClose();
-      fetchAreas(); // Refresh areas after creating a task
-    } else {
-      alert('La tarea no se pudo crear correctamente.');
-    }
-  } catch (error) {
-    console.error("❌ Error al crear la tarea:", error.response?.data || error);
-    alert('Error al crear la tarea.');
-  } finally {
-    setSubmitting(false);
-  }
-};
+          resetForm();
+          onClose();
+          fetchAreas(); // Refresh areas after creating a task
+        } else {
+          alert('La tarea no se pudo crear correctamente.');
+        }
+      } catch (error) {
+        console.error("❌ Error al crear la tarea:", error.response?.data || error);
+        alert('Error al crear la tarea.');
+      } finally {
+        setSubmitting(false);
+      }
+    };
 
   return (
     <div className="fixed inset-0 bg-[#000000A8] bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
@@ -110,7 +112,7 @@ function NewTask({ areaId, onClose, users = [] }) {
               ))}
             </select>
           )}
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-6">
+          <h2  className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-6">
             Crear nueva tarea
           </h2>
           <Formik
@@ -136,7 +138,7 @@ function NewTask({ areaId, onClose, users = [] }) {
               return (
                 <Form className="space-y-2 sm:space-y-4">
                   <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
+                    <label  className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
                       Título de la tarea
                     </label>
                     <Field
@@ -146,6 +148,28 @@ function NewTask({ areaId, onClose, users = [] }) {
                     />
                     <ErrorMessage
                       name="title"
+                      component="div"
+                      className="text-red-500 text-xs mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label onClick={() => (console.log(areas))} className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
+                      Solicitar a:
+                    </label>
+                    <Field
+                      as="select"
+                      name="requestedTo"
+                      className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                    >
+                      <option value="default">Seleccione una área</option>
+                      {areas.map(area => (
+                        <option key={area.id} value={area.id}>
+                          {area.name}
+                        </option>
+                      ))}
+                    </Field>
+                    <ErrorMessage
+                      name="requestedTo"
                       component="div"
                       className="text-red-500 text-xs mt-1"
                     />

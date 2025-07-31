@@ -21,7 +21,7 @@ const Home = () => {
     const { areas } = useAreas();
     const [ lastTasks , setLastTasks ] = useState([]);
     const [ allTasks, setAllTasks ] = useState([]);
-    const { getDate, getRoleFromToken, getEmailFromToken, user } = useAuth();
+    const { getDate, getRoleFromToken, getEmailFromToken, user, userArea } = useAuth();
     const [tasks, setTasks] = useState([])
     const [userHasArea, setUserHasArea] = useState(false);
     const [report, setReport] = useState(null);
@@ -52,6 +52,44 @@ const Home = () => {
         }
     }
 
+    function clasificarPorSubarea(tasks) {
+        // Mapeo de prioridad textual
+        const priorityMap = {
+            rojo: 'Urgente',
+            amarillo: 'Atención',
+            verde: 'Pendiente'
+        };
+
+        // Objeto acumulador
+        const resultado = {};
+
+        tasks.forEach(task => {
+            const subArea = task.subArea.name;
+            const prioridad = priorityMap[task.priority];
+
+            // Si no existe el subArea en el resultado, inicializamos sus contadores
+            if (!resultado[subArea]) {
+            resultado[subArea] = {
+                'Urgente': 0,
+                'Atención': 0,
+                'Pendiente': 0
+            };
+            }
+
+            // Incrementamos el contador correspondiente
+            resultado[subArea][prioridad]++;
+        });
+
+        // Convertimos a arreglo de objetos como pediste
+        return Object.entries(resultado).map(([key, value]) => ({
+            [key]: value
+        }));
+        }
+
+        // Ejemplo de uso
+        const datosClasificados = clasificarPorSubarea(tasks.filter(task => task.areaId === userArea)); // donde tareas es tu array
+        console.log(datosClasificados);
+
     useEffect(() => {
         const fetchTasks = async () => {
             try {
@@ -68,7 +106,7 @@ const Home = () => {
     
     const fetchAllTasks = async () => {
         try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/tasks`,);
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/tasks/getAll`,);
         if (response.status === 200) {
             setAllTasks(response.data);
         }
@@ -123,17 +161,21 @@ const Home = () => {
             statusCounts[task.status]++;
             }
         });
+        
+        // console.log(task.status);
 
         return {
             name: area.name,
             ...statusCounts
         };
         });
+        
 
         const labels = processedData.map(item => item.name);
         const urgenteData = processedData.map(item => item.Urgente);
         const atencionData = processedData.map(item => item.Atención);
         const pendienteData = processedData.map(item => item.Pendiente);
+
 
         const ctx = chartRef.current.getContext('2d');
         
@@ -412,7 +454,7 @@ const Home = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 my-6">
                     <div className="bg-white shadow-md rounded-2xl p-4">
-                        <h1 className="text-gray-800 font-bold text-lg">Semaforos por area (de la semana)</h1>
+                        <h1 className="text-gray-800 font-bold text-lg">Semaforos por subarea</h1>
                         <div className="flex justify-center gap-6 -mb-10 mt-5">
                             <div className="flex items-center gap-2">
                                 <PiSirenDuotone size={20} color="#DC2626" />
@@ -432,7 +474,7 @@ const Home = () => {
                         </div>
                     </div>
                     <div className="bg-white shadow-md rounded-2xl p-4">
-                        <h1 className="text-gray-800 font-bold text-lg">Semaforos de todas las areas (de la semana)</h1>
+                        <h1 className="text-gray-800 font-bold text-lg">Semaforos del area</h1>
                         <div className="flex justify-center gap-6 -mb-10 mt-5">
                             <div className="flex items-center gap-2">
                                 <PiSirenDuotone size={20} color="#DC2626" />
