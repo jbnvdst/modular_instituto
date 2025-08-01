@@ -12,7 +12,12 @@ import { AreasProvider } from "./utils/context/AreasContext";
 import { useAuth } from './utils/context/AuthContext';
 
 const AppRoutes = () => { 
-  const { user } = useAuth(); 
+  const { user, loadingAuth } = useAuth();
+
+  if (loadingAuth) {
+    // puedes poner un spinner bonito aquí
+    return <div className="w-full h-screen flex items-center justify-center">Cargando...</div>;
+  }
 
   let routes = useRoutes([
     { path: '/', element: <Login /> },
@@ -25,10 +30,10 @@ const AppRoutes = () => {
     { path: '/areas/:id', element: user ? <Areas /> : <Navigate to="/" replace /> },
     { path: '/tasktemplates', element: user ? <TaskTemplates /> : <Navigate to="/" replace /> },
     { path: '/recurringtasks', element: user ? <RecurringTasks /> : <Navigate to="/" replace /> },
-    ])
+  ]);
 
-  return routes
-}
+  return routes;
+};
 
 function App() {
   return (
