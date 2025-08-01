@@ -455,7 +455,7 @@ const Home = () => {
                                 </div>
                             </div>
                         </NavLink> */}
-                        <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer"
+                        {/* <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer"
                         onClick={() => {
                             ExportReporteTareas(tasks)}}
                         >
@@ -465,7 +465,7 @@ const Home = () => {
                             <div>
                                 <h1 className="text-gray-800 font-semibold text-sm ">Descargar reporte del ultimo mes</h1>
                             </div>
-                        </div>
+                        </div> */}
                         <NavLink to="/profile">
                             <div className="flex gap-2 items-center border border-gray-300 bg-gray-100 rounded-md p-2 hover:bg-gray-200 transition-all duration-200 cursor-pointer">
                                 <div className="flex justify-center items-center bg-[#0f7871] rounded-md p-2">

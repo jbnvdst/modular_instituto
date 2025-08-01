@@ -5,8 +5,9 @@ import { Bar, Doughnut } from 'react-chartjs-2';
 import { useAreas } from '../../utils/context/AreasContext';
 import { useAuth } from '../../utils/context/AuthContext';
 import { useParams } from 'react-router-dom';
-import { utils, writeFileXLSX } from 'xlsx-js-style';
 import axios from 'axios';
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import { NewTask, ResolvedTask, ToggleSwitch, NewNote } from '../../components';
 import Layout from '../../components/Layout';
 import { FaRegStickyNote } from "react-icons/fa";
@@ -126,137 +127,112 @@ function Areas() {
 
   }, [selectedArea, areas]);
 
-  const handleDownloadReport = () => {
+  const handleDownloadReport = async () => {
     if (!areaData || !areaData.tasks) return;
 
-    // Separa pendientes y resueltas
-    const tareasPendientes = areaData.tasks.filter(task => !task.resolvedAt);
-    const tareasResueltas = areaData.tasks.filter(task => task.resolvedAt);
+    const tareasPendientes = areaData.tasks.filter((t) => !t.resolvedAt);
+    const tareasResueltas = areaData.tasks.filter((t) => t.resolvedAt);
 
-    // Función para ordenar por prioridad y luego por fecha
     const prioridadOrden = { verde: 1, amarillo: 2, rojo: 3 };
     const sortByPriorityAndDate = (a, b) => {
       const pa = prioridadOrden[a.priority];
       const pb = prioridadOrden[b.priority];
-      if (pa !== pb) return pa - pb; // primero prioridad
-      return new Date(b.createdAt) - new Date(a.createdAt); // luego fecha desc
+      if (pa !== pb) return pa - pb;
+      return new Date(b.createdAt) - new Date(a.createdAt);
     };
 
     const pendientesOrdenadas = [...tareasPendientes].sort(sortByPriorityAndDate);
     const resueltasOrdenadas = [...tareasResueltas].sort(sortByPriorityAndDate);
 
-    // Función para dar estilo a la celda según prioridad
-    const getPriorityStyle = (priority, isResolved = false) => {
-      if (isResolved) {
-        return {
-          font: { color: { rgb: "000000" }, bold: true },
-          fill: {
-            type: "pattern",
-            patternType: "solid",
-            fgColor: { rgb: "D9D9D9" }
-          }
+    const workbook = new ExcelJS.Workbook();
+
+    const crearHoja = (nombre, datos, isResolved = false) => {
+      const ws = workbook.addWorksheet(nombre);
+
+      ws.columns = [
+        { header: "Título", key: "title", width: 40 },
+        { header: "Prioridad", key: "priority", width: 15 },
+        { header: "Subárea", key: "subarea", width: 25 },
+        { header: "Creado por", key: "creator", width: 20 },
+        { header: "Fecha de creación", key: "created", width: 20 },
+        ...(isResolved
+          ? [
+              { header: "Fecha de resolución", key: "resolved", width: 20 },
+              { header: "Resuelto por", key: "resolvedBy", width: 25 },
+            ]
+          : []),
+      ];
+
+      // Encabezados con estilo
+      ws.getRow(1).eachCell((cell) => {
+        cell.font = { bold: true, color: { argb: "000000" } };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "E0E0E0" },
         };
-      }
-      switch (priority) {
-        case "rojo":
-          return {
-            font: { color: { rgb: "FFFFFF" }, bold: true },
-            fill: {
-              type: "pattern",
-              patternType: "solid",
-              fgColor: { rgb: "FF0000" }
-            }
-          };
-        case "amarillo":
-          return {
-            font: { color: { rgb: "000000" }, bold: true },
-            fill: {
-              type: "pattern",
-              patternType: "solid",
-              fgColor: { rgb: "FFD700" }
-            }
-          };
-        case "verde":
-          return {
-            font: { color: { rgb: "FFFFFF" }, bold: true },
-            fill: {
-              type: "pattern",
-              patternType: "solid",
-              fgColor: { rgb: "00B050" }
-            }
-          };
-        default:
-          return {};
-      }
-    };
+      });
 
-
-    // Encabezados comunes
-    const headerPendientes = ["Título", "Prioridad", "Subárea", "Creado por", "Fecha de creación"];
-    const headerResueltas = ["Título", "Prioridad", "Subárea", "Creado por", "Fecha de creación", "Fecha de resolución"];
-
-    // Armar datos pendientes
-    const pendientesData = [
-      headerPendientes,
-      ...pendientesOrdenadas.map(task => [
-        task.title,
-        {
-          v: task.priority === "rojo" ? "Urgente" : task.priority === "amarillo" ? "Atención" : "Pendiente",
-          s: getPriorityStyle(task.priority, false)
-        },
-        task.subArea?.name || "",
-        task.creator?.name || "",
-        new Date(task.createdAt).toLocaleString()
-      ])
-    ];
-
-    // Armar datos resueltas
-    const resueltasData = [
-      headerResueltas,
-      ...resueltasOrdenadas.map(task => [
-        task.title,
-        {
-          v: task.priority === "rojo" ? "Urgente" : task.priority === "amarillo" ? "Atención" : "Pendiente",
-          s: getPriorityStyle(task.priority, true) // gris para resueltas
-        },
-        task.subArea?.name || "",
-        task.creator?.name || "",
-        new Date(task.createdAt).toLocaleString(),
-        new Date(task.resolvedAt).toLocaleString()
-      ])
-    ];
-
-    // Crear libro Excel
-    const workbook = utils.book_new();
-    const wsPendientes = utils.aoa_to_sheet(pendientesData);
-    const wsResueltas = utils.aoa_to_sheet(resueltasData);
-
-    const headerStyle = {
-      font: { bold: true, color: { rgb: "000000" } },
-      fill: {
-        type: "pattern",
-        patternType: "solid",
-        fgColor: { rgb: "E0E0E0" }
-      }
-    };
-
-    const applyHeaderStyle = (worksheet, headers) => {
-      headers.forEach((_, i) => {
-        const cellRef = String.fromCharCode(65 + i) + "1"; // A1, B1...
-        if (worksheet[cellRef]) {
-          worksheet[cellRef].s = headerStyle;
+      // Colores de fondo para prioridad
+      const getPriorityColor = (priority) => {
+        if (isResolved) return "D9D9D9"; // gris claro
+        switch (priority) {
+          case "rojo":
+            return "F4CCCC"; // rojo claro
+          case "amarillo":
+            return "FFF2CC"; // amarillo claro
+          case "verde":
+            return "93C47D"; // verde claro
+          default:
+            return "FFFFFF";
         }
+      };
+
+      datos.forEach((task) => {
+        const rowData = [
+          task.title,
+          task.priority === "rojo"
+            ? "Urgente"
+            : task.priority === "amarillo"
+            ? "Atención"
+            : "Pendiente",
+          task.subArea?.name || "",
+          task.creator?.name || "",
+          new Date(task.createdAt).toLocaleString(),
+        ];
+
+        if (isResolved) {
+          rowData.push(
+            new Date(task.resolvedAt).toLocaleString(),
+            task.resolver?.name || "" // <--- aquí añadimos quién resolvió
+          );
+        }
+
+        const row = ws.addRow(rowData);
+
+        // Color de fondo para la celda de prioridad
+        const priorityCell = row.getCell(2);
+        priorityCell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: getPriorityColor(task.priority) },
+        };
+        priorityCell.font = {
+          color: { argb: "000000" },
+          bold: true,
+        };
       });
     };
 
-    applyHeaderStyle(wsPendientes, headerPendientes);
-    applyHeaderStyle(wsResueltas, headerResueltas);
+    crearHoja("Pendientes", pendientesOrdenadas, false);
+    crearHoja("Resueltas", resueltasOrdenadas, true);
 
+    const buffer = await workbook.xlsx.writeBuffer();
+    const fechaHoy = new Date()
+      .toLocaleDateString("es-MX", { day: "2-digit", month: "2-digit", year: "numeric" })
+      .replace(/\//g, "-");
 
-    utils.book_append_sheet(workbook, wsPendientes, "Pendientes");
-    utils.book_append_sheet(workbook, wsResueltas, "Resueltas");
-
-    writeFileXLSX(workbook, `Reporte_${areaData.name}.xlsx`);
+    saveAs(new Blob([buffer]), `Reporte_${areaData.name}_${fechaHoy}.xlsx`);
   };
 
 

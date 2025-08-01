@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { TbReport } from "react-icons/tb";
 import { Download } from "lucide-react";
 import { CountingCard } from "../../components/CountingCard";
+import ExcelJS from "exceljs";
 import axios from "axios";
 import { saveAs } from 'file-saver';
 
@@ -49,38 +50,76 @@ const GenerateReport = () => {
         }
     }
 
-    const handleDownloadReport = (data) => {
-        const header = [
-            'id',
-            'Área',
-            '¿Cuál es el problema relevante?',
-            '¿Qué originó el problema?',
-            'Propuesta y tiempo para solucionarlo',
-            'Responsable(s) de la solución',
-        ];
+    const handleDownloadReport = async () => {
+        try {
+            const workbook = new ExcelJS.Workbook();
 
-        const rows = data.map((report, index) => [
-            index + 1,
-            report.area?.name || '',
-            report.answer1 || '',
-            report.answer2 || '',
-            report.answer3 || '',
-            report.responsible || '',
-        ]);
+            // --- Hoja de reportes generados ---
+            const wsReports = workbook.addWorksheet("Reportes generados");
+            wsReports.columns = [
+            { header: "ID", key: "id", width: 30 },
+            { header: "Área", key: "area", width: 30 },
+            { header: "Problema relevante", key: "answer1", width: 50 },
+            { header: "Origen del problema", key: "answer2", width: 50 },
+            { header: "Propuesta", key: "answer3", width: 50 },
+            { header: "Responsable", key: "responsible", width: 30 },
+            { header: "Creado por", key: "answeredBy", width: 30 },
+            { header: "Fecha", key: "createdAt", width: 20 },
+            ];
 
-        const csvContent = [header, ...rows]
-            .map(row =>
-            row
-                .map(value =>
-                `"${String(value).replace(/"/g, '""')}"` // escape quotes
-                )
-                .join(',')
-            )
-            .join('\n');
+            reportsData.forEach((r, index) => {
+                wsReports.addRow({
+                    id: index + 1, // número consecutivo
+                    area: r.area?.name || "",
+                    answer1: r.answer1 || "",
+                    answer2: r.answer2 || "",
+                    answer3: r.answer3 || "",
+                    responsible: r.responsible || "",
+                    answeredBy: r.answeredBy?.name || "",
+                    createdAt: new Date(r.createdAt).toLocaleDateString(),
+                });
+            });
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        saveAs(blob, `Reporte_problematicas_${monthNames[month - 1]}_${year}.csv`);
-    };
+            // --- Hoja de áreas sin reportar ---
+            const wsUnreported = workbook.addWorksheet("Áreas sin reportar");
+            wsUnreported.columns = [
+            { header: "ID", key: "id", width: 30 },
+            { header: "Área", key: "name", width: 30 },
+            { header: "Responsable", key: "responsible", width: 30 },
+            { header: "Correo Responsable", key: "email", width: 40 },
+            ];
+
+            unreportedAreas.forEach((a, index) => {
+                wsUnreported.addRow({
+                    id: index + 1, // número consecutivo
+                    name: a.name,
+                    responsible: a.ownerUser?.name || "",
+                    email: a.ownerUser?.email || "",
+                });
+            });
+
+            // --- Estilos para encabezados ---
+            [wsReports, wsUnreported].forEach((sheet) => {
+            sheet.getRow(1).eachCell((cell) => {
+                cell.font = { bold: true, color: { argb: "000000" } };
+                cell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "E0E0E0" },
+                };
+            });
+            });
+
+            // --- Generar archivo y descargar ---
+            const fechaHoy = new Date()
+            .toLocaleDateString("es-MX")
+            .replace(/\//g, "-");
+            const buffer = await workbook.xlsx.writeBuffer();
+            saveAs(new Blob([buffer]), `Reporte_problematicas_${monthNames[month - 1]}_${year}_${fechaHoy}.xlsx`);
+        } catch (error) {
+            console.error("Error generando reporte:", error);
+        }
+        };
 
     useEffect(() => {
         getNextMonth();
@@ -97,7 +136,10 @@ const GenerateReport = () => {
                     <h1 className="w-full text-2xl font-bold text-gray-800">Generar Reporte de Problemáticas relevantes</h1>
                     <p className="w-full text-gray-600 mt-1">Verifica cuantas y cuales de las áreas han llenado los datos de su reporte y genera el reporte con los datos existentes</p>
                 </div>
-                <button onClick={() => handleDownloadReport(reportsData)} className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">
+                <button
+                    onClick={handleDownloadReport}
+                    className="flex px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200"
+                    >
                     <Download size={20} className="mr-2" />
                     Descargar Reporte
                 </button>
