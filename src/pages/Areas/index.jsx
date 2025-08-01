@@ -5,6 +5,7 @@ import { Bar, Doughnut } from 'react-chartjs-2';
 import { useAreas } from '../../utils/context/AreasContext';
 import { useAuth } from '../../utils/context/AuthContext';
 import { useParams } from 'react-router-dom';
+import { utils, writeFileXLSX } from 'xlsx-js-style';
 import axios from 'axios';
 import { NewTask, ResolvedTask, ToggleSwitch, NewNote } from '../../components';
 import Layout from '../../components/Layout';
@@ -124,6 +125,140 @@ function Areas() {
     });
 
   }, [selectedArea, areas]);
+
+  const handleDownloadReport = () => {
+    if (!areaData || !areaData.tasks) return;
+
+    // Separa pendientes y resueltas
+    const tareasPendientes = areaData.tasks.filter(task => !task.resolvedAt);
+    const tareasResueltas = areaData.tasks.filter(task => task.resolvedAt);
+
+    // Función para ordenar por prioridad y luego por fecha
+    const prioridadOrden = { verde: 1, amarillo: 2, rojo: 3 };
+    const sortByPriorityAndDate = (a, b) => {
+      const pa = prioridadOrden[a.priority];
+      const pb = prioridadOrden[b.priority];
+      if (pa !== pb) return pa - pb; // primero prioridad
+      return new Date(b.createdAt) - new Date(a.createdAt); // luego fecha desc
+    };
+
+    const pendientesOrdenadas = [...tareasPendientes].sort(sortByPriorityAndDate);
+    const resueltasOrdenadas = [...tareasResueltas].sort(sortByPriorityAndDate);
+
+    // Función para dar estilo a la celda según prioridad
+    const getPriorityStyle = (priority, isResolved = false) => {
+      if (isResolved) {
+        return {
+          font: { color: { rgb: "000000" }, bold: true },
+          fill: {
+            type: "pattern",
+            patternType: "solid",
+            fgColor: { rgb: "D9D9D9" }
+          }
+        };
+      }
+      switch (priority) {
+        case "rojo":
+          return {
+            font: { color: { rgb: "FFFFFF" }, bold: true },
+            fill: {
+              type: "pattern",
+              patternType: "solid",
+              fgColor: { rgb: "FF0000" }
+            }
+          };
+        case "amarillo":
+          return {
+            font: { color: { rgb: "000000" }, bold: true },
+            fill: {
+              type: "pattern",
+              patternType: "solid",
+              fgColor: { rgb: "FFD700" }
+            }
+          };
+        case "verde":
+          return {
+            font: { color: { rgb: "FFFFFF" }, bold: true },
+            fill: {
+              type: "pattern",
+              patternType: "solid",
+              fgColor: { rgb: "00B050" }
+            }
+          };
+        default:
+          return {};
+      }
+    };
+
+
+    // Encabezados comunes
+    const headerPendientes = ["Título", "Prioridad", "Subárea", "Creado por", "Fecha de creación"];
+    const headerResueltas = ["Título", "Prioridad", "Subárea", "Creado por", "Fecha de creación", "Fecha de resolución"];
+
+    // Armar datos pendientes
+    const pendientesData = [
+      headerPendientes,
+      ...pendientesOrdenadas.map(task => [
+        task.title,
+        {
+          v: task.priority === "rojo" ? "Urgente" : task.priority === "amarillo" ? "Atención" : "Pendiente",
+          s: getPriorityStyle(task.priority, false)
+        },
+        task.subArea?.name || "",
+        task.creator?.name || "",
+        new Date(task.createdAt).toLocaleString()
+      ])
+    ];
+
+    // Armar datos resueltas
+    const resueltasData = [
+      headerResueltas,
+      ...resueltasOrdenadas.map(task => [
+        task.title,
+        {
+          v: task.priority === "rojo" ? "Urgente" : task.priority === "amarillo" ? "Atención" : "Pendiente",
+          s: getPriorityStyle(task.priority, true) // gris para resueltas
+        },
+        task.subArea?.name || "",
+        task.creator?.name || "",
+        new Date(task.createdAt).toLocaleString(),
+        new Date(task.resolvedAt).toLocaleString()
+      ])
+    ];
+
+    // Crear libro Excel
+    const workbook = utils.book_new();
+    const wsPendientes = utils.aoa_to_sheet(pendientesData);
+    const wsResueltas = utils.aoa_to_sheet(resueltasData);
+
+    const headerStyle = {
+      font: { bold: true, color: { rgb: "000000" } },
+      fill: {
+        type: "pattern",
+        patternType: "solid",
+        fgColor: { rgb: "E0E0E0" }
+      }
+    };
+
+    const applyHeaderStyle = (worksheet, headers) => {
+      headers.forEach((_, i) => {
+        const cellRef = String.fromCharCode(65 + i) + "1"; // A1, B1...
+        if (worksheet[cellRef]) {
+          worksheet[cellRef].s = headerStyle;
+        }
+      });
+    };
+
+    applyHeaderStyle(wsPendientes, headerPendientes);
+    applyHeaderStyle(wsResueltas, headerResueltas);
+
+
+    utils.book_append_sheet(workbook, wsPendientes, "Pendientes");
+    utils.book_append_sheet(workbook, wsResueltas, "Resueltas");
+
+    writeFileXLSX(workbook, `Reporte_${areaData.name}.xlsx`);
+  };
+
 
   
   useEffect(() => {
@@ -379,9 +514,12 @@ function Areas() {
                               <FaRegStickyNote className="w-5 h-5 text-teal-600 mr-3" />
                               <span className="text-sm font-medium text-teal-800">Crear Nota</span>
                           </button>
-                          <button className="w-full flex cursor-pointer items-center p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                              <Activity className="w-5 h-5 text-gray-600 mr-3" />
-                              <span className="text-sm font-medium text-gray-700">Descargar Reporte</span>
+                          <button
+                            onClick={handleDownloadReport}
+                            className="w-full flex cursor-pointer items-center p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <Activity className="w-5 h-5 text-gray-600 mr-3" />
+                            <span className="text-sm font-medium text-gray-700">Descargar Reporte</span>
                           </button>
                           <ToggleSwitch
                             word1="Sin Resolver"
