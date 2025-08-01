@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [recurringTasks, setRecurringTasks] = useState([]);
   const [userArea, setUserArea] = useState(null);
   const [notes, setNotes] = useState([]);
+  const [loadingAuth, setLoadingAuth] = useState(true);
 
   const getRoleFromToken = () => {
     const token = localStorage.getItem("token");
@@ -108,10 +109,15 @@ export const AuthProvider = ({ children }) => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
       const payload = JSON.parse(atob(storedToken.split('.')[1]));
-      setUser({ id: payload.id, role: payload.role, name: payload.name, email: payload.email });
-      //  console.log(payload);
+      setUser({ 
+        id: payload.id, 
+        role: payload.role, 
+        name: payload.name, 
+        email: payload.email 
+      });
       setToken(storedToken);
     }
+    setLoadingAuth(false); // ya terminó de intentar cargar el usuario
   }, []);
 
   useEffect(() => {
@@ -158,7 +164,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, getDate, taskTemplates, fetchTemplates, recurringTasks, fetchRecurringTasks, getRoleFromToken, userArea, notes, fetchNotes }}>
+    <AuthContext.Provider value={{ user, token, login, logout, getDate, loadingAuth, taskTemplates, fetchTemplates, recurringTasks, fetchRecurringTasks, getRoleFromToken, userArea, notes, fetchNotes }}>
       {children}
     </AuthContext.Provider>
   );
