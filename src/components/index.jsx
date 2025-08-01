@@ -22,3 +22,5 @@ export * from './ToggleSwitch';
 export * from './UsuariosTab';
 export * from './NewNote';
 export * from './GenerateReport';
+export * from './RequestsList';
+export * from './Request';

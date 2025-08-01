@@ -9,7 +9,7 @@ import { FaRegStickyNote } from "react-icons/fa";
 import axios from 'axios';
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { NewTask, ResolvedTask, ToggleSwitch, NewNote } from '../../components';
+import { NewTask, ResolvedTask, ToggleSwitch, NewNote, RequestsList } from '../../components';
 import { BiSolidBookContent } from "react-icons/bi";
 import Layout from '../../components/Layout';
 
@@ -573,28 +573,7 @@ function Areas() {
                     <BiSolidBookContent className="w-5 h-5 text-teal-600" />
                     <h3 onClick={() => console.log(personal)} className="text-lg font-semibold text-gray-900">Solicitudes</h3>
                     </div>
-                    <div className="space-y-3">
-                    {personal?.length > 0 ? (
-                        <div className="overflow-x-auto">
-                          <table className="w-full">
-                              <tbody className="bg-white divide-y divide-gray-200">
-                                  {personal.map((user) => (
-                                      <tr key={user.id} className="hover:bg-gray-50">
-                                          <td className="px-6 py-4 whitespace-nowrap">
-                                              <div>
-                                                  <div onClick={() => console.log(user)} className="text-sm font-medium text-gray-900">{user.name}</div>                                                  
-                                              </div>
-                                          </td>                                          
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.areas[0].UserArea.role}</td>                                                                  
-                                      </tr>
-                                  ))}
-                              </tbody>
-                          </table>
-                      </div>
-                    ) : (
-                      <div className="text-gray-500">No hay personal asignado a esta área.</div>
-                    )}
-                    </div>
+                    <RequestsList/>
                 </div>
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="flex items-center space-x-2 mb-4">

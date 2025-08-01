@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [recurringTasks, setRecurringTasks] = useState([]);
   const [userArea, setUserArea] = useState(null);
   const [notes, setNotes] = useState([]);
+  const [requests, setRequests] = useState([]);
 
   const getRoleFromToken = () => {
     const token = localStorage.getItem("token");
@@ -27,6 +28,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (!userArea) return;
     fetchNotes();
+    fetchRequests();
   }, [userArea]);
 
   const login = async (email, password) => {
@@ -66,6 +68,17 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Error fetching notes:", error);
+    }
+  };
+
+  const fetchRequests = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/request-status/${user.id}`);
+      if (response.status === 200) {
+        setRequests(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching requests:", error);
     }
   };
 
@@ -158,7 +171,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, getDate, taskTemplates, fetchTemplates, recurringTasks, fetchRecurringTasks, getRoleFromToken, userArea, notes, fetchNotes }}>
+    <AuthContext.Provider value={{ user, token, login, logout, getDate, taskTemplates, fetchTemplates, recurringTasks, fetchRecurringTasks, getRoleFromToken, userArea, notes, fetchNotes, requests, fetchRequests }}>
       {children}
     </AuthContext.Provider>
   );
