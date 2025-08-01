@@ -522,8 +522,9 @@ function Areas() {
                     </div>
                     <div className="space-y-3">
                     {notes.length > 0 ? (
-                      notes
-                        .slice(-10) // Toma los últimos 10 elementos
+                      [...notes]
+                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // ordenar por fecha descendente
+                        .slice(0, 5) // tomar solo las 5 más recientes
                         .map((nota) => (
                           <div
                             key={nota.id}
