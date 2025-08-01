@@ -83,6 +83,78 @@ const Home = () => {
         const datosClasificados = clasificarPorSubarea(tasks.filter(task => task.areaId === userArea)); // donde tareas es tu array
         // console.log(datosClasificados);
 
+        const calcularDatasetsUltimos7Dias = (tasks) => {
+            const prioridadMap = { rojo: "Urgente", amarillo: "Atención", verde: "Pendiente" };
+
+            // Generamos un arreglo con los últimos 7 días (de hoy hacia atrás)
+            const hoy = new Date();
+            const dias = [];
+            for (let i = 6; i >= 0; i--) {
+                const fecha = new Date(hoy);
+                fecha.setDate(hoy.getDate() - i);
+                const etiqueta = fecha.toLocaleDateString("es-MX", {
+                    day: "2-digit",
+                    month: "2-digit"
+                });
+                dias.push({ fecha, etiqueta });
+            }
+
+            // Inicializar contadores
+            const datos = {
+                Urgente: Array(7).fill(0),
+                Atención: Array(7).fill(0),
+                Pendiente: Array(7).fill(0)
+            };
+
+            // Contar tareas por prioridad y día
+            tasks.forEach(task => {
+                const fechaTask = new Date(task.createdAt);
+                const prioridad = prioridadMap[task.priority];
+                // Buscar el índice del día correspondiente
+                dias.forEach((d, index) => {
+                    const mismaFecha = d.fecha.getFullYear() === fechaTask.getFullYear() &&
+                        d.fecha.getMonth() === fechaTask.getMonth() &&
+                        d.fecha.getDate() === fechaTask.getDate();
+                    if (mismaFecha) {
+                        datos[prioridad][index]++;
+                    }
+                });
+            });
+
+            return {
+                labels: dias.map(d => d.etiqueta),
+                datasets: [
+                    {
+                        label: "Urgente",
+                        data: datos.Urgente,
+                        borderColor: "#DC262670",
+                        backgroundColor: "rgba(220, 38, 38, 0.3)",
+                        tension: 0.4,
+                        fill: false
+                    },
+                    {
+                        label: "Atención",
+                        data: datos.Atención,
+                        borderColor: "#F59E0B70",
+                        backgroundColor: "rgba(245, 158, 11, 0.3)",
+                        tension: 0.4,
+                        fill: false
+                    },
+                    {
+                        label: "Pendiente",
+                        data: datos.Pendiente,
+                        borderColor: "#16A34A70",
+                        backgroundColor: "rgba(22, 163, 74, 0.3)",
+                        tension: 0.4,
+                        fill: false
+                    }
+                ]
+            };
+        };
+
+        
+
+
     useEffect(() => {
         const fetchTasks = async () => {
             try {
@@ -271,65 +343,32 @@ const Home = () => {
         }
     };
     
-    const lineDatasets = [
-        {
-            label: 'Urgente',
-            data: [4, 6, 2, 7, 3, 5, 8],
-            borderColor: '#DC262670',
-            backgroundColor: 'rgba(220, 38, 38, 0.3)',
-            tension: 0.4,
-            fill: false
-        },
-        {
-            label: 'Atención',
-            data: [3, 2, 4, 6, 1, 5, 2],
-            borderColor: '#F59E0B70',
-            backgroundColor: 'rgba(245, 158, 11, 0.3)',
-            tension: 0.4,
-            fill: false
-        },
-        {
-            label: 'Pendiente',
-            data: [5, 4, 3, 2, 1, 0, 2],
-            borderColor: '#16A34A70',
-            backgroundColor: 'rgba(22, 163, 74, 0.3)',
-            tension: 0.4,
-            fill: false
-        }
-    ];
-    
     
     useEffect(() => {
         if (!lineChartRef.current) return;
+        if (lineChartInstance.current) lineChartInstance.current.destroy();
 
-        if (lineChartInstance.current) {
-            lineChartInstance.current.destroy();
-        }
+        // Filtrar tareas del área del usuario
+        const tareasUsuario = tasks.filter(task => task.areaId === userArea);
+
+        // Generar datos dinámicos para los últimos 7 días
+        const { labels, datasets } = calcularDatasetsUltimos7Dias(tareasUsuario);
 
         const ctx = lineChartRef.current.getContext('2d');
         lineChartInstance.current = new Chart.Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
-                datasets: lineDatasets // Usar el array definido arriba
+                labels: labels,
+                datasets: datasets
             },
             options: {
                 responsive: true,
                 plugins: {
-                    title: {
-                        display: true,
-                        padding: 20
-                    },
-                    legend: {
-                        display: false // CAMBIAR ESTO: de 'top' a false
-                    }
+                    title: { display: true, padding: 20 },
+                    legend: { display: false }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        min: 0,
-                        max: 8
-                    }
+                    y: { beginAtZero: true }
                 }
             }
         });
@@ -339,7 +378,7 @@ const Home = () => {
                 lineChartInstance.current.destroy();
             }
         };
-    }, []);
+    }, [tasks, userArea]);
 
     return ( 
         <Layout>
