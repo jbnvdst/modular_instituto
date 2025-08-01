@@ -362,15 +362,22 @@ const Home = () => {
                 datasets: datasets
             },
             options: {
-                responsive: true,
-                plugins: {
-                    title: { display: true, padding: 20 },
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { beginAtZero: true }
+            responsive: true,
+            plugins: {
+                title: { display: true, padding: 20 },
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return Number.isInteger(value) ? value : '';
+                        }
+                    }
                 }
             }
+        }
         });
 
         return () => {

@@ -27,19 +27,15 @@ function Areas() {
   const [ userAreas, setUserAreas ] = useState([]);
   const areaData = userAreas.find(area => area.id === selectedArea);
   const [tasksCount, setTasksCount] = useState({ urgent: 0, attention: 0, pending: 0 });
-  const [days, setDays] = useState({
-    lunes: 0,
-    martes: 0,
-    miercoles: 0,
-    jueves: 0,
-    viernes: 0,
-    sabado: 0,
-    domingo: 0
-  });
+
+  // IMPORTANTE: ahora days es un objeto con labels y datasets
+  const [days, setDays] = useState({ labels: [], datasets: [] });
   
   useEffect(() => {
     setUserAreas(areas.filter(area => area.id === userArea));
     fetchPersonal();
+
+    // Calcular tareas pendientes
     setTasksCount(userAreas.filter(area => area.id === selectedArea).reduce((acc, area) => {
       area.tasks.forEach(task => {
         if (!task.resolvedAt) {
@@ -55,32 +51,78 @@ function Areas() {
       return acc;
     }, { urgent: 0, attention: 0, pending: 0 }));
 
-    setDays(userAreas.filter(area => area.id === selectedArea).reduce((acc, area) => {
-      area.tasks.forEach(task => {
-        if (task.resolvedAt) {
-          const resolvedDate = new Date(task.resolvedAt);
-          const now = new Date();
-          const diffDays = (now - resolvedDate) / (1000 * 60 * 60 * 24);
-
-          if (diffDays <= 7) {
-            const dayIndex = resolvedDate.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
-            const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-            const dayName = dayNames[dayIndex];
-
-            acc[dayName] = (acc[dayName] || 0) + 1;
-          }
-        }
+    // === NUEVO CÓDIGO: últimos 7 días reales, tareas creadas, clasificadas por prioridad ===
+    const hoy = new Date();
+    const ultimos7 = [];
+    for (let i = 6; i >= 0; i--) {
+      const f = new Date(hoy);
+      f.setDate(hoy.getDate() - i);
+      ultimos7.push({
+        date: f,
+        label: f.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit' })
       });
-      return acc;
-    }, {
-      lunes: 0,
-      martes: 0,
-      miercoles: 0,
-      jueves: 0,
-      viernes: 0,
-      sabado: 0,
-      domingo: 0
-    }));
+    }
+
+    const tareas = userAreas
+      .filter(area => area.id === selectedArea)
+      .flatMap(area => area.tasks);
+
+    const priorityMap = {
+      rojo: "Urgente",
+      amarillo: "Atención",
+      verde: "Pendiente",
+    };
+
+    // Inicializa estructura
+    const counts = {
+      Urgente: Array(7).fill(0),
+      Atención: Array(7).fill(0),
+      Pendiente: Array(7).fill(0),
+    };
+
+    ultimos7.forEach((dia, index) => {
+      const tareasDelDia = tareas.filter((task) => {
+        const fecha = new Date(task.createdAt);
+        return (
+          fecha.getFullYear() === dia.date.getFullYear() &&
+          fecha.getMonth() === dia.date.getMonth() &&
+          fecha.getDate() === dia.date.getDate()
+        );
+      });
+
+      tareasDelDia.forEach((task) => {
+        const tipo = priorityMap[task.priority];
+        counts[tipo][index]++;
+      });
+    });
+
+    setDays({
+      labels: ultimos7.map((d) => d.label),
+      datasets: [
+        {
+          label: "Urgente",
+          data: counts.Urgente,
+          backgroundColor: "#ff000070",
+          borderColor: "#fff",
+          borderWidth: 1,
+        },
+        {
+          label: "Atención",
+          data: counts.Atención,
+          backgroundColor: "#F59E0B70",
+          borderColor: "#fff",
+          borderWidth: 1,
+        },
+        {
+          label: "Pendiente",
+          data: counts.Pendiente,
+          backgroundColor: "#16A34A70",
+          borderColor: "#fff",
+          borderWidth: 1,
+        },
+      ],
+    });
+
   }, [selectedArea, areas]);
 
   
@@ -114,7 +156,6 @@ function Areas() {
         try {
             const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/user-areas/getUsers/${selectedArea}`);
             setPersonal(response.data);
-            // console.log("Personal fetched:", response.data);
         } catch (error) {
             console.error("Error fetching personal in area:", error);
         }
@@ -129,41 +170,22 @@ function Areas() {
     }]
   };
 
-  const barChartData = {
-  labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-  datasets: [{
-    label: 'Completadas',
-    data: [
-      days.lunes,
-      days.martes,
-      days.miércoles,
-      days.jueves,
-      days.viernes,
-      days.sábado,
-      days.domingo
-    ],
-    backgroundColor: '#10b98190',
-    borderRadius: 4
-  }]
-};
-
   const handleDeleteTask = async (taskId) => {
-  if (!selectedArea || !taskId) return;
-  try {
-    await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/tasks/${taskId}`);
-    // Opcional: Actualiza el estado local para quitar la tarea borrada
-    setUserAreas(prev =>
-      prev.map(area =>
-        area.id === selectedArea
-          ? { ...area, tasks: area.tasks.filter(task => task.id !== taskId) }
-          : area
-      )
-    );
-  } catch (error) {
-    console.error("Error al borrar la tarea:", error);
-    alert("No se pudo borrar la tarea.");
-  }
-};
+    if (!selectedArea || !taskId) return;
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/tasks/${taskId}`);
+      setUserAreas(prev =>
+        prev.map(area =>
+          area.id === selectedArea
+            ? { ...area, tasks: area.tasks.filter(task => task.id !== taskId) }
+            : area
+        )
+      );
+    } catch (error) {
+      console.error("Error al borrar la tarea:", error);
+      alert("No se pudo borrar la tarea.");
+    }
+  };
 
   const handleCreateTask = () => {
     if (newTask.title.trim()) {
@@ -188,7 +210,6 @@ function Areas() {
     <Layout>
         <div className="bg-gray-50 w-full min-h-screen py-6">
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
                     <h1 onClick={() => console.log(userAreas)} className="text-sm text-gray-500">Áreas</h1>
@@ -197,7 +218,6 @@ function Areas() {
 
             <hr className="my-4 border-gray-200"/>
 
-            {/* Selector de Área */}
             <div className="bg-white rounded-lg shadow-sm p-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
                 Seleccionar Área
@@ -240,7 +260,6 @@ function Areas() {
 
             {selectedArea && (
             <>
-                {/* Semáforos de Tareas */}
                 <div className='grid grid-cols-[70%_1fr] gap-6'>
                   <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="flex justify-between items-center mb-4">
@@ -360,10 +379,6 @@ function Areas() {
                               <FaRegStickyNote className="w-5 h-5 text-teal-600 mr-3" />
                               <span className="text-sm font-medium text-teal-800">Crear Nota</span>
                           </button>
-                          {/* <button className="w-full flex cursor-pointer items-center p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                              <Users className="w-5 h-5 text-gray-600 mr-3" />
-                              <span className="text-sm font-medium text-gray-700">Mensaje a Área</span>
-                          </button> */}
                           <button className="w-full flex cursor-pointer items-center p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
                               <Activity className="w-5 h-5 text-gray-600 mr-3" />
                               <span className="text-sm font-medium text-gray-700">Descargar Reporte</span>
@@ -378,9 +393,7 @@ function Areas() {
                   </div>
                 </div>
 
-                {/* Personal Asignado y Gráficas */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Personal Asignado */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="flex items-center space-x-2 mb-4">
                     <Users className="w-5 h-5 text-teal-600" />
@@ -410,7 +423,6 @@ function Areas() {
                     </div>
                 </div>
 
-                {/* Gráficas */}
                 <div className="space-y-6">
                     <div className="bg-white rounded-lg shadow-sm p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribución de Tareas</h3>
@@ -422,8 +434,28 @@ function Areas() {
                     <div className="bg-white rounded-lg shadow-sm p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Actividad Semanal</h3>
                     <div className="h-48">
-                        {(areaData && Object.keys(days).some(day => days[day] > 0)) ?
-                          <Bar data={barChartData} options={{ maintainAspectRatio: false }} /> : "No hay datos que graficar"}
+                        {(areaData && days.datasets.length > 0 && days.datasets.some(ds => ds.data.some(v => v > 0))) ?
+                          <Bar 
+                            data={days}
+                            options={{
+                              maintainAspectRatio: false,
+                              responsive: true,
+                              plugins: {
+                                legend: { display: false },
+                              },
+                              scales: {
+                                x: { stacked: true },
+                                y: {
+                                  stacked: true,
+                                  beginAtZero: true,
+                                  ticks: {
+                                    callback: (value) =>
+                                      Number.isInteger(value) ? value : "",
+                                  },
+                                },
+                              },
+                            }}
+                          /> : "No hay datos que graficar"}
                     </div>
                     </div>
                 </div>
@@ -435,7 +467,6 @@ function Areas() {
                 areaId={selectedArea}
                 onClose={() => setShowNewTaskModal(false)}
                 users={areaData.staff}
-                // fetchTasks={fetchTasks} // si tienes una función para refrescar tareas
               />
             )}
             {showNoteModal && (
@@ -449,7 +480,6 @@ function Areas() {
               <ResolvedTask
                 taskId={resolvedTaskModal}
                 onClose={() => setResolvedTaskModal(false)}
-                // fetchTasks={fetchTasks} // si tienes una función para refrescar tareas
               />
             )}
         </div>
