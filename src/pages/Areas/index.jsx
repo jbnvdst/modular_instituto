@@ -5,12 +5,13 @@ import { Bar, Doughnut } from 'react-chartjs-2';
 import { useAreas } from '../../utils/context/AreasContext';
 import { useAuth } from '../../utils/context/AuthContext';
 import { useParams } from 'react-router-dom';
+import { FaRegStickyNote } from "react-icons/fa";
 import axios from 'axios';
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { NewTask, ResolvedTask, ToggleSwitch, NewNote } from '../../components';
+import { BiSolidBookContent } from "react-icons/bi";
 import Layout from '../../components/Layout';
-import { FaRegStickyNote } from "react-icons/fa";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -24,7 +25,7 @@ function Areas() {
   const [newTask, setNewTask] = useState({ title: '', priority: 'medium', assignedTo: '' });
   const { areas, loadingAreas } = useAreas();
   const [ personal, setPersonal ] = useState([]);
-  const { user, getDate, userArea } = useAuth();
+  const { user, getDate, userArea, notes, fetchNotes } = useAuth();
   const [ resolved, setResolved] = useState(false);
   const [ userAreas, setUserAreas ] = useState([]);
   const areaData = userAreas.find(area => area.id === selectedArea);
@@ -32,6 +33,12 @@ function Areas() {
 
   // IMPORTANTE: ahora days es un objeto con labels y datasets
   const [days, setDays] = useState({ labels: [], datasets: [] });
+
+  useEffect(() => {
+    if (selectedArea) {
+      fetchNotes(selectedArea);
+    }
+  }, [selectedArea]);
   
   useEffect(() => {
     setUserAreas(areas.filter(area => area.id === userArea));
@@ -510,6 +517,86 @@ function Areas() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="flex items-center space-x-2 mb-4">
+                    <FaRegStickyNote  className="w-5 h-5 text-teal-600" />
+                    <h3 onClick={() => console.log(personal)} className="text-lg font-semibold text-gray-900">Notas del Área</h3>
+                    </div>
+                    <div className="space-y-3">
+                    {notes.length > 0 ? (
+                      notes
+                        .slice(-10) // Toma los últimos 10 elementos
+                        .map((nota) => (
+                          <div
+                            key={nota.id}
+                            className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex-shrink-0">
+                                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                  <svg
+                                    className="w-4 h-4 text-green-600"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-gray-900 font-semibold text-sm">
+                                  {nota.title} |{" "}
+                                  <span className="text-green-600 font-medium">
+                                    {nota.status}
+                                  </span>
+                                </h4>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Creado por: {nota.creator?.name || nota.createdBy}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  Descripción: {nota.description}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                    ) : (
+                      <p className="text-gray-500">No hay notas para esta área.</p>
+                    )}
+                    </div>
+                </div>
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="flex items-center space-x-2 mb-4">
+                    <BiSolidBookContent className="w-5 h-5 text-teal-600" />
+                    <h3 onClick={() => console.log(personal)} className="text-lg font-semibold text-gray-900">Solicitudes</h3>
+                    </div>
+                    <div className="space-y-3">
+                    {personal?.length > 0 ? (
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                  {personal.map((user) => (
+                                      <tr key={user.id} className="hover:bg-gray-50">
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                              <div>
+                                                  <div onClick={() => console.log(user)} className="text-sm font-medium text-gray-900">{user.name}</div>                                                  
+                                              </div>
+                                          </td>                                          
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.areas[0].UserArea.role}</td>                                                                  
+                                      </tr>
+                                  ))}
+                              </tbody>
+                          </table>
+                      </div>
+                    ) : (
+                      <div className="text-gray-500">No hay personal asignado a esta área.</div>
+                    )}
+                    </div>
+                </div>
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="flex items-center space-x-2 mb-4">
                     <Users className="w-5 h-5 text-teal-600" />
                     <h3 onClick={() => console.log(personal)} className="text-lg font-semibold text-gray-900">Personal Asignado</h3>
                     </div>
@@ -587,7 +674,20 @@ function Areas() {
               <NewNote
                 areaId={selectedArea}
                 onClose={() => setShowNoteModal(false)}
-                users={areaData.staff}
+                onSave={async (values) => {
+                  const payload = {
+                    title: values.nombre,
+                    doc_title: values.numeroOficio,
+                    description: values.descripcion,
+                    status: values.estatus.charAt(0).toUpperCase() + values.estatus.slice(1), // Asegura primera letra mayúscula
+                    areaId: userArea,
+                    involvedArea: selectedArea,
+                    createdBy: user.id
+                  };
+                  await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/notes`, payload);
+
+                  fetchNotes(selectedArea);
+                }}
               />
             )}
             {resolvedTaskModal && (

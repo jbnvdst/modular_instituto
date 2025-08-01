@@ -3,7 +3,6 @@ import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 
 const statusOptions = [
-  { value: 'enviado', label: 'Enviado' },
   { value: 'resuelto', label: 'Resuelto' },
   { value: 'pendiente', label: 'Pendiente' },
 ]

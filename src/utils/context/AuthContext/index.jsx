@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [taskTemplates, setTaskTemplates] = useState([]);
   const [recurringTasks, setRecurringTasks] = useState([]);
   const [userArea, setUserArea] = useState(null);
+  const [notes, setNotes] = useState([]);
 
   const getRoleFromToken = () => {
     const token = localStorage.getItem("token");
@@ -25,7 +26,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (!userArea) return;
-    // fetchNotes();
+    fetchNotes();
   }, [userArea]);
 
   const login = async (email, password) => {
@@ -54,6 +55,18 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
+  };
+
+  const fetchNotes = async (involvedArea) => {
+    if (!involvedArea) return;
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/notes/${involvedArea}`);
+      if (response.status === 200) {
+        setNotes(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+    }
   };
 
   const fetchTemplates = async () => {
@@ -145,7 +158,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, getDate, taskTemplates, fetchTemplates, recurringTasks, fetchRecurringTasks, getRoleFromToken, userArea }}>
+    <AuthContext.Provider value={{ user, token, login, logout, getDate, taskTemplates, fetchTemplates, recurringTasks, fetchRecurringTasks, getRoleFromToken, userArea, notes, fetchNotes }}>
       {children}
     </AuthContext.Provider>
   );
