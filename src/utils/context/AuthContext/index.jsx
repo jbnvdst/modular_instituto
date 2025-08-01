@@ -12,12 +12,8 @@ export const AuthProvider = ({ children }) => {
   const [recurringTasks, setRecurringTasks] = useState([]);
   const [userArea, setUserArea] = useState(null);
   const [notes, setNotes] = useState([]);
-<<<<<<< HEAD
   const [requests, setRequests] = useState([]);
-=======
   const [loadingAuth, setLoadingAuth] = useState(true);
->>>>>>> d38c2a45bad7a2e87c004849f9cc7cf97bde26ae
-
   const getRoleFromToken = () => {
     const token = localStorage.getItem("token");
     if (!token) return null;
