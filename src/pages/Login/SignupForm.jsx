@@ -82,13 +82,13 @@ const SignupForm = ({ setShowRegister }) => {
                 setIsLoading(true);
                 // Aquí iría la lógica de registro
                 // alert(`Registrado: ${values.name}, ${values.email}`);
-                const valuesToSend = {
-                    name: values.name,
-                    email: values.email,
-                    password: values.password,
-                    role: tokenValid || 'user',
-                    area: values.area,
-                }
+const valuesToSend = {
+    name: values.name,
+    email: values.email,
+    password: values.password,
+    role: tokenValid || 'user',
+    area: values.area,
+}
                 try {
                     const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`, valuesToSend, {
                         headers: {
