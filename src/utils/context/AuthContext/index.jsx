@@ -141,6 +141,17 @@ export const AuthProvider = ({ children }) => {
     fetchUserArea();
   }, [user]);
 
+  const getIdFromToken = () => {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.id || null;
+    } catch {
+      return null;
+    }
+  };
+
   const getDate = (dateString) => {
     const inputDate = new Date(dateString);
     const now = new Date();
@@ -176,7 +187,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, getDate, loadingAuth, taskTemplates, fetchTemplates, recurringTasks, fetchRecurringTasks, getRoleFromToken, userArea, notes, fetchNotes, requests, fetchRequests }}>
+    <AuthContext.Provider value={{ user, token, login, logout, getDate, getIdFromToken, loadingAuth, taskTemplates, fetchTemplates, recurringTasks, fetchRecurringTasks, getRoleFromToken, userArea, notes, fetchNotes, requests, fetchRequests }}>
       {children}
     </AuthContext.Provider>
   );

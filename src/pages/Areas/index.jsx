@@ -12,6 +12,7 @@ import { saveAs } from "file-saver";
 import { NewTask, ResolvedTask, ToggleSwitch, NewNote, RequestsList } from '../../components';
 import { BiSolidBookContent } from "react-icons/bi";
 import Layout from '../../components/Layout';
+import { NewRequest } from '../../components/NewRequest';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -21,6 +22,7 @@ function Areas() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
   const [ showNoteModal, setShowNoteModal ] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
   const [resolvedTaskModal, setResolvedTaskModal] = useState(null);
   const [newTask, setNewTask] = useState({ title: '', priority: 'medium', assignedTo: '' });
   const { areas, loadingAreas } = useAreas();
@@ -497,6 +499,12 @@ function Areas() {
                               <FaRegStickyNote className="w-5 h-5 text-teal-600 mr-3" />
                               <span className="text-sm font-medium text-teal-800">Crear Nota</span>
                           </button>
+                          <button onClick={() => (setShowRequestModal(true))}  
+                              className="w-full cursor-pointer flex items-center p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                              >
+                              <FaRegStickyNote className="w-5 h-5 text-teal-600 mr-3" />
+                              <span className="text-sm font-medium text-teal-800">Crear Solicitud</span>
+                          </button>
                           <button
                             onClick={handleDownloadReport}
                             className="w-full flex cursor-pointer items-center p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
@@ -668,6 +676,12 @@ function Areas() {
 
                   fetchNotes(selectedArea);
                 }}
+              />
+            )}
+            {showRequestModal && (
+              <NewRequest
+                areaId={selectedArea}
+                onClose={() => setShowRequestModal(false)}
               />
             )}
             {resolvedTaskModal && (
