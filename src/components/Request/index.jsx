@@ -1,13 +1,26 @@
 import React, { useState } from "react";
 import { useAuth } from "../../utils/context/AuthContext";
+import { EditRequest } from "../EditRequest";
+import axios from "axios";
 
 const Request = ({ request }) => {
     const [opened, setOpened] = useState(false);
     const { getDate } = useAuth();
 
-    const handleOpen = () => {
+    const handleOpen = async () => {
         if(request.status === "Sin leer") {
-            console.log("Marcar como leido");
+            try{
+                const response = await axios.put(
+                    `${import.meta.env.VITE_API_BASE_URL}/api/request-status/markAsRead/${request.id}`,
+                    {},
+                    { headers: { 'Content-Type': 'application/json' } }
+                );
+                if (response.status === 200) {
+                    request.status = "Leído"; // Update the status locally
+                }
+            } catch (error) {
+                console.error("Error al marcar como leído:", error);
+            }
         }
         setOpened(!opened);
     };
@@ -26,7 +39,7 @@ const Request = ({ request }) => {
     };
 
     return (
-        <div key={request.id} className={`${opened ? "max-h-64" : "max-h-32"} flex flex-col items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-300 ease-in-out`}>
+        <div key={request.id} className={`${opened ? "max-h-96" : "max-h-32"} flex flex-col items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-300 ease-in-out`}>
             {!opened ? (
                 <div className="flex flex-col w-full gap-2 ">
                     <div className="flex w-full items-center justify-between">
@@ -49,6 +62,7 @@ const Request = ({ request }) => {
                         <p className="text-xs text-gray-500 mt-1">Solicitado por: {request.request.creator.name}</p>
                         <p className="text-xs text-gray-500">{getDate(request.request.createdAt)}</p>
                     </div>
+                    <EditRequest request={request} />
                     <span onClick={() => handleOpen()} className="cursor-pointer inline-flex px-2 py-1 text-sm text-white font-medium rounded-full bg-teal-600/80">Cerrar</span>
                 </div>
             )}
