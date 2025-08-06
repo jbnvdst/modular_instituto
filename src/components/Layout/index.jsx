@@ -112,7 +112,7 @@ const Layout = ({ children }) => {
                             />
                         </NavLink>
                         <button
-                            className="hidden sm:block bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200"
+                            className="bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200"
                             onClick={() => setShowModal(true)}
                         >
                             <img src={logoutIcon} alt="Logout" className="w-4 h-4" />
