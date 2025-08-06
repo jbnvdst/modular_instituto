@@ -397,13 +397,13 @@ const Home = () => {
                 </h1>
                 <p className="text-white text-xs">Sistema de gestión hospitalaria operando como {getRoleFromToken()}</p>
             </div>
-            <div className="flex gap-4 py-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-5">
                 {/* <CountingCard title="Miembros en el sistema" count={150} icon="FaUsers" /> */}
                 <CountingCard title="Areas en total" count={areas.length} icon="IoBed" />
                 <CountingCard title="Tareas en el sistema" count={allTasks.length} icon="FaUserDoctor" />
                 <CountingCard title="Tareas resueltas" count={5} icon="IoBarChart" />
             </div>
-            <div className="grid grid-cols-[60%_1fr] gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-[60%_1fr] gap-4">
                 <div className="flex flex-col gap-4">
                     <div className="bg-white shadow-md rounded-2xl p-4 h-full">
                         <div className="flex w-full justify-between items-center">

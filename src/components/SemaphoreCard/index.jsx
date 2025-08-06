@@ -16,28 +16,13 @@ const SemaphoreCard = ({ semaphore, setSelectedArea, orderByQualification }) => 
             acc.pending += 1;
         }
         return acc;
-    }
-    , { urgent: 0, attention: 0, pending: 0 });
+    }, { urgent: 0, attention: 0, pending: 0 });
 
     useEffect(() => {
         let value = calculateOrder();
         setOrder(value);
         setAverage(value < 0 ? 100 - (value * -1 / semaphore.tasks.length) : 100);
-        // console.log(`Order: ${value}, Average: ${100 - (value * -1 / semaphore.tasks.length)}`);
     }, [semaphore.tasks]);
-
-    // const getStatusColor = (status) => {
-    //     switch (status) {
-    //         case 'Urgente':
-    //             return 'bg-gradient-to-tr from-red-700 to-rose-700 text-white';
-    //         case 'Atención':
-    //             return 'bg-gradient-to-tr from-amber-400 to-amber-500 text-white';
-    //         case 'Pendiente':
-    //             return 'bg-gradient-to-tr from-emerald-500 to-teal-500 text-white';
-    //         default:
-    //             return 'bg-gray-200 text-black';
-    //     }
-    // }
 
     const calculateOrder = () => {
         if(semaphore.tasks.length === 0) return 0;
@@ -54,20 +39,15 @@ const SemaphoreCard = ({ semaphore, setSelectedArea, orderByQualification }) => 
             }
         });
         return order * -1;
-
-        // let average = order / semaphore.tasks.length;
     };
     
     const getColor = () => {
         let avg = average;
-        // Asegura que el valor esté entre 0 y 100
-        // Clamp entre 0 y 100
         avg = Math.max(0, Math.min(100, avg));
 
-        // Define los colores como objetos RGBA
-        const red =    { r: 255, g: 0,   b: 0,   a: 112 }; // #FF000070
-        const yellow = { r: 245, g: 158, b: 11,  a: 112 }; // #F59E0B70
-        const green =  { r: 22,  g: 163, b: 74,  a: 112 }; // #16A34A70
+        const red =    { r: 255, g: 0,   b: 0,   a: 112 };
+        const yellow = { r: 245, g: 158, b: 11,  a: 112 };
+        const green =  { r: 22,  g: 163, b: 74,  a: 112 };
 
         let start, end, ratio;
 
@@ -91,30 +71,81 @@ const SemaphoreCard = ({ semaphore, setSelectedArea, orderByQualification }) => 
     }
 
     return (
-        <div className={`flex flex-col overflow-hidden justify-between rounded-[32px] w-64 shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] hover:-translate-y-1 duration-200 bg-white`} style={{ order: orderByQualification ? Math.floor(average) : order }}>
-            <div className="flex flex-col justify-between h-full gap-2">
-                <div className="flex justify-between w-full px-4 py-3" style={{ backgroundColor: getColor(order) }}>
-                    <h2 onClick={() => console.log(semaphore)} className="text-2xl text-white font-semibold">{name}</h2>
-                    <h1 className="text-4xl text-white font-semibold">{Math.floor(average)}</h1>
+        <div 
+            className={`
+                flex flex-col overflow-hidden justify-between 
+                rounded-2xl sm:rounded-3xl 
+                w-full
+                shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] 
+                hover:-translate-y-1 duration-200 bg-white
+                min-h-[240px] sm:min-h-[280px]
+            `} 
+            style={{ order: orderByQualification ? Math.floor(average) : order }}
+        >
+            <div className="flex flex-col justify-between h-full">
+                {/* Header con color dinámico */}
+                <div 
+                    className="flex justify-between items-center w-full px-3 sm:px-4 py-3 sm:py-4" 
+                    style={{ backgroundColor: getColor(order) }}
+                >
+                    <h2 
+                        onClick={() => console.log(semaphore)} 
+                        className="text-lg sm:text-xl md:text-2xl text-white font-semibold truncate flex-1 mr-2"
+                    >
+                        {name}
+                    </h2>
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl text-white font-semibold">
+                        {Math.floor(average)}
+                    </h1>
                 </div>
-                <div className="flex flex-col h-full justify-between gap-2 px-4 pb-4">
-                    <p className="text-sm">{description}</p>
-                    <b className="text-sm">Encargado: {ownerUser.name}</b>
-                    <button onClick={() => setSelectedArea(semaphore)} className="px-2 py-1 border-2 rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 hover:text-teal-500 duration-200">Ver detalles</button>
+                
+                {/* Contenido */}
+                <div className="flex flex-col h-full justify-between gap-2 px-3 sm:px-4 py-3 sm:pb-4">
+                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
+                        {description}
+                    </p>
+                    <b className="text-xs sm:text-sm text-gray-700 truncate">
+                        Encargado: {ownerUser.name}
+                    </b>
+                    <button 
+                        onClick={() => setSelectedArea(semaphore)} 
+                        className="px-3 py-1.5 sm:px-4 sm:py-2 
+                                 border-2 rounded-full 
+                                 text-xs sm:text-sm font-semibold 
+                                 cursor-pointer hover:bg-gray-200 hover:text-teal-500 
+                                 duration-200 transition-colors
+                                 w-full"
+                    >
+                        Ver detalles
+                    </button>
                 </div>
             </div>
-            <div className="w-full bg-gray-200 grid grid-cols-3 p-2 rounded-b-[32px]">
-                <div className="flex flex-col items-center text-rose-700 border-r border-white">
-                    <h3 className="text-xl font-semibold">{tasksCount.urgent}</h3>
-                    <p className="uppercase text-[10px] font-medium">Urgente</p>
+            
+            {/* Footer con estadísticas */}
+            <div className="w-full bg-gray-100 grid grid-cols-3 p-2 rounded-b-2xl sm:rounded-b-3xl">
+                <div className="flex flex-col items-center text-rose-700 border-r border-gray-200">
+                    <h3 className="text-base sm:text-lg md:text-xl font-semibold">
+                        {tasksCount.urgent}
+                    </h3>
+                    <p className="uppercase text-[9px] sm:text-[10px] font-medium">
+                        Urgente
+                    </p>
                 </div>
-                <div className="flex flex-col items-center text-amber-500 border-r border-white">
-                    <h3 className="text-xl font-semibold">{tasksCount.attention}</h3>
-                    <p className="uppercase text-[10px] font-medium">En atención</p>
+                <div className="flex flex-col items-center text-amber-500 border-r border-gray-200">
+                    <h3 className="text-base sm:text-lg md:text-xl font-semibold">
+                        {tasksCount.attention}
+                    </h3>
+                    <p className="uppercase text-[9px] sm:text-[10px] font-medium text-center">
+                        En atención
+                    </p>
                 </div>
                 <div className="flex flex-col items-center text-teal-500">
-                    <h3 className="text-xl font-semibold">{tasksCount.pending}</h3>
-                    <p className="uppercase text-[10px] font-medium">Pendiente</p>
+                    <h3 className="text-base sm:text-lg md:text-xl font-semibold">
+                        {tasksCount.pending}
+                    </h3>
+                    <p className="uppercase text-[9px] sm:text-[10px] font-medium">
+                        Pendiente
+                    </p>
                 </div>
             </div>
         </div>

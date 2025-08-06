@@ -12,9 +12,6 @@ const RecurringTasks = () => {
     const [selectedTask, setSelectedTask] = useState(null);
     const [confirmationModal, setConfirmationModal] = useState(null);
     
-    // React.useEffect(() => {
-    //     fetchRecurringTasks();
-    // }, [fetchRecurringTasks]);
     const getFrequencyName = (frequency) => {
         switch (frequency) {
             case 'daily':
@@ -27,18 +24,18 @@ const RecurringTasks = () => {
     }
 
     const handleDeleteTask = async (taskId) => {
-    try {
-        const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/recurring-tasks/${taskId}`);
-        if (response.status === 200) {
-            await fetchRecurringTasks();
-            setConfirmationModal(null);
-            setSelectedTask(null);
+        try {
+            const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/recurring-tasks/${taskId}`);
+            if (response.status === 200) {
+                await fetchRecurringTasks();
+                setConfirmationModal(null);
+                setSelectedTask(null);
+            }
+        } catch (error) {
+            console.error("Error al eliminar la tarea:", error);
+            alert("Error al eliminar la tarea. Por favor, inténtalo de nuevo.");
         }
-    } catch (error) {
-        console.error("Error al eliminar la tarea:", error);
-        alert("Error al eliminar la tarea. Por favor, inténtalo de nuevo.");
     }
-  }
     
     return (
         <Layout>
@@ -57,72 +54,193 @@ const RecurringTasks = () => {
                     }}
                 />
             )}
-            <div className="bg-gray-50 w-full min-h-screen py-6">
-                <div className="space-y-6 w-full">
-                    <div className="flex justify-between items-center">
-                        <h1 onClick={() => console.log(recurringTasks)} className="text-sm text-gray-500">Mis tareas</h1>
-                        <button onClick={() => setSelectedTask('new')} className="flex gap-2 items-center px-4 py-2 bg-teal-500 text-white rounded-lg cursor-pointer hover:bg-teal-600 transition duration-200">
-                            <FaPlus />
-                            <span className="ml-2">Nueva plantilla</span>
+            <div className="bg-gray-50 w-full min-h-screen py-3 sm:py-6">
+                <div className="space-y-4 sm:space-y-6 w-full">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <h1 onClick={() => console.log(recurringTasks)} className="text-xs sm:text-sm text-gray-500">
+                            Mis tareas
+                        </h1>
+                        <button 
+                            onClick={() => setSelectedTask('new')} 
+                            className="flex gap-2 items-center px-3 sm:px-4 py-2 
+                                     bg-teal-500 text-white rounded-lg cursor-pointer 
+                                     hover:bg-teal-600 transition duration-200
+                                     text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start"
+                        >
+                            <FaPlus className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span>Nueva tarea</span>
                         </button>
                     </div>
-                    <hr className="my-4 border-gray-200"/>
+                    <hr className="my-3 sm:my-4 border-gray-200"/>
                 </div>
-                {recurringTasks.length > 0 ? <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prioridad</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Necesidad</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frecuencia</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inicio</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fin</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">última ejecución</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                
+                {recurringTasks.length > 0 ? (
+                    <>
+                        {/* Vista móvil - Cards */}
+                        <div className="block lg:hidden space-y-3 mt-4">
                             {recurringTasks.map((task) => (
-                                <tr key={task.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{task.title}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                            task.priority === 'verde' 
-                                                ? 'bg-green-100 text-teal-500'
-                                                : task.priority === 'amarillo' ? 'bg-yellow-100 text-yellow-400'
-                                                : 'bg-red-100 text-red-400'
-                                        }`}>
-                                            {task.priority === 'rojo' ? 'Urgente' : task.priority === 'amarillo' ? 'En atención' : 'Pendiente'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{task.area.name}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{task.subArea.name}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Cada {task.interval} {getFrequencyName(task.frequency)}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(task.startDate).toLocaleDateString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{task.endDate ? new Date(task.endDate).toLocaleDateString() : 'Indefinido'}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{task.lastExecuted ? new Date(task.lastExecuted).toLocaleDateString() : 'Nunca'}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div className="flex space-x-2">
-                                            <button onClick={() => setSelectedTask(task)} className="text-blue-600 cursor-pointer hover:text-blue-800">
-                                                <Edit2 size={16} />
+                                <div key={task.id} className="bg-white rounded-lg shadow-md p-4 border-l-4 border-teal-500">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold text-gray-900 text-sm">
+                                                {task.title}
+                                            </h3>
+                                            <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded-full ${
+                                                task.priority === 'verde' 
+                                                    ? 'bg-green-100 text-green-600'
+                                                    : task.priority === 'amarillo' 
+                                                    ? 'bg-yellow-100 text-yellow-600'
+                                                    : 'bg-red-100 text-red-600'
+                                            }`}>
+                                                {task.priority === 'rojo' ? 'Urgente' : 
+                                                 task.priority === 'amarillo' ? 'Atención' : 'Pendiente'}
+                                            </span>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={() => setSelectedTask(task)} 
+                                                className="text-blue-600 hover:text-blue-800 p-1"
+                                            >
+                                                <Edit2 size={18} />
                                             </button>
-                                            <button onClick={() => setConfirmationModal(task.id)} className="text-red-600 cursor-pointer hover:text-red-800">
-                                                <Trash2 size={16} />
+                                            <button 
+                                                onClick={() => setConfirmationModal(task.id)} 
+                                                className="text-red-600 hover:text-red-800 p-1"
+                                            >
+                                                <Trash2 size={18} />
                                             </button>
                                         </div>
-                                    </td>
-                                </tr>
+                                    </div>
+                                    
+                                    <div className="space-y-1 text-xs text-gray-600">
+                                        <div className="flex justify-between">
+                                            <span className="font-medium">Área:</span>
+                                            <span>{task.area.name}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="font-medium">Subárea:</span>
+                                            <span>{task.subArea.name}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="font-medium">Frecuencia:</span>
+                                            <span>Cada {task.interval} {getFrequencyName(task.frequency)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="font-medium">Inicio:</span>
+                                            <span>{new Date(task.startDate).toLocaleDateString()}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="font-medium">Fin:</span>
+                                            <span>{task.endDate ? new Date(task.endDate).toLocaleDateString() : 'Indefinido'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="font-medium">Última ejecución:</span>
+                                            <span>{task.lastExecuted ? new Date(task.lastExecuted).toLocaleDateString() : 'Nunca'}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
-                </div>
-                :
-                <div className="p-4 bg-white rounded-lg shadow-md">
-                    <p className="text-gray-500">No tienes tareas recurrentes disponibles.</p>
-                </div>
-                }
+                        </div>
+
+                        {/* Vista desktop - Tabla */}
+                        <div className="hidden lg:block overflow-x-auto mt-4 bg-white rounded-lg shadow">
+                            <table className="w-full">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Título
+                                        </th>
+                                        <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Prioridad
+                                        </th>
+                                        <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Área
+                                        </th>
+                                        <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Necesidad
+                                        </th>
+                                        <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Frecuencia
+                                        </th>
+                                        <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Inicio
+                                        </th>
+                                        <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Fin
+                                        </th>
+                                        <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Última ejecución
+                                        </th>
+                                        <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Acciones
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {recurringTasks.map((task) => (
+                                        <tr key={task.id} className="hover:bg-gray-50">
+                                            <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {task.title}
+                                            </td>
+                                            <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                                    task.priority === 'verde' 
+                                                        ? 'bg-green-100 text-green-600'
+                                                        : task.priority === 'amarillo' 
+                                                        ? 'bg-yellow-100 text-yellow-600'
+                                                        : 'bg-red-100 text-red-600'
+                                                }`}>
+                                                    {task.priority === 'rojo' ? 'Urgente' : 
+                                                     task.priority === 'amarillo' ? 'Atención' : 'Pendiente'}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {task.area.name}
+                                            </td>
+                                            <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {task.subArea.name}
+                                            </td>
+                                            <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                Cada {task.interval} {getFrequencyName(task.frequency)}
+                                            </td>
+                                            <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {new Date(task.startDate).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {task.endDate ? new Date(task.endDate).toLocaleDateString() : 'Indefinido'}
+                                            </td>
+                                            <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {task.lastExecuted ? new Date(task.lastExecuted).toLocaleDateString() : 'Nunca'}
+                                            </td>
+                                            <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <div className="flex space-x-2">
+                                                    <button 
+                                                        onClick={() => setSelectedTask(task)} 
+                                                        className="text-blue-600 cursor-pointer hover:text-blue-800 p-1"
+                                                    >
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => setConfirmationModal(task.id)} 
+                                                        className="text-red-600 cursor-pointer hover:text-red-800 p-1"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
+                ) : (
+                    <div className="p-4 sm:p-6 bg-white rounded-lg shadow-md mt-4">
+                        <p className="text-sm sm:text-base text-gray-500 text-center">
+                            No tienes tareas recurrentes disponibles.
+                        </p>
+                    </div>
+                )}
             </div>
         </Layout>
     );

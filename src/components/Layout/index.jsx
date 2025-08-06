@@ -6,14 +6,16 @@ import logoutIcon from "../../assets/icons/exit.png";
 import profilePic from "../../assets/img/default_profile.jpg";
 import { ModalAlert } from "../../components/ModalAlert";
 import { useAuth } from "../../utils/context/AuthContext";
+import { HiMenu } from 'react-icons/hi';
 import axios from "axios";
 
 const Layout = ({ children }) => {
     const [showModal, setShowModal] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [notifications, setNotifications] = useState([]);
+    const [sidebarOpen, setSidebarOpen] = useState(false); 
     const location = useLocation();
-    const { user } = useAuth(); // Asegúrate de tener el usuario actual
+    const { user } = useAuth();
 
     // Obtener notificaciones al montar el componente
     useEffect(() => {
@@ -74,36 +76,54 @@ const Layout = ({ children }) => {
     }, [location.pathname]);
 
     return (
-        <div className="flex w-svw overflow-x-hidden overflow-y-auto">
-            <Sidebar />
+        <div className="flex w-full min-h-screen overflow-x-hidden">
+            <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+            
             <div className="w-full">
-                <header className="flex justify-between items-center w-full px-5 pl-8 pt-8">
-                    <h3 className="ml-[230px] text-3xl font-bold  text-gray-800">{pageTitle}</h3>
-                    <div className="flex items-center gap-4">
+                <header className="flex justify-between items-center w-full px-4 md:px-5 md:pl-8 pt-6 md:pt-8">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+                        >
+                            <HiMenu size={24} /> 
+                        </button>
+                        <h3 className="md:ml-[230px] text-xl md:text-3xl font-bold text-gray-800">
+                            {pageTitle}
+                        </h3>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 md:gap-4">
                         <NavLink
                             to="/notification"
                             className="bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200 relative"
                         >
                             <img src={bellIcon} alt="Notifications" className="w-4 h-4" />
                             {hasUnread && (
-                                <span className="absolute w-3 h-3 bg-red-400 rounded-full border border-white" 
-                                      style={{ top: '-4px', right: '-4px' }}></span>
+                                <span className="absolute w-2 h-2 md:w-3 md:h-3 bg-red-400 rounded-full border border-white" 
+                                    style={{ top: '-4px', right: '-4px' }}></span>
                             )}
                         </NavLink>
                         <NavLink to="/profile">
-                            <img src={`${getProfilePictureByToken()}`} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
+                            <img 
+                                src={`${getProfilePictureByToken()}`} 
+                                alt="Profile" 
+                                className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" 
+                            />
                         </NavLink>
                         <button
-                            className="bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200"
+                            className="hidden sm:block bg-white border border-gray-200 shadow-xs p-2 rounded-sm cursor-pointer hover:bg-gray-100 transition-all duration-200"
                             onClick={() => setShowModal(true)}
                         >
                             <img src={logoutIcon} alt="Logout" className="w-4 h-4" />
                         </button>
                     </div>
                 </header>
-                <main className="ml-[230px] px-5 pl-8">
+                
+                <main className="md:ml-[230px] px-4 md:px-5 md:pl-8 py-4 pb-20 md:pb-8">
                     {children}
                 </main>
+                
                 {showModal && (
                     <ModalAlert
                         title="Cerrar sesión"

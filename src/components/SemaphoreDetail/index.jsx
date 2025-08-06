@@ -11,7 +11,6 @@ const SemaphoreDetail = ({ semaphore, onClose }) => {
         let value = calculateOrder();
         setOrder(value);
         setAverage(value < 0 ? 100 - (value * -1 / semaphore.tasks.length) : 100);
-        // console.log(`Order: ${value}, Average: ${100 - (value * -1 / semaphore.tasks.length)}`);
     }, [semaphore.tasks]);
 
     const calculateOrder = () => {
@@ -29,8 +28,6 @@ const SemaphoreDetail = ({ semaphore, onClose }) => {
             }
         });
         return order * -1;
-
-        // let average = order / semaphore.tasks.length;
     };
     
     const tasksCount = semaphore.tasks.map((task) => task.priority).reduce((acc, priority) => {
@@ -44,19 +41,15 @@ const SemaphoreDetail = ({ semaphore, onClose }) => {
             acc.pending += 1;
         }
         return acc;
-    }
-    , { urgent: 0, attention: 0, pending: 0 }); 
+    }, { urgent: 0, attention: 0, pending: 0 }); 
 
     const getColor = () => {
         let avg = average;
-        // Asegura que el valor esté entre 0 y 100
-        // Clamp entre 0 y 100
         avg = Math.max(0, Math.min(100, avg));
 
-        // Define los colores como objetos RGBA
-        const red =    { r: 255, g: 0,   b: 0,   a: 112 }; // #FF000070
-        const yellow = { r: 245, g: 158, b: 11,  a: 112 }; // #F59E0B70
-        const green =  { r: 22,  g: 163, b: 74,  a: 112 }; // #16A34A70
+        const red =    { r: 255, g: 0,   b: 0,   a: 112 };
+        const yellow = { r: 245, g: 158, b: 11,  a: 112 };
+        const green =  { r: 22,  g: 163, b: 74,  a: 112 };
 
         let start, end, ratio;
 
@@ -80,34 +73,75 @@ const SemaphoreDetail = ({ semaphore, onClose }) => {
     }
 
     return (
-        <div className="fixed w-full h-svh left-0 top-0 bg-[#000000B1] flex items-center justify-center z-10">
-            <div className="rounded-[32px] bg-white ">
-                <div className={`flex flex-col justify-between rounded-[32px] w-[600px] shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] text-white`} style={{ backgroundColor: getColor(order) }}>
-                    <div className="flex flex-col justify-between h-full gap-2 p-4">
-                        <div className="flex justify-between items-center w-full">
-                            <h2 className="text-2xl font-semibold">{name}</h2>
-                            <img src={closeIcon} alt="Close" className="w-4 h-4 cursor-pointer invert" onClick={() => onClose(null)} />
+        <div className="fixed w-full h-full left-0 top-0 bg-[#000000B1] flex items-center justify-center z-50 p-4">
+            <div className="rounded-2xl sm:rounded-3xl bg-white w-full max-w-[600px] max-h-[90vh] overflow-hidden">
+                <div 
+                    className="flex flex-col justify-between rounded-2xl sm:rounded-3xl shadow-[4px_4px_8px_0px_rgba(0,_0,_0,_0.1)] text-white" 
+                    style={{ backgroundColor: getColor(order) }}
+                >
+                    {/* Header */}
+                    <div className="flex flex-col justify-between h-full gap-2 p-3 sm:p-4">
+                        <div className="flex justify-between items-start w-full">
+                            <h2 className="text-xl sm:text-2xl font-semibold flex-1 mr-2">
+                                {name}
+                            </h2>
+                            <button 
+                                onClick={() => onClose(null)}
+                                className="p-2 -m-2 hover:bg-white/20 rounded-lg transition-colors"
+                            >
+                                <img 
+                                    src={closeIcon} 
+                                    alt="Close" 
+                                    className="w-5 h-5 sm:w-4 sm:h-4 cursor-pointer invert" 
+                                />
+                            </button>
                         </div>
-                        <p className="text-sm">{description}</p>
-                        <b className="text-sm">Encargado: {ownerUser.name}</b>
+                        <p className="text-xs sm:text-sm opacity-90">
+                            {description}
+                        </p>
+                        <b className="text-xs sm:text-sm">
+                            Encargado: {ownerUser.name}
+                        </b>
                     </div>
-                    <div className="flex flex-col gap-2 p-4 bg-white max-h-[500px] overflow-y-auto scrollbar-hide">
-                        {semaphore.tasks.length > 0 ? semaphore.tasks.map((task) => (
-                            <TaskCard key={task.id} task={task} />
-                        )) : <h1 className="text-gray-900">No hay niguna tarea en esta area</h1>}
+                    
+                    {/* Tasks List - Scrolleable */}
+                    <div className="flex flex-col gap-2 p-3 sm:p-4 bg-white max-h-[40vh] sm:max-h-[50vh] overflow-y-auto scrollbar-hide">
+                        {semaphore.tasks.length > 0 ? (
+                            semaphore.tasks.map((task) => (
+                                <TaskCard key={task.id} task={task} />
+                            ))
+                        ) : (
+                            <h1 className="text-gray-500 text-center py-8 text-sm sm:text-base">
+                                No hay ninguna tarea en esta área
+                            </h1>
+                        )}
                     </div>
-                    <div className="w-full bg-gray-200 grid grid-cols-3 p-2 rounded-b-[32px]">
-                        <div className="flex flex-col items-center text-rose-700 border-r border-white">
-                            <h3 className="text-xl font-semibold">{tasksCount.urgent}</h3>
-                            <p className="uppercase text-[10px] font-medium">Urgente</p>
+                    
+                    {/* Footer Stats */}
+                    <div className="w-full bg-gray-100 grid grid-cols-3 p-2 rounded-b-2xl sm:rounded-b-3xl">
+                        <div className="flex flex-col items-center text-rose-700 border-r border-gray-200">
+                            <h3 className="text-lg sm:text-xl font-semibold">
+                                {tasksCount.urgent}
+                            </h3>
+                            <p className="uppercase text-[9px] sm:text-[10px] font-medium">
+                                Urgente
+                            </p>
                         </div>
-                        <div className="flex flex-col items-center text-amber-500 border-r border-white">
-                            <h3 className="text-xl font-semibold">{tasksCount.attention}</h3>
-                            <p className="uppercase text-[10px] font-medium">En atención</p>
+                        <div className="flex flex-col items-center text-amber-500 border-r border-gray-200">
+                            <h3 className="text-lg sm:text-xl font-semibold">
+                                {tasksCount.attention}
+                            </h3>
+                            <p className="uppercase text-[9px] sm:text-[10px] font-medium text-center">
+                                En atención
+                            </p>
                         </div>
                         <div className="flex flex-col items-center text-teal-500">
-                            <h3 className="text-xl font-semibold">{tasksCount.pending}</h3>
-                            <p className="uppercase text-[10px] font-medium">Pendiente</p>
+                            <h3 className="text-lg sm:text-xl font-semibold">
+                                {tasksCount.pending}
+                            </h3>
+                            <p className="uppercase text-[9px] sm:text-[10px] font-medium">
+                                Pendiente
+                            </p>
                         </div>
                     </div>
                 </div>
