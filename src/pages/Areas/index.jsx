@@ -28,7 +28,7 @@ function Areas() {
   const [newTask, setNewTask] = useState({ title: '', priority: 'medium', assignedTo: '' });
   const { areas, loadingAreas } = useAreas();
   const [ personal, setPersonal ] = useState([]);
-  const { user, getDate, userArea, notes, fetchNotes } = useAuth();
+  const { user, getDate, userArea, notes, fetchNotes, getRoleFromToken } = useAuth();
   const [ resolved, setResolved] = useState(false);
   const [ userAreas, setUserAreas ] = useState([]);
   const areaData = userAreas.find(area => area.id === selectedArea);
@@ -41,6 +41,8 @@ function Areas() {
       fetchNotes(selectedArea);
     }
   }, [selectedArea]);
+  
+  const role = getRoleFromToken();
   
   useEffect(() => {
     setUserAreas(areas.filter(area => area.id === userArea));
@@ -450,7 +452,7 @@ function Areas() {
                                   <p className="text-[10px] sm:text-xs text-gray-500 sm:mb-2">
                                     Creado {getDate(task.createdAt)}
                                   </p>
-                                  <div className='flex justify-end gap-1'>
+                                  {role !== 'medico' && <div className='flex justify-end gap-1'>
                                     <div onClick={() => handleDeleteTask(task.id)} className='flex justify-center items-center p-1 sm:px-2 text-red-600 cursor-pointer hover:bg-red-50 rounded'>
                                       <Trash2 size={15} className="sm:w-[17px]"/>
                                     </div>
@@ -460,7 +462,7 @@ function Areas() {
                                     >
                                       Resolver
                                     </span>
-                                  </div>
+                                  </div>}
                                 </div>
                               </div>
                             ))
@@ -572,7 +574,6 @@ function Areas() {
                   </div>
                   <RequestsList/>
                 </div>
-                
                 <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                   <div className="flex items-center space-x-2 mb-3 sm:mb-4">
                     <Users className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
@@ -601,7 +602,6 @@ function Areas() {
                     )}
                   </div>
                 </div>
-
                 <div className="space-y-4 sm:space-y-6">
                   <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Distribución de Tareas</h3>
