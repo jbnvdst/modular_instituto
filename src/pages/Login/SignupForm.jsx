@@ -33,9 +33,11 @@ const SignupForm = ({ setShowRegister }) => {
         const token = e.target.value;
         handleChange(e); // actualiza el estado de Formik
 
-        if (token === 'MedICG2025') {
+        if (token === 'DMmedico') {
             setTokenValid('medico');
-        } else if (token === 'SecretAdmin#@&') {
+        } else if (token === 'DMjefatura') {
+            setTokenValid('jefe de area');
+        } else if (token === 'DMadmin') {
             setTokenValid('admin');
         } else {
             setTokenValid(false);

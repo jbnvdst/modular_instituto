@@ -17,6 +17,7 @@ import { NewRequest } from '../../components/NewRequest';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 function Areas() {
+  // TODO TU CÓDIGO ORIGINAL - SIN CAMBIOS
   const { id } = useParams();
   const [selectedArea, setSelectedArea] = useState(id || "");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -32,10 +33,9 @@ function Areas() {
   const [ userAreas, setUserAreas ] = useState([]);
   const areaData = userAreas.find(area => area.id === selectedArea);
   const [tasksCount, setTasksCount] = useState({ urgent: 0, attention: 0, pending: 0 });
-
-  // IMPORTANTE: ahora days es un objeto con labels y datasets
   const [days, setDays] = useState({ labels: [], datasets: [] });
 
+  // TODOS TUS USEEFFECTS - SIN CAMBIOS
   useEffect(() => {
     if (selectedArea) {
       fetchNotes(selectedArea);
@@ -46,7 +46,6 @@ function Areas() {
     setUserAreas(areas.filter(area => area.id === userArea));
     fetchPersonal();
 
-    // Calcular tareas pendientes
     setTasksCount(userAreas.filter(area => area.id === selectedArea).reduce((acc, area) => {
       area.tasks.forEach(task => {
         if (!task.resolvedAt) {
@@ -62,7 +61,6 @@ function Areas() {
       return acc;
     }, { urgent: 0, attention: 0, pending: 0 }));
 
-    // === NUEVO CÓDIGO: últimos 7 días reales, tareas creadas, clasificadas por prioridad ===
     const hoy = new Date();
     const ultimos7 = [];
     for (let i = 6; i >= 0; i--) {
@@ -84,7 +82,6 @@ function Areas() {
       verde: "Pendiente",
     };
 
-    // Inicializa estructura
     const counts = {
       Urgente: Array(7).fill(0),
       Atención: Array(7).fill(0),
@@ -136,6 +133,7 @@ function Areas() {
 
   }, [selectedArea, areas]);
 
+  // TODAS TUS FUNCIONES - SIN CAMBIOS
   const handleDownloadReport = async () => {
     if (!areaData || !areaData.tasks) return;
 
@@ -172,7 +170,6 @@ function Areas() {
           : []),
       ];
 
-      // Encabezados con estilo
       ws.getRow(1).eachCell((cell) => {
         cell.font = { bold: true, color: { argb: "000000" } };
         cell.fill = {
@@ -182,16 +179,15 @@ function Areas() {
         };
       });
 
-      // Colores de fondo para prioridad
       const getPriorityColor = (priority) => {
-        if (isResolved) return "D9D9D9"; // gris claro
+        if (isResolved) return "D9D9D9";
         switch (priority) {
           case "rojo":
-            return "F4CCCC"; // rojo claro
+            return "F4CCCC";
           case "amarillo":
-            return "FFF2CC"; // amarillo claro
+            return "FFF2CC";
           case "verde":
-            return "93C47D"; // verde claro
+            return "93C47D";
           default:
             return "FFFFFF";
         }
@@ -213,13 +209,12 @@ function Areas() {
         if (isResolved) {
           rowData.push(
             new Date(task.resolvedAt).toLocaleString(),
-            task.resolver?.name || "" // <--- aquí añadimos quién resolvió
+            task.resolver?.name || ""
           );
         }
 
         const row = ws.addRow(rowData);
 
-        // Color de fondo para la celda de prioridad
         const priorityCell = row.getCell(2);
         priorityCell.fill = {
           type: "pattern",
@@ -244,14 +239,11 @@ function Areas() {
     saveAs(new Blob([buffer]), `Reporte_${areaData.name}_${fechaHoy}.xlsx`);
   };
 
-
-  
   useEffect(() => {
     if(userAreas?.length === 1) {
       setSelectedArea(userAreas[0]?.id);
     }
   }, [userAreas]);
-
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -264,22 +256,22 @@ function Areas() {
 
   const getPriorityIcon = (priority) => {
     switch (priority) {
-      case 'rojo': return <AlertCircle className="w-4 h-4" />;
-      case 'amarillo': return <Clock className="w-4 h-4" />;
-      case 'verde': return <CheckCircle className="w-4 h-4" />;
-      default: return <Clock className="w-4 h-4" />;
+      case 'rojo': return <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />;
+      case 'amarillo': return <Clock className="w-3 h-3 sm:w-4 sm:h-4" />;
+      case 'verde': return <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />;
+      default: return <Clock className="w-3 h-3 sm:w-4 sm:h-4" />;
     }
   };
 
-   const fetchPersonal = async () => {
-        if (!selectedArea) return;
-        try {
-            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/user-areas/getUsers/${selectedArea}`);
-            setPersonal(response.data);
-        } catch (error) {
-            console.error("Error fetching personal in area:", error);
-        }
-    };
+  const fetchPersonal = async () => {
+    if (!selectedArea) return;
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/user-areas/getUsers/${selectedArea}`);
+      setPersonal(response.data);
+    } catch (error) {
+      console.error("Error fetching personal in area:", error);
+    }
+  };
 
   const chartData = {
     labels: ['Urgentes', 'Atención', 'Pendientes'],
@@ -326,223 +318,219 @@ function Areas() {
     }
   };
   
+  // RENDER CON CAMBIOS RESPONSIVE
   return (
     <Layout>
-        <div className="bg-gray-50 w-full min-h-screen py-6">
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 onClick={() => console.log(userAreas)} className="text-sm text-gray-500">Áreas</h1>
-                </div>
+      <div className="bg-gray-50 w-full min-h-screen py-3 sm:py-6">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-xs sm:text-sm text-gray-500">Áreas</h1>
             </div>
+          </div>
 
-            <hr className="my-4 border-gray-200"/>
+          <hr className="my-3 sm:my-4 border-gray-200"/>
 
-            <div className="bg-white rounded-lg shadow-sm p-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-                Seleccionar Área
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+              Seleccionar Área
             </label>
             <div className="relative">
-                <button
+              <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full md:w-64 flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-lg hover:border-teal-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-                >
-                <span className="text-gray-700">
-                    {selectedArea ? userAreas.find(area => area.id === selectedArea)?.name : 'Seleccione un área'}
+                className="w-full lg:w-64 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-lg hover:border-teal-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+              >
+                <span className="text-gray-700 text-sm sm:text-base truncate">
+                  {selectedArea ? userAreas.find(area => area.id === selectedArea)?.name : 'Seleccione un área'}
                 </span>
-                <ChevronDown className="w-5 h-5 text-gray-400" />
-                </button>
-                {isDropdownOpen && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
-                    {userAreas.length === 0 && (
-                      <div className="px-4 py-3 text-gray-500">No tienes áreas asignadas como encargado.</div>
-                    )}
-                    {userAreas.length === 1 && (
-                      <div onClick={() => setIsDropdownOpen(false)} className="px-4 py-3 text-gray-500">Solo tienes un área asignada: {userAreas[0].name}</div>
-                    )}
-                    {userAreas.length > 1 &&userAreas.map(area => (
+                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 ml-2" />
+              </button>
+              {isDropdownOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {userAreas.length === 0 && (
+                    <div className="px-3 sm:px-4 py-3 text-gray-500 text-xs sm:text-sm">No tienes áreas asignadas como encargado.</div>
+                  )}
+                  {userAreas.length === 1 && (
+                    <div onClick={() => setIsDropdownOpen(false)} className="px-3 sm:px-4 py-3 text-gray-500 text-xs sm:text-sm">Solo tienes un área asignada: {userAreas[0].name}</div>
+                  )}
+                  {userAreas.length > 1 && userAreas.map(area => (
                     <button
-                        key={area.id}
-                        onClick={() => {
-                          setSelectedArea(area.id);
-                          setIsDropdownOpen(false);
-                        }}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
+                      key={area.id}
+                      onClick={() => {
+                        setSelectedArea(area.id);
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
                     >
-                        <div className="font-medium text-gray-900">{area.name}</div>
-                        <div className="text-sm text-gray-500">{area.code}</div>
+                      <div className="font-medium text-gray-900 text-sm sm:text-base">{area.name}</div>
+                      <div className="text-xs sm:text-sm text-gray-500">{area.code}</div>
                     </button>
-                    ))}
+                  ))}
                 </div>
-                )}
+              )}
             </div>
-            </div>
+          </div>
 
-            {selectedArea && (
+          {selectedArea && (
             <>
-                <div className='grid grid-cols-[70%_1fr] gap-6'>
-                  <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 onClick={() => console.log(areaData.tasks)} className="text-lg font-semibold text-gray-900">Tareas del Área</h3>
-                    </div>
-                    <div className="mt-4 block text-sm text-gray-700">
-                          {resolved ? (
-                            <div className="flex flex-col max-h-92 gap-1.5 overflow-y-auto scrollbar-hide">
-                              {areaData?.tasks?.filter(task => task.resolvedAt !== null).length > 0 ? (
-                                areaData.tasks
-                                  .filter(task => task.resolvedAt !== null)
-                                  .map(task => (
-                                    <div
-                                      key={task.id}
-                                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
-                                    >
-                                      <div className="flex items-center space-x-3">
-                                        <div className={`p-2 rounded-full bg-gray-200`}>
-                                          {getPriorityIcon(task.priority)}
-                                        </div>
-                                        <div>
-                                          <h4
-                                            onClick={() => console.log(task)}
-                                            className="font-medium text-gray-900"
-                                          >
-                                            <b>{task.subArea.name}</b> | {task.title}
-                                          </h4>
-                                          <p className="text-sm text-gray-500">
-                                            Resuelto por: {task.resolver.name}
-                                          </p>
-                                          <p className="text-sm text-gray-500">
-                                            {task.comment ? `Comentario: ${task.comment}` : 'Sin comentario'}
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <div className="text-right">
-                                        <p className="text-xs text-gray-500 mt-1">
-                                          Creado {getDate(task.createdAt)}
-                                        </p>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                          Resuelto {getDate(task.resolvedAt)}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  ))
-                              ) : (
-                                <div className="text-gray-500">No hay tareas resueltas en esta área.</div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="flex flex-col max-h-92 gap-1.5 overflow-y-auto scrollbar-hide">
-                              {areaData?.tasks?.filter(task => task.resolvedAt === null).length > 0 ? (
-                                areaData.tasks
-                                  .filter(task => task.resolvedAt === null)
-                                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                                  .map(task => (
-                                    <div
-                                      key={task.id}
-                                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
-                                    >
-                                      <div className="flex items-center space-x-3">
-                                        <div className={`p-2 rounded-full ${getPriorityColor(task.priority)}`}>
-                                          {getPriorityIcon(task.priority)}
-                                        </div>
-                                        <div>
-                                          <h4
-                                            onClick={() => console.log(task)}
-                                            className="font-medium text-gray-900"
-                                          ><b>{task.subArea?.name}</b> | {task.title}
-                                          </h4>
-                                          <p className="text-sm text-gray-500">
-                                            Creado por: {task.creator.name}
-                                          </p>
-                                          <p className="text-sm text-gray-500">
-                                            {task.description && `Descripción: ${task.description}`}
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <div className="text-right">
-                                        <p className="text-xs text-gray-500 mb-2">
-                                          Creado {getDate(task.createdAt)}
-                                        </p>
-                                        <div className='flex justify-end'>
-                                          <div onClick={() => handleDeleteTask(task.id)} className='flex justify-center items-center px-2 text-red-600 cursor-pointer'>
-                                            <Trash2 size={17}/>
-                                          </div>
-                                          <span
-                                            onClick={() => setResolvedTaskModal(task.id)}
-                                            className="cursor-pointer inline-flex px-2 py-1 text-sm text-white font-medium rounded-full bg-teal-600/80"
-                                          >
-                                            Resolver
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))
-                              ) : (
-                                <div className="text-gray-500">No hay tareas pendientes en esta área.</div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                    
+              <div className='grid grid-cols-1 xl:grid-cols-[70%_1fr] gap-4 sm:gap-6'>
+                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 order-2 xl:order-1">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">Tareas del Área</h3>
                   </div>
-                  <div className="bg-white rounded-lg shadow-sm p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
-                      <div className="space-y-3">
-                          <button onClick={() => setShowNewTaskModal(true)}  
-                              className="w-full cursor-pointer flex items-center p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                  <div className="mt-4 block text-xs sm:text-sm text-gray-700">
+                    {resolved ? (
+                      <div className="flex flex-col max-h-[400px] sm:max-h-92 gap-1.5 overflow-y-auto scrollbar-hide">
+                        {areaData?.tasks?.filter(task => task.resolvedAt !== null).length > 0 ? (
+                          areaData.tasks
+                            .filter(task => task.resolvedAt !== null)
+                            .map(task => (
+                              <div
+                                key={task.id}
+                                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 gap-2"
                               >
-                              <Bell className="w-5 h-5 text-teal-600 mr-3" />
-                              <span className="text-sm font-medium text-teal-800">Crear Tarea</span>
-                          </button>
-                          <button onClick={() => (setShowNoteModal(true))}  
-                              className="w-full cursor-pointer flex items-center p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
-                              >
-                              <FaRegStickyNote className="w-5 h-5 text-teal-600 mr-3" />
-                              <span className="text-sm font-medium text-teal-800">Crear Nota</span>
-                          </button>
-                          <button onClick={() => (setShowRequestModal(true))}  
-                              className="w-full cursor-pointer flex items-center p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
-                              >
-                              <FaRegStickyNote className="w-5 h-5 text-teal-600 mr-3" />
-                              <span className="text-sm font-medium text-teal-800">Crear Solicitud</span>
-                          </button>
-                          <button
-                            onClick={handleDownloadReport}
-                            className="w-full flex cursor-pointer items-center p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                          >
-                            <Activity className="w-5 h-5 text-gray-600 mr-3" />
-                            <span className="text-sm font-medium text-gray-700">Descargar Reporte</span>
-                          </button>
-                          <ToggleSwitch
-                            word1="Sin Resolver"
-                            word2="Resueltas"
-                            value={resolved}
-                            onChange={setResolved}
-                          />
+                                <div className="flex items-center space-x-2 sm:space-x-3">
+                                  <div className={`p-1.5 sm:p-2 rounded-full bg-gray-200`}>
+                                    {getPriorityIcon(task.priority)}
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium text-gray-900 text-sm sm:text-base">
+                                      <b>{task.subArea.name}</b> | {task.title}
+                                    </h4>
+                                    <p className="text-xs sm:text-sm text-gray-500">
+                                      Resuelto por: {task.resolver.name}
+                                    </p>
+                                    <p className="text-xs sm:text-sm text-gray-500">
+                                      {task.comment ? `Comentario: ${task.comment}` : 'Sin comentario'}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="text-right ml-8 sm:ml-0">
+                                  <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
+                                    Creado {getDate(task.createdAt)}
+                                  </p>
+                                  <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
+                                    Resuelto {getDate(task.resolvedAt)}
+                                  </p>
+                                </div>
+                              </div>
+                            ))
+                        ) : (
+                          <div className="text-gray-500 text-center py-4">No hay tareas resueltas en esta área.</div>
+                        )}
                       </div>
+                    ) : (
+                      <div className="flex flex-col max-h-[400px] sm:max-h-92 gap-1.5 overflow-y-auto scrollbar-hide">
+                        {areaData?.tasks?.filter(task => task.resolvedAt === null).length > 0 ? (
+                          areaData.tasks
+                            .filter(task => task.resolvedAt === null)
+                            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                            .map(task => (
+                              <div
+                                key={task.id}
+                                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 gap-2"
+                              >
+                                <div className="flex items-center space-x-2 sm:space-x-3">
+                                  <div className={`p-1.5 sm:p-2 rounded-full ${getPriorityColor(task.priority)}`}>
+                                    {getPriorityIcon(task.priority)}
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium text-gray-900 text-sm sm:text-base">
+                                      <b>{task.subArea?.name}</b> | {task.title}
+                                    </h4>
+                                    <p className="text-xs sm:text-sm text-gray-500">
+                                      Creado por: {task.creator.name}
+                                    </p>
+                                    <p className="text-xs sm:text-sm text-gray-500">
+                                      {task.description && `Descripción: ${task.description}`}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex sm:block items-center gap-2 ml-8 sm:ml-0">
+                                  <p className="text-[10px] sm:text-xs text-gray-500 sm:mb-2">
+                                    Creado {getDate(task.createdAt)}
+                                  </p>
+                                  <div className='flex justify-end gap-1'>
+                                    <div onClick={() => handleDeleteTask(task.id)} className='flex justify-center items-center p-1 sm:px-2 text-red-600 cursor-pointer hover:bg-red-50 rounded'>
+                                      <Trash2 size={15} className="sm:w-[17px]"/>
+                                    </div>
+                                    <span
+                                      onClick={() => setResolvedTaskModal(task.id)}
+                                      className="cursor-pointer inline-flex px-2 py-1 text-xs sm:text-sm text-white font-medium rounded-full bg-teal-600/80"
+                                    >
+                                      Resolver
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                        ) : (
+                          <div className="text-gray-500 text-center py-4">No hay tareas pendientes en esta área.</div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
+                
+                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 order-1 xl:order-2">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Acciones Rápidas</h3>
+                  <div className="space-y-2 sm:space-y-3">
+                    <button onClick={() => setShowNewTaskModal(true)}  
+                      className="w-full cursor-pointer flex items-center p-2.5 sm:p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                    >
+                      <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 mr-3" />
+                      <span className="text-xs sm:text-sm font-medium text-teal-800">Crear Tarea</span>
+                    </button>
+                    <button onClick={() => (setShowNoteModal(true))}  
+                      className="w-full cursor-pointer flex items-center p-2.5 sm:p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                    >
+                      <FaRegStickyNote className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 mr-3" />
+                      <span className="text-xs sm:text-sm font-medium text-teal-800">Crear Nota</span>
+                    </button>
+                    <button onClick={() => (setShowRequestModal(true))}  
+                      className="w-full cursor-pointer flex items-center p-2.5 sm:p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                    >
+                      <FaRegStickyNote className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 mr-3" />
+                      <span className="text-xs sm:text-sm font-medium text-teal-800">Crear Solicitud</span>
+                    </button>
+                    <button
+                      onClick={handleDownloadReport}
+                      className="w-full flex cursor-pointer items-center p-2.5 sm:p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 mr-3" />
+                      <span className="text-xs sm:text-sm font-medium text-gray-700">Descargar Reporte</span>
+                    </button>
+                    <ToggleSwitch
+                      word1="Sin Resolver"
+                      word2="Resueltas"
+                      value={resolved}
+                      onChange={setResolved}
+                    />
+                  </div>
+                </div>
+              </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex items-center space-x-2 mb-4">
-                    <FaRegStickyNote  className="w-5 h-5 text-teal-600" />
-                    <h3 onClick={() => console.log(personal)} className="text-lg font-semibold text-gray-900">Notas del Área</h3>
-                    </div>
-                    <div className="space-y-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                  <div className="flex items-center space-x-2 mb-3 sm:mb-4">
+                    <FaRegStickyNote className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">Notas del Área</h3>
+                  </div>
+                  <div className="space-y-2 sm:space-y-3 max-h-[250px] sm:max-h-[300px] overflow-y-auto scrollbar-hide">
                     {notes.length > 0 ? (
                       [...notes]
-                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // ordenar por fecha descendente
-                        .slice(0, 5) // tomar solo las 5 más recientes
+                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                        .slice(0, 5)
                         .map((nota) => (
                           <div
                             key={nota.id}
-                            className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                            className="flex items-center justify-between p-3 sm:p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
                           >
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2 sm:space-x-3">
                               <div className="flex-shrink-0">
-                                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-100 rounded-full flex items-center justify-center">
                                   <svg
-                                    className="w-4 h-4 text-green-600"
+                                    className="w-3 h-3 sm:w-4 sm:h-4 text-green-600"
                                     fill="currentColor"
                                     viewBox="0 0 20 20"
                                   >
@@ -555,16 +543,16 @@ function Areas() {
                                 </div>
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-gray-900 font-semibold text-sm">
+                                <h4 className="text-gray-900 font-semibold text-xs sm:text-sm">
                                   {nota.title} |{" "}
                                   <span className="text-green-600 font-medium">
                                     {nota.status}
                                   </span>
                                 </h4>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
                                   Creado por: {nota.creator?.name || nota.createdBy}
                                 </p>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-[10px] sm:text-xs text-gray-500">
                                   Descripción: {nota.description}
                                 </p>
                               </div>
@@ -572,126 +560,134 @@ function Areas() {
                           </div>
                         ))
                     ) : (
-                      <p className="text-gray-500">No hay notas para esta área.</p>
+                      <p className="text-gray-500 text-sm">No hay notas para esta área.</p>
                     )}
-                    </div>
+                  </div>
                 </div>
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex items-center space-x-2 mb-4">
-                    <BiSolidBookContent className="w-5 h-5 text-teal-600" />
-                    <h3 onClick={() => console.log(personal)} className="text-lg font-semibold text-gray-900">Solicitudes</h3>
-                    </div>
-                    <RequestsList/>
+                
+                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                  <div className="flex items-center space-x-2 mb-3 sm:mb-4">
+                    <BiSolidBookContent className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">Solicitudes</h3>
+                  </div>
+                  <RequestsList/>
                 </div>
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex items-center space-x-2 mb-4">
-                    <Users className="w-5 h-5 text-teal-600" />
-                    <h3 onClick={() => console.log(personal)} className="text-lg font-semibold text-gray-900">Personal Asignado</h3>
-                    </div>
-                    <div className="space-y-3">
+                
+                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                  <div className="flex items-center space-x-2 mb-3 sm:mb-4">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">Personal Asignado</h3>
+                  </div>
+                  <div className="space-y-3">
                     {personal?.length > 0 ? (
-                        <div className="overflow-x-auto">
-                          <table className="w-full">
-                              <tbody className="bg-white divide-y divide-gray-200">
-                                  {personal.map((user) => (
-                                      <tr key={user.id} className="hover:bg-gray-50">
-                                          <td className="px-6 py-4 whitespace-nowrap">
-                                              <div>
-                                                  <div onClick={() => console.log(user)} className="text-sm font-medium text-gray-900">{user.name}</div>                                                  
-                                              </div>
-                                          </td>                                          
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.areas[0].UserArea.role}</td>                                                                  
-                                      </tr>
-                                  ))}
-                              </tbody>
-                          </table>
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {personal.map((user) => (
+                              <tr key={user.id} className="hover:bg-gray-50">
+                                <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                                  <div className="text-xs sm:text-sm font-medium text-gray-900">{user.name}</div>                                                  
+                                </td>                                          
+                                <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
+                                  {user.areas[0].UserArea.role}
+                                </td>                                                                  
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
                     ) : (
-                      <div className="text-gray-500">No hay personal asignado a esta área.</div>
+                      <div className="text-gray-500 text-sm">No hay personal asignado a esta área.</div>
                     )}
-                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-6">
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribución de Tareas</h3>
-                    <div className="h-48">
-                      {areaData && areaData.tasks.length > 0 ? <Doughnut data={chartData} options={{ maintainAspectRatio: false }} /> : "No hay datos que graficar"}
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Distribución de Tareas</h3>
+                    <div className="h-40 sm:h-48">
+                      {areaData && areaData.tasks.length > 0 ? 
+                        <Doughnut data={chartData} options={{ maintainAspectRatio: false }} /> : 
+                        <div className="flex items-center justify-center h-full text-gray-500 text-sm">No hay datos que graficar</div>
+                      }
                     </div>
-                    </div>
-                    
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Actividad Semanal</h3>
-                    <div className="h-48">
-                        {(areaData && days.datasets.length > 0 && days.datasets.some(ds => ds.data.some(v => v > 0))) ?
-                          <Bar 
-                            data={days}
-                            options={{
-                              maintainAspectRatio: false,
-                              responsive: true,
-                              plugins: {
-                                legend: { display: false },
-                              },
-                              scales: {
-                                x: { stacked: true },
-                                y: {
-                                  stacked: true,
-                                  beginAtZero: true,
-                                  ticks: {
-                                    callback: (value) =>
-                                      Number.isInteger(value) ? value : "",
-                                  },
+                  </div>
+                  
+                  <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Actividad Semanal</h3>
+                    <div className="h-40 sm:h-48">
+                      {(areaData && days.datasets.length > 0 && days.datasets.some(ds => ds.data.some(v => v > 0))) ?
+                        <Bar 
+                          data={days}
+                          options={{
+                            maintainAspectRatio: false,
+                            responsive: true,
+                            plugins: {
+                              legend: { display: false },
+                            },
+                            scales: {
+                              x: { stacked: true },
+                              y: {
+                                stacked: true,
+                                beginAtZero: true,
+                                ticks: {
+                                  callback: (value) =>
+                                    Number.isInteger(value) ? value : "",
                                 },
                               },
-                            }}
-                          /> : "No hay datos que graficar"}
+                            },
+                          }}
+                        /> : 
+                        <div className="flex items-center justify-center h-full text-gray-500 text-sm">No hay datos que graficar</div>
+                      }
                     </div>
-                    </div>
+                  </div>
                 </div>
-                </div>
+              </div>
             </>
-            )}
-            {showNewTaskModal && (
-              <NewTask
-                areaId={selectedArea}
-                onClose={() => setShowNewTaskModal(false)}
-                users={areaData.staff}
-              />
-            )}
-            {showNoteModal && (
-              <NewNote
-                areaId={selectedArea}
-                onClose={() => setShowNoteModal(false)}
-                onSave={async (values) => {
-                  const payload = {
-                    title: values.nombre,
-                    doc_title: values.numeroOficio,
-                    description: values.descripcion,
-                    status: values.estatus.charAt(0).toUpperCase() + values.estatus.slice(1), // Asegura primera letra mayúscula
-                    areaId: userArea,
-                    involvedArea: selectedArea,
-                    createdBy: user.id
-                  };
-                  await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/notes`, payload);
-
-                  fetchNotes(selectedArea);
-                }}
-              />
-            )}
-            {showRequestModal && (
-              <NewRequest
-                areaId={selectedArea}
-                onClose={() => setShowRequestModal(false)}
-              />
-            )}
-            {resolvedTaskModal && (
-              <ResolvedTask
-                taskId={resolvedTaskModal}
-                onClose={() => setResolvedTaskModal(false)}
-              />
-            )}
+          )}
+          
+          {/* TODOS TUS MODALES - SIN CAMBIOS */}
+          {showNewTaskModal && (
+            <NewTask
+              areaId={selectedArea}
+              onClose={() => setShowNewTaskModal(false)}
+              users={areaData.staff}
+            />
+          )}
+          {showNoteModal && (
+            <NewNote
+              areaId={selectedArea}
+              onClose={() => setShowNoteModal(false)}
+              onSave={async (values) => {
+                const payload = {
+                  title: values.nombre,
+                  doc_title: values.numeroOficio,
+                  description: values.descripcion,
+                  status: values.estatus.charAt(0).toUpperCase() + values.estatus.slice(1),
+                  areaId: userArea,
+                  involvedArea: selectedArea,
+                  createdBy: user.id
+                };
+                await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/notes`, payload);
+                fetchNotes(selectedArea);
+              }}
+            />
+          )}
+          {showRequestModal && (
+            <NewRequest
+              areaId={selectedArea}
+              onClose={() => setShowRequestModal(false)}
+            />
+          )}
+          {resolvedTaskModal && (
+            <ResolvedTask
+              taskId={resolvedTaskModal}
+              onClose={() => setResolvedTaskModal(false)}
+            />
+          )}
         </div>
-        </div>
+      </div>
     </Layout>
   );
 }

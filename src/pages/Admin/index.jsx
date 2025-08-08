@@ -5,8 +5,8 @@ import { UsuariosTab, AreasTab, SubAreasTab, TabButton, GenerateReport } from '.
 import Layout from "../../components/Layout";
 
 const Admin = () => {
-    const [ activeTab, setActiveTab] = useState('usuarios');
-    const [ users, setUsers] = useState([]);
+    const [ activeTab, setActiveTab ] = useState('usuarios');
+    const [ users, setUsers ] = useState([]);
 
     useEffect(() => {
         fetchUsers();
@@ -21,7 +21,6 @@ const Admin = () => {
         }
     };
 
-
     const jerarquia = [
         { nivel: 1, cargo: "Director General", personas: ["Dr. García"], color: "bg-teal-600" },
         { nivel: 2, cargo: "Jefes de Área", personas: ["Dr. Enrique Rodríguez", "Dra. Carmen Silva"], color: "bg-teal-500" },
@@ -29,10 +28,8 @@ const Admin = () => {
         { nivel: 4, cargo: "Especialistas", personas: ["Dr. Pedro Martínez", "Dra. Sofia Reyes", "Dr. Carlos Mendez", "Dra. Isabel Vega"], color: "bg-teal-300" },
     ];
 
-
     const renderContent = () => {
         switch(activeTab) {
-            // case 'usuarios': return <UsuariosTab />;
             case 'areas': return <AreasTab users={users}/>;
             case 'subareas': return <SubAreasTab />;
             case 'usuarios': return <UsuariosTab users={users} setUsers={setUsers} fetchUsers={fetchUsers} />;
@@ -42,46 +39,51 @@ const Admin = () => {
 
     return (
         <Layout>
-            <h1 className="text-sm text-gray-500">Gestiona usuarios, áreas y permisos del sistema hospitalario</h1>
-            <hr className="my-4 border-gray-200"/>
-            <div className=" max-w-7xl mx-auto">
-                <div className="flex space-x-1 mb-8 bg-gray-100 p-1 rounded-lg w-fit">
-                    <TabButton 
-                        id="usuarios" 
-                        label="Usuarios" 
-                        icon={Users}
-                        isActive={activeTab === 'usuarios'} 
-                        onClick={setActiveTab} 
-                    />
-                    <TabButton 
-                        id="areas" 
-                        label="Áreas" 
-                        icon={Building2}
-                        isActive={activeTab === 'areas'} 
-                        onClick={setActiveTab} 
-                    />
-                    <TabButton 
-                        id="subareas" 
-                        label="Necesidades" 
-                        icon={Shield}
-                        isActive={activeTab === 'subareas'} 
-                        onClick={setActiveTab} 
-                    />
-                    <TabButton 
-                        id="report" 
-                        label="Reporte mensual" 
-                        icon={NotebookPen}
-                        isActive={activeTab === 'report'} 
-                        onClick={setActiveTab} 
-                    />
+            <h1 className="text-xs sm:text-sm text-gray-500">
+                Gestiona usuarios, áreas y permisos del sistema hospitalario
+            </h1>
+            <hr className="my-3 sm:my-4 border-gray-200"/>
+            
+            <div className="max-w-7xl mx-auto">
+                {/* Tabs - Scroll horizontal en móvil */}
+                <div className="mb-6 sm:mb-8 overflow-x-auto">
+                    <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit min-w-full sm:min-w-fit">
+                        <TabButton 
+                            id="usuarios" 
+                            label="Usuarios" 
+                            icon={Users}
+                            isActive={activeTab === 'usuarios'} 
+                            onClick={setActiveTab} 
+                        />
+                        <TabButton 
+                            id="areas" 
+                            label="Áreas" 
+                            icon={Building2}
+                            isActive={activeTab === 'areas'} 
+                            onClick={setActiveTab} 
+                        />
+                        <TabButton 
+                            id="subareas" 
+                            label="Necesidades" 
+                            icon={Shield}
+                            isActive={activeTab === 'subareas'} 
+                            onClick={setActiveTab} 
+                        />
+                        <TabButton 
+                            id="report" 
+                            label="Reporte mensual" 
+                            icon={NotebookPen}
+                            isActive={activeTab === 'report'} 
+                            onClick={setActiveTab} 
+                        />
+                    </div>
                 </div>
 
                 {/* Content */}
-                {renderContent()}
+                <div className="w-full overflow-x-hidden">
+                    {renderContent()}
+                </div>
             </div>
-            
-            
-            
         </Layout>
     );
 };
