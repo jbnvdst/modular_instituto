@@ -87,7 +87,7 @@ const SignupForm = ({ setShowRegister }) => {
                     email: values.email,
                     password: values.password,
                     role: tokenValid || 'user',
-                    area: values.area,
+                    area: values.area, 
                 }
                 try {
                     const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`, valuesToSend, {
