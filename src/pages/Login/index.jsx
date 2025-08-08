@@ -76,7 +76,7 @@ const Login = () => {
             {/* Formulario Login o Registro */}
             <div className="space-y-4">
               {!showRegister ? <LoginForm /> : <SignupForm setShowRegister={setShowRegister} />}
-            </div>
+            </div> 
 
             {/* Divider */}
             <div className="relative my-4 sm:my-6">
