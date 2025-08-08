@@ -94,12 +94,12 @@ const LoginForm = () => {
                     />
                     <span className="text-xs sm:text-xs text-gray-600">Recordar sesión</span>
                     </label>
-                    <button
+                    {/* <button
                     type="button"
                     className="text-xs sm:text-xs cursor-pointer text-teal-600 hover:text-teal-700 transition-colors font-medium text-left sm:text-right"
                     >
                     ¿Olvidaste tu contraseña?
-                    </button>
+                    </button> */}
                 </div>
 
                 {/* Botón de envío */}
