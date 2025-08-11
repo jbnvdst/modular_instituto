@@ -17,7 +17,6 @@ import { NewRequest } from '../../components/NewRequest';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 function Areas() {
-  // TODO TU CÓDIGO ORIGINAL - SIN CAMBIOS
   const { id } = useParams();
   const [selectedArea, setSelectedArea] = useState(id || "");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -34,8 +33,66 @@ function Areas() {
   const areaData = userAreas.find(area => area.id === selectedArea);
   const [tasksCount, setTasksCount] = useState({ urgent: 0, attention: 0, pending: 0 });
   const [days, setDays] = useState({ labels: [], datasets: [] });
+  
+  // Estado para el tab de subárea seleccionado
+  const [selectedSubArea, setSelectedSubArea] = useState("all");
 
-  // TODOS TUS USEEFFECTS - SIN CAMBIOS
+  // Función mejorada para obtener subáreas únicas
+const getUniqueSubAreas = () => {
+  if (!areaData?.tasks) return [];
+  const subAreas = new Set();
+  areaData.tasks.forEach(task => {
+    if (task.subArea?.name) {
+      subAreas.add(task.subArea.name);
+    }
+  });
+  
+  // Lista de subáreas conocidas en orden preferido
+  const knownSubAreas = [
+    'Servicios Generales',
+    'Biomedica', 
+    'Insumos',
+    'Estructura',
+    'Recurso Humano',
+    'Sistemas'
+  ];
+  
+  // Separar subáreas conocidas de las nuevas
+  const foundSubAreas = Array.from(subAreas);
+  const orderedKnown = knownSubAreas.filter(sa => foundSubAreas.includes(sa));
+  const newSubAreas = foundSubAreas.filter(sa => !knownSubAreas.includes(sa));
+  
+  // Combinar: primero las conocidas en orden, luego las nuevas alfabéticamente
+  return [...orderedKnown, ...newSubAreas.sort()];
+};
+
+  const uniqueSubAreas = getUniqueSubAreas();
+
+  // Función para filtrar tareas por subárea
+  const getFilteredTasks = () => {
+    if (!areaData?.tasks) return [];
+    
+    let filtered = areaData.tasks.filter(task => 
+      resolved ? task.resolvedAt !== null : task.resolvedAt === null
+    );
+
+    if (selectedSubArea !== "all") {
+      filtered = filtered.filter(task => task.subArea?.name === selectedSubArea);
+    }
+
+    return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  };
+
+  // Función para contar tareas por subárea
+  const getTaskCountBySubArea = (subAreaName) => {
+    if (!areaData?.tasks) return 0;
+    return areaData.tasks.filter(task => {
+      const matchesResolved = resolved ? task.resolvedAt !== null : task.resolvedAt === null;
+      const matchesSubArea = subAreaName === "all" ? true : task.subArea?.name === subAreaName;
+      return matchesResolved && matchesSubArea;
+    }).length;
+  };
+
   useEffect(() => {
     if (selectedArea) {
       fetchNotes(selectedArea);
@@ -133,7 +190,11 @@ function Areas() {
 
   }, [selectedArea, areas]);
 
-  // TODAS TUS FUNCIONES - SIN CAMBIOS
+  // Effect para resetear el tab cuando cambia resolved o selectedArea
+  useEffect(() => {
+    setSelectedSubArea("all");
+  }, [resolved, selectedArea]);
+
   const handleDownloadReport = async () => {
     if (!areaData || !areaData.tasks) return;
 
@@ -317,8 +378,10 @@ function Areas() {
       setShowNewTaskModal(false);
     }
   };
+
+  // Usar las tareas filtradas
+  const filteredTasks = getFilteredTasks();
   
-  // RENDER CON CAMBIOS RESPONSIVE
   return (
     <Layout>
       <div className="bg-gray-50 w-full min-h-screen py-3 sm:py-6">
@@ -374,82 +437,107 @@ function Areas() {
           {selectedArea && (
             <>
               <div className='grid grid-cols-1 xl:grid-cols-[70%_1fr] gap-4 sm:gap-6'>
-                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 order-2 xl:order-1">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">Tareas del Área</h3>
+                <div className="bg-white rounded-lg shadow-sm order-2 xl:order-1">
+                  {/* Tabs de SubÁreas */}
+                  <div className="border-b border-gray-200">
+                    <nav className="flex space-x-1 px-4 pt-4 overflow-x-auto scrollbar-hide" aria-label="Tabs">
+                      {/* Tab "Todas" */}
+                      <button
+                        onClick={() => setSelectedSubArea("all")}
+                        className={`
+                          whitespace-nowrap py-2 px-2 sm:px-3 border-b-2 font-medium text-xs sm:text-sm transition-colors
+                          ${selectedSubArea === "all"
+                            ? 'border-teal-500 text-teal-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          }
+                        `}
+                      >
+                        Todas
+                        <span className={`ml-1 sm:ml-2 inline-flex items-center justify-center px-1.5 sm:px-2 py-0.5 text-xs font-bold rounded-full
+                          ${selectedSubArea === "all" ? 'bg-teal-100 text-teal-600' : 'bg-gray-100 text-gray-600'}`}>
+                          {getTaskCountBySubArea("all")}
+                        </span>
+                      </button>
+
+                      {/* Tabs dinámicos por SubÁrea */}
+                      {uniqueSubAreas.map(subArea => (
+                        <button
+                          key={subArea}
+                          onClick={() => setSelectedSubArea(subArea)}
+                          className={`
+                            whitespace-nowrap py-2 px-2 sm:px-3 border-b-2 font-medium text-xs sm:text-sm transition-colors
+                            ${selectedSubArea === subArea
+                              ? 'border-teal-500 text-teal-600'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }
+                          `}
+                        >
+                          {subArea}
+                          <span className={`ml-1 sm:ml-2 inline-flex items-center justify-center px-1.5 sm:px-2 py-0.5 text-xs font-bold rounded-full
+                            ${selectedSubArea === subArea ? 'bg-teal-100 text-teal-600' : 'bg-gray-100 text-gray-600'}`}>
+                            {getTaskCountBySubArea(subArea)}
+                          </span>
+                        </button>
+                      ))}
+                    </nav>
                   </div>
-                  <div className="mt-4 block text-xs sm:text-sm text-gray-700">
-                    {resolved ? (
+
+                  {/* Contenido de tareas con filtrado */}
+                  <div className="p-4 sm:p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                        Tareas del Área
+                        {selectedSubArea !== "all" && ` - ${selectedSubArea}`}
+                      </h3>
+                    </div>
+                    <div className="mt-4 block text-xs sm:text-sm text-gray-700">
                       <div className="flex flex-col max-h-[400px] sm:max-h-92 gap-1.5 overflow-y-auto scrollbar-hide">
-                        {areaData?.tasks?.filter(task => task.resolvedAt !== null).length > 0 ? (
-                          areaData.tasks
-                            .filter(task => task.resolvedAt !== null)
-                            .map(task => (
-                              <div
-                                key={task.id}
-                                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 gap-2"
-                              >
-                                <div className="flex items-center space-x-2 sm:space-x-3">
-                                  <div className={`p-1.5 sm:p-2 rounded-full bg-gray-200`}>
-                                    {getPriorityIcon(task.priority)}
-                                  </div>
-                                  <div>
-                                    <h4 className="font-medium text-gray-900 text-sm sm:text-base">
-                                      <b>{task.subArea.name}</b> | {task.title}
-                                    </h4>
-                                    <p className="text-xs sm:text-sm text-gray-500">
-                                      Resuelto por: {task.resolver.name}
-                                    </p>
-                                    <p className="text-xs sm:text-sm text-gray-500">
-                                      {task.comment ? `Comentario: ${task.comment}` : 'Sin comentario'}
-                                    </p>
-                                  </div>
+                        {filteredTasks.length > 0 ? (
+                          filteredTasks.map(task => (
+                            <div
+                              key={task.id}
+                              className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 gap-2"
+                            >
+                              <div className="flex items-center space-x-2 sm:space-x-3">
+                                <div className={`p-1.5 sm:p-2 rounded-full ${
+                                  resolved ? 'bg-gray-200' : getPriorityColor(task.priority)
+                                }`}>
+                                  {getPriorityIcon(task.priority)}
                                 </div>
-                                <div className="text-right ml-8 sm:ml-0">
-                                  <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
-                                    Creado {getDate(task.createdAt)}
-                                  </p>
+                                <div>
+                                  <h4 className="font-medium text-gray-900 text-sm sm:text-base">
+                                    <b className="text-teal-600">{task.subArea?.name}</b> | {task.title}
+                                  </h4>
+                                  {resolved ? (
+                                    <>
+                                      <p className="text-xs sm:text-sm text-gray-500">
+                                        Resuelto por: {task.resolver?.name}
+                                      </p>
+                                      <p className="text-xs sm:text-sm text-gray-500">
+                                        {task.comment ? `Comentario: ${task.comment}` : 'Sin comentario'}
+                                      </p>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <p className="text-xs sm:text-sm text-gray-500">
+                                        Creado por: {task.creator?.name}
+                                      </p>
+                                      <p className="text-xs sm:text-sm text-gray-500">
+                                        {task.description && `Descripción: ${task.description}`}
+                                      </p>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                              <div className={resolved ? "text-right ml-8 sm:ml-0" : "flex sm:block items-center gap-2 ml-8 sm:ml-0"}>
+                                <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
+                                  Creado {getDate(task.createdAt)}
+                                </p>
+                                {resolved ? (
                                   <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
                                     Resuelto {getDate(task.resolvedAt)}
                                   </p>
-                                </div>
-                              </div>
-                            ))
-                        ) : (
-                          <div className="text-gray-500 text-center py-4">No hay tareas resueltas en esta área.</div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col max-h-[400px] sm:max-h-92 gap-1.5 overflow-y-auto scrollbar-hide">
-                        {areaData?.tasks?.filter(task => task.resolvedAt === null).length > 0 ? (
-                          areaData.tasks
-                            .filter(task => task.resolvedAt === null)
-                            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                            .map(task => (
-                              <div
-                                key={task.id}
-                                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 gap-2"
-                              >
-                                <div className="flex items-center space-x-2 sm:space-x-3">
-                                  <div className={`p-1.5 sm:p-2 rounded-full ${getPriorityColor(task.priority)}`}>
-                                    {getPriorityIcon(task.priority)}
-                                  </div>
-                                  <div>
-                                    <h4 className="font-medium text-gray-900 text-sm sm:text-base">
-                                      <b>{task.subArea?.name}</b> | {task.title}
-                                    </h4>
-                                    <p className="text-xs sm:text-sm text-gray-500">
-                                      Creado por: {task.creator.name}
-                                    </p>
-                                    <p className="text-xs sm:text-sm text-gray-500">
-                                      {task.description && `Descripción: ${task.description}`}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex sm:block items-center gap-2 ml-8 sm:ml-0">
-                                  <p className="text-[10px] sm:text-xs text-gray-500 sm:mb-2">
-                                    Creado {getDate(task.createdAt)}
-                                  </p>
+                                ) : (
                                   <div className='flex justify-end gap-1'>
                                     <div onClick={() => handleDeleteTask(task.id)} className='flex justify-center items-center p-1 sm:px-2 text-red-600 cursor-pointer hover:bg-red-50 rounded'>
                                       <Trash2 size={15} className="sm:w-[17px]"/>
@@ -461,14 +549,18 @@ function Areas() {
                                       Resolver
                                     </span>
                                   </div>
-                                </div>
+                                )}
                               </div>
-                            ))
+                            </div>
+                          ))
                         ) : (
-                          <div className="text-gray-500 text-center py-4">No hay tareas pendientes en esta área.</div>
+                          <div className="text-gray-500 text-center py-4">
+                            No hay tareas {resolved ? 'resueltas' : 'pendientes'} 
+                            {selectedSubArea !== "all" && ` en ${selectedSubArea}`}.
+                          </div>
                         )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
                 
@@ -647,7 +739,6 @@ function Areas() {
             </>
           )}
           
-          {/* TODOS TUS MODALES - SIN CAMBIOS */}
           {showNewTaskModal && (
             <NewTask
               areaId={selectedArea}
