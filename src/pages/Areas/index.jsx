@@ -35,17 +35,19 @@ function Areas() {
   const [tasksCount, setTasksCount] = useState({ urgent: 0, attention: 0, pending: 0 });
   const [days, setDays] = useState({ labels: [], datasets: [] });
 
+  // Rol y privilegios (sin redeclarar "role")
+  const userRole = (getRoleFromToken?.() || '').toLowerCase();
+  const isAdmin = ['admin', 'administrador', 'superadmin'].includes(userRole);
+
   // Estado para el tab de subárea seleccionado
   const [selectedSubArea, setSelectedSubArea] = useState("all");
 
-  // Función mejorada para obtener subáreas únicas
+  // Subáreas únicas (ordenando conocidas primero)
   const getUniqueSubAreas = () => {
     if (!areaData?.tasks) return [];
     const subAreas = new Set();
     areaData.tasks.forEach(task => {
-      if (task.subArea?.name) {
-        subAreas.add(task.subArea.name);
-      }
+      if (task.subArea?.name) subAreas.add(task.subArea.name);
     });
 
     const knownSubAreas = [
@@ -66,7 +68,7 @@ function Areas() {
 
   const uniqueSubAreas = getUniqueSubAreas();
 
-  // Función para filtrar tareas por subárea y estatus resuelto
+  // Filtrado por subárea y estatus
   const getFilteredTasks = () => {
     if (!areaData?.tasks) return [];
 
@@ -81,7 +83,7 @@ function Areas() {
     return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   };
 
-  // Función para contar tareas por subárea (para las chips de tabs)
+  // Contador por subárea
   const getTaskCountBySubArea = (subAreaName) => {
     if (!areaData?.tasks) return 0;
     return areaData.tasks.filter(task => {
@@ -91,20 +93,36 @@ function Areas() {
     }).length;
   };
 
+  // Cargar notas y personal al cambiar de área
   useEffect(() => {
     if (selectedArea) {
       fetchNotes(selectedArea);
       fetchPersonal();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedArea]);
 
-  const role = getRoleFromToken();
-
+  // RELLENO de userAreas según rol (admin ve todas)
   useEffect(() => {
-    // Áreas del usuario (encargado de X área)
-    setUserAreas(areas.filter(area => area.id === userArea));
+    if (!areas) return;
 
-    // Contador de tareas por prioridad para la dona
+    if (isAdmin) {
+      setUserAreas(areas);
+    } else {
+      setUserAreas(areas.filter(area => area.id === userArea));
+    }
+  }, [areas, userArea, isAdmin]);
+
+  // Selección de área por defecto si no hay una elegida
+  useEffect(() => {
+    if (!selectedArea && userAreas?.length > 0) {
+      setSelectedArea(userAreas[0]?.id);
+    }
+  }, [userAreas, selectedArea]);
+
+  // Contadores y datasets de gráficos al cambiar área/areas
+  useEffect(() => {
+    // Contador dona
     const counts = areas
       .filter(area => area.id === selectedArea)
       .reduce((acc, area) => {
@@ -120,7 +138,7 @@ function Areas() {
 
     setTasksCount(counts);
 
-    // Datos de los últimos 7 días para la barra apilada
+    // Últimos 7 días
     const hoy = new Date();
     const ultimos7 = [];
     for (let i = 6; i >= 0; i--) {
@@ -136,17 +154,9 @@ function Areas() {
       .filter(area => area.id === selectedArea)
       .flatMap(area => area.tasks || []);
 
-    const priorityMap = {
-      rojo: "Urgente",
-      amarillo: "Atención",
-      verde: "Pendiente",
-    };
+    const priorityMap = { rojo: "Urgente", amarillo: "Atención", verde: "Pendiente" };
 
-    const weekly = {
-      Urgente: Array(7).fill(0),
-      Atención: Array(7).fill(0),
-      Pendiente: Array(7).fill(0),
-    };
+    const weekly = { Urgente: Array(7).fill(0), Atención: Array(7).fill(0), Pendiente: Array(7).fill(0) };
 
     ultimos7.forEach((dia, index) => {
       const tareasDelDia = tareas.filter((task) => {
@@ -190,9 +200,9 @@ function Areas() {
         },
       ],
     });
-  }, [selectedArea, areas, userArea]);
+  }, [selectedArea, areas]);
 
-  // Reset tab cuando cambia resolved o selectedArea
+  // Reset tab al cambiar resolved/selectedArea
   useEffect(() => {
     setSelectedSubArea("all");
   }, [resolved, selectedArea]);
@@ -227,19 +237,15 @@ function Areas() {
         { header: "Fecha de creación", key: "created", width: 20 },
         ...(isResolved
           ? [
-            { header: "Fecha de resolución", key: "resolved", width: 20 },
-            { header: "Resuelto por", key: "resolvedBy", width: 25 },
-          ]
+              { header: "Fecha de resolución", key: "resolved", width: 20 },
+              { header: "Resuelto por", key: "resolvedBy", width: 25 },
+            ]
           : []),
       ];
 
       ws.getRow(1).eachCell((cell) => {
         cell.font = { bold: true, color: { argb: "000000" } };
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "E0E0E0" },
-        };
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "E0E0E0" } };
       });
 
       const getPriorityFill = (priority) => {
@@ -271,15 +277,8 @@ function Areas() {
         const row = ws.addRow(rowData);
 
         const priorityCell = row.getCell(2);
-        priorityCell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: getPriorityFill(task.priority) },
-        };
-        priorityCell.font = {
-          color: { argb: "000000" },
-          bold: true,
-        };
+        priorityCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: getPriorityFill(task.priority) } };
+        priorityCell.font = { color: { argb: "000000" }, bold: true };
       });
     };
 
@@ -293,12 +292,6 @@ function Areas() {
 
     saveAs(new Blob([buffer]), `Reporte_${areaData.name || 'Area'}_${fechaHoy}.xlsx`);
   };
-
-  useEffect(() => {
-    if (userAreas?.length === 1) {
-      setSelectedArea(userAreas[0]?.id);
-    }
-  }, [userAreas]);
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -365,7 +358,6 @@ function Areas() {
         createdAt: new Date().toISOString(),
         resolvedAt: null
       };
-      // Actualiza en userAreas (no existe setAreaData)
       setUserAreas(prev =>
         prev.map(area =>
           area.id === selectedArea
@@ -409,7 +401,9 @@ function Areas() {
               {isDropdownOpen && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   {userAreas.length === 0 && (
-                    <div className="px-3 sm:px-4 py-3 text-gray-500 text-xs sm:text-sm">No tienes áreas asignadas como encargado.</div>
+                    <div className="px-3 sm:px-4 py-3 text-gray-500 text-xs sm:text-sm">
+                      {isAdmin ? 'No hay áreas cargadas.' : 'No tienes áreas asignadas como encargado.'}
+                    </div>
                   )}
                   {userAreas.length === 1 && (
                     <div onClick={() => setIsDropdownOpen(false)} className="px-3 sm:px-4 py-3 text-gray-500 text-xs sm:text-sm">
@@ -525,16 +519,14 @@ function Areas() {
                                       <p className="text-xs sm:text-sm text-gray-500">
                                         {task.description && `Descripción: ${task.description}`}
                                       </p>
-                                      {
-                                        task.file && (
-                                          <a href={task.file} target='_blank' className="text-xs sm:text-sm text-gray-500 mt-1">
-                                            <div className='flex items-center gap-1 text-teal-600 font-semibold'>
-                                              <FaFileArrowDown size={20}/>
-                                              Ver archivo adjunto {task.file.name}
-                                            </div>
-                                          </a>
-                                        )
-                                      }
+                                      {task.file && (
+                                        <a href={task.file} target='_blank' className="text-xs sm:text-sm text-gray-500 mt-1" rel="noreferrer">
+                                          <div className='flex items-center gap-1 text-teal-600 font-semibold'>
+                                            <FaFileArrowDown size={20}/>
+                                            Ver archivo adjunto {task.file.name}
+                                          </div>
+                                        </a>
+                                      )}
                                     </>
                                   )}
                                 </div>
@@ -551,7 +543,7 @@ function Areas() {
                                   </p>
                                 ) : (
                                   <>
-                                    {role !== 'medico' && (
+                                    {!['medico', 'médico'].includes(userRole) && (
                                       <div className='flex justify-end gap-1'>
                                         <div
                                           onClick={() => handleDeleteTask(task.id)}
@@ -694,13 +686,13 @@ function Areas() {
                       <div className="overflow-x-auto">
                         <table className="w-full">
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {personal.map((user) => (
-                              <tr key={user.id} className="hover:bg-gray-50">
+                            {personal.map((u) => (
+                              <tr key={u.id} className="hover:bg-gray-50">
                                 <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                                  <div className="text-xs sm:text-sm font-medium text-gray-900">{user.name}</div>
+                                  <div className="text-xs sm:text-sm font-medium text-gray-900">{u.name}</div>
                                 </td>
                                 <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
-                                  {user.areas[0].UserArea.role}
+                                  {u.areas[0].UserArea.role}
                                 </td>
                               </tr>
                             ))}
@@ -733,17 +725,13 @@ function Areas() {
                           options={{
                             maintainAspectRatio: false,
                             responsive: true,
-                            plugins: {
-                              legend: { display: false },
-                            },
+                            plugins: { legend: { display: false } },
                             scales: {
                               x: { stacked: true },
                               y: {
                                 stacked: true,
                                 beginAtZero: true,
-                                ticks: {
-                                  callback: (value) => Number.isInteger(value) ? value : "",
-                                },
+                                ticks: { callback: (value) => Number.isInteger(value) ? value : "" },
                               },
                             },
                           }}
