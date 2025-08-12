@@ -6,6 +6,7 @@ import { useAreas } from '../../utils/context/AreasContext';
 import { useAuth } from '../../utils/context/AuthContext';
 import { useParams } from 'react-router-dom';
 import { FaRegStickyNote } from "react-icons/fa";
+import { FaFileArrowDown } from "react-icons/fa6";
 import axios from 'axios';
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
@@ -524,6 +525,16 @@ function Areas() {
                                       <p className="text-xs sm:text-sm text-gray-500">
                                         {task.description && `Descripción: ${task.description}`}
                                       </p>
+                                      {
+                                        task.file && (
+                                          <a href={task.file} target='_blank' className="text-xs sm:text-sm text-gray-500 mt-1">
+                                            <div className='flex items-center gap-1 text-teal-600 font-semibold'>
+                                              <FaFileArrowDown size={20}/>
+                                              Ver archivo adjunto {task.file.name}
+                                            </div>
+                                          </a>
+                                        )
+                                      }
                                     </>
                                   )}
                                 </div>
