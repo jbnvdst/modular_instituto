@@ -14,6 +14,16 @@ const TaskCard = ({ task }) => {
             <div className="flex flex-col flex-1">
                 <b className="text-xs font-semibold text-gray-800">{task.subArea?.name}</b>
                 <p onClick={() => console.log(task)} className="text-gray-800">{task.title}</p>
+                {
+                    task.file && (
+                        <a href={task.file} target='_blank' className="text-xs sm:text-sm text-gray-500 mt-1">
+                        <div className='flex items-center gap-1 text-teal-600 font-semibold'>
+                            <FaFileArrowDown size={20}/>
+                            Ver archivo adjunto {task.file.name}
+                        </div>
+                        </a>
+                    )
+                }
             </div>
             <span className="text-gray-500 text-sm ml-4 whitespace-nowrap">{getDate(task.createdAt)}</span>
         </div>

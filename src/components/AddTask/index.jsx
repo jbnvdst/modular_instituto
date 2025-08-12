@@ -15,30 +15,48 @@ function AddTask({ onClick, fetchAlerts }) {
     urgency: Yup.string().oneOf(['urgente', 'atencion', 'pendiente'], 'Selecciona un nivel de urgencia').required('El nivel de urgencia es obligatorio'),
   })
 
-  const handleSubmit = async (values, { resetForm, setSubmitting}) => {
-    try {
-      await new Promise(resolve => setTimeout(resolve, 5000));
+  const handleSubmit = async (values, { resetForm, setSubmitting }) => {
+  try {
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/alerts`,
-        values,
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-      if (response.status === 201) {
-        await fetchAlerts?.();
-        onClick();
-        resetForm();
-      } else {
-        alert('Error al crear la alerta. Por favor, inténtalo de nuevo.');
+    // Crear FormData
+    const formData = new FormData();
+
+    // Agregar campos (todos excepto file)
+    for (const key in values) {
+      if (key !== 'file') {
+        formData.append(key, values[key]);
       }
-    } catch (error) {
-      alert('Error al guardar la alerta. Por favor, inténtalo de nuevo.');
-      console.error(error);
     }
-    finally{
-      setSubmitting(false);
+
+    // Agregar archivo si existe
+    if (values.file) {
+      formData.append('file', values.file);
     }
-  };
+
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/api/alerts`,
+        formData,
+      {
+        // NO pongas Content-Type explícito aquí, axios lo define solo:
+        // headers: { 'Content-Type': 'multipart/form-data' }
+      }
+    );
+
+    if (response.status === 201) {
+      await fetchAlerts?.();
+      onClick();
+      resetForm();
+    } else {
+      alert('Error al crear la alerta. Por favor, inténtalo de nuevo.');
+    }
+  } catch (error) {
+    alert('Error al guardar la alerta. Por favor, inténtalo de nuevo.');
+    console.error(error);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 bg-[#000000A8] bg-opacity-50 flex items-center justify-center z-50">
@@ -87,6 +105,27 @@ function AddTask({ onClick, fetchAlerts }) {
                   </Field>
                   <ErrorMessage 
                     name="urgency" 
+                    component="div" 
+                    className="text-red-500 text-sm mt-1" 
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">
+                    Adjuntar archivo (opcional)
+                  </label>
+                  <Field name="file">
+                    {({ form }) => (
+                      <input
+                        type="file"
+                        onChange={(event) => {
+                          form.setFieldValue('file', event.currentTarget.files[0]);
+                        }}
+                      />
+                    )}
+                  </Field>
+                  <ErrorMessage 
+                    name="file" 
                     component="div" 
                     className="text-red-500 text-sm mt-1" 
                   />

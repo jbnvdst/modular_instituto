@@ -32,6 +32,7 @@ function NewTask({ areaId, onClose, users = [] }) {
     subAreaId: 'default',
     createdBy: getIdFromToken(),
     areaId: areaId,
+    file: null
   }
 
   const validationSchema = Yup.object({
@@ -43,19 +44,33 @@ function NewTask({ areaId, onClose, users = [] }) {
 
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
   try {
-    const payload = {
-      ...values,
-      resolvedAt: null
-    };
+    // const payload = {
+    //   ...values,
+    //   resolvedAt: null
+    // };
+
+    const formData = new FormData();
+
+    for (const key in values) {
+      if (key !== 'file') {
+        formData.append(key, values[key]);
+      }
+    }
+
+    if (values.file) {
+      formData.append('file', values.file);
+    }
+
+    formData.append('resolvedAt', null);
+
 
     const token = localStorage.getItem("token");
 
     const response = await axios.post(
       `${import.meta.env.VITE_API_BASE_URL}/api/tasks`,
-      payload,
+      formData,
       {
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         }
       }
@@ -226,6 +241,18 @@ function NewTask({ areaId, onClose, users = [] }) {
                       rows="2"
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors resize-none"
                       placeholder="Descripción de la tarea"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
+                      Archivo adjunto (opcional)
+                    </label>
+                    <input
+                      type="file"
+                      onChange={(event) => {
+                        // Actualizamos el valor del campo 'file' en Formik
+                        setValues({ ...values, file: event.currentTarget.files[0] });
+                      }}
                     />
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
