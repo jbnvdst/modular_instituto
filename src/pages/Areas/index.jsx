@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Plus, Users, Bell, AlertCircle, CheckCircle, Clock, Activity, Trash2} from 'lucide-react';
+import { ChevronDown, Plus, Users, Bell, AlertCircle, CheckCircle, Clock, Activity, Trash2 } from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { useAreas } from '../../utils/context/AreasContext';
@@ -21,58 +21,55 @@ function Areas() {
   const [selectedArea, setSelectedArea] = useState(id || "");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
-  const [ showNoteModal, setShowNoteModal ] = useState(false);
+  const [showNoteModal, setShowNoteModal] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [resolvedTaskModal, setResolvedTaskModal] = useState(null);
   const [newTask, setNewTask] = useState({ title: '', priority: 'medium', assignedTo: '' });
   const { areas, loadingAreas } = useAreas();
-  const [ personal, setPersonal ] = useState([]);
+  const [personal, setPersonal] = useState([]);
   const { user, getDate, userArea, notes, fetchNotes, getRoleFromToken } = useAuth();
-  const [ resolved, setResolved] = useState(false);
-  const [ userAreas, setUserAreas ] = useState([]);
+  const [resolved, setResolved] = useState(false);
+  const [userAreas, setUserAreas] = useState([]);
   const areaData = userAreas.find(area => area.id === selectedArea);
   const [tasksCount, setTasksCount] = useState({ urgent: 0, attention: 0, pending: 0 });
   const [days, setDays] = useState({ labels: [], datasets: [] });
-  
+
   // Estado para el tab de subárea seleccionado
   const [selectedSubArea, setSelectedSubArea] = useState("all");
 
   // Función mejorada para obtener subáreas únicas
-const getUniqueSubAreas = () => {
-  if (!areaData?.tasks) return [];
-  const subAreas = new Set();
-  areaData.tasks.forEach(task => {
-    if (task.subArea?.name) {
-      subAreas.add(task.subArea.name);
-    }
-  });
-  
-  // Lista de subáreas conocidas en orden preferido
-  const knownSubAreas = [
-    'Servicios Generales',
-    'Biomedica', 
-    'Insumos',
-    'Estructura',
-    'Recurso Humano',
-    'Sistemas'
-  ];
-  
-  // Separar subáreas conocidas de las nuevas
-  const foundSubAreas = Array.from(subAreas);
-  const orderedKnown = knownSubAreas.filter(sa => foundSubAreas.includes(sa));
-  const newSubAreas = foundSubAreas.filter(sa => !knownSubAreas.includes(sa));
-  
-  // Combinar: primero las conocidas en orden, luego las nuevas alfabéticamente
-  return [...orderedKnown, ...newSubAreas.sort()];
-};
+  const getUniqueSubAreas = () => {
+    if (!areaData?.tasks) return [];
+    const subAreas = new Set();
+    areaData.tasks.forEach(task => {
+      if (task.subArea?.name) {
+        subAreas.add(task.subArea.name);
+      }
+    });
+
+    const knownSubAreas = [
+      'Servicios Generales',
+      'Biomedica',
+      'Insumos',
+      'Estructura',
+      'Recurso Humano',
+      'Sistemas'
+    ];
+
+    const foundSubAreas = Array.from(subAreas);
+    const orderedKnown = knownSubAreas.filter(sa => foundSubAreas.includes(sa));
+    const newSubAreas = foundSubAreas.filter(sa => !knownSubAreas.includes(sa));
+
+    return [...orderedKnown, ...newSubAreas.sort()];
+  };
 
   const uniqueSubAreas = getUniqueSubAreas();
 
-  // Función para filtrar tareas por subárea
+  // Función para filtrar tareas por subárea y estatus resuelto
   const getFilteredTasks = () => {
     if (!areaData?.tasks) return [];
-    
-    let filtered = areaData.tasks.filter(task => 
+
+    let filtered = areaData.tasks.filter(task =>
       resolved ? task.resolvedAt !== null : task.resolvedAt === null
     );
 
@@ -83,7 +80,7 @@ const getUniqueSubAreas = () => {
     return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   };
 
-  // Función para contar tareas por subárea
+  // Función para contar tareas por subárea (para las chips de tabs)
   const getTaskCountBySubArea = (subAreaName) => {
     if (!areaData?.tasks) return 0;
     return areaData.tasks.filter(task => {
@@ -96,30 +93,33 @@ const getUniqueSubAreas = () => {
   useEffect(() => {
     if (selectedArea) {
       fetchNotes(selectedArea);
+      fetchPersonal();
     }
   }, [selectedArea]);
-  
+
   const role = getRoleFromToken();
-  
+
   useEffect(() => {
+    // Áreas del usuario (encargado de X área)
     setUserAreas(areas.filter(area => area.id === userArea));
-    fetchPersonal();
 
-    setTasksCount(userAreas.filter(area => area.id === selectedArea).reduce((acc, area) => {
-      area.tasks.forEach(task => {
-        if (!task.resolvedAt) {
-          if (task.priority === 'rojo') {
-            acc.urgent += 1;
-          } else if (task.priority === 'amarillo') {
-            acc.attention += 1;
-          } else if (task.priority === 'verde') {
-            acc.pending += 1;
+    // Contador de tareas por prioridad para la dona
+    const counts = areas
+      .filter(area => area.id === selectedArea)
+      .reduce((acc, area) => {
+        (area.tasks || []).forEach(task => {
+          if (!task.resolvedAt) {
+            if (task.priority === 'rojo') acc.urgent += 1;
+            else if (task.priority === 'amarillo') acc.attention += 1;
+            else if (task.priority === 'verde') acc.pending += 1;
           }
-        }
-      });
-      return acc;
-    }, { urgent: 0, attention: 0, pending: 0 }));
+        });
+        return acc;
+      }, { urgent: 0, attention: 0, pending: 0 });
 
+    setTasksCount(counts);
+
+    // Datos de los últimos 7 días para la barra apilada
     const hoy = new Date();
     const ultimos7 = [];
     for (let i = 6; i >= 0; i--) {
@@ -131,9 +131,9 @@ const getUniqueSubAreas = () => {
       });
     }
 
-    const tareas = userAreas
+    const tareas = areas
       .filter(area => area.id === selectedArea)
-      .flatMap(area => area.tasks);
+      .flatMap(area => area.tasks || []);
 
     const priorityMap = {
       rojo: "Urgente",
@@ -141,7 +141,7 @@ const getUniqueSubAreas = () => {
       verde: "Pendiente",
     };
 
-    const counts = {
+    const weekly = {
       Urgente: Array(7).fill(0),
       Atención: Array(7).fill(0),
       Pendiente: Array(7).fill(0),
@@ -159,7 +159,7 @@ const getUniqueSubAreas = () => {
 
       tareasDelDia.forEach((task) => {
         const tipo = priorityMap[task.priority];
-        counts[tipo][index]++;
+        if (tipo) weekly[tipo][index]++;
       });
     });
 
@@ -168,31 +168,30 @@ const getUniqueSubAreas = () => {
       datasets: [
         {
           label: "Urgente",
-          data: counts.Urgente,
+          data: weekly.Urgente,
           backgroundColor: "#ff000070",
           borderColor: "#fff",
           borderWidth: 1,
         },
         {
           label: "Atención",
-          data: counts.Atención,
+          data: weekly.Atención,
           backgroundColor: "#F59E0B70",
           borderColor: "#fff",
           borderWidth: 1,
         },
         {
           label: "Pendiente",
-          data: counts.Pendiente,
+          data: weekly.Pendiente,
           backgroundColor: "#16A34A70",
           borderColor: "#fff",
           borderWidth: 1,
         },
       ],
     });
+  }, [selectedArea, areas, userArea]);
 
-  }, [selectedArea, areas]);
-
-  // Effect para resetear el tab cuando cambia resolved o selectedArea
+  // Reset tab cuando cambia resolved o selectedArea
   useEffect(() => {
     setSelectedSubArea("all");
   }, [resolved, selectedArea]);
@@ -227,9 +226,9 @@ const getUniqueSubAreas = () => {
         { header: "Fecha de creación", key: "created", width: 20 },
         ...(isResolved
           ? [
-              { header: "Fecha de resolución", key: "resolved", width: 20 },
-              { header: "Resuelto por", key: "resolvedBy", width: 25 },
-            ]
+            { header: "Fecha de resolución", key: "resolved", width: 20 },
+            { header: "Resuelto por", key: "resolvedBy", width: 25 },
+          ]
           : []),
       ];
 
@@ -242,28 +241,20 @@ const getUniqueSubAreas = () => {
         };
       });
 
-      const getPriorityColor = (priority) => {
+      const getPriorityFill = (priority) => {
         if (isResolved) return "D9D9D9";
         switch (priority) {
-          case "rojo":
-            return "F4CCCC";
-          case "amarillo":
-            return "FFF2CC";
-          case "verde":
-            return "93C47D";
-          default:
-            return "FFFFFF";
+          case "rojo": return "F4CCCC";
+          case "amarillo": return "FFF2CC";
+          case "verde": return "93C47D";
+          default: return "FFFFFF";
         }
       };
 
       datos.forEach((task) => {
         const rowData = [
           task.title,
-          task.priority === "rojo"
-            ? "Urgente"
-            : task.priority === "amarillo"
-            ? "Atención"
-            : "Pendiente",
+          task.priority === "rojo" ? "Urgente" : task.priority === "amarillo" ? "Atención" : "Pendiente",
           task.subArea?.name || "",
           task.creator?.name || "",
           new Date(task.createdAt).toLocaleString(),
@@ -282,7 +273,7 @@ const getUniqueSubAreas = () => {
         priorityCell.fill = {
           type: "pattern",
           pattern: "solid",
-          fgColor: { argb: getPriorityColor(task.priority) },
+          fgColor: { argb: getPriorityFill(task.priority) },
         };
         priorityCell.font = {
           color: { argb: "000000" },
@@ -299,11 +290,11 @@ const getUniqueSubAreas = () => {
       .toLocaleDateString("es-MX", { day: "2-digit", month: "2-digit", year: "numeric" })
       .replace(/\//g, "-");
 
-    saveAs(new Blob([buffer]), `Reporte_${areaData.name}_${fechaHoy}.xlsx`);
+    saveAs(new Blob([buffer]), `Reporte_${areaData.name || 'Area'}_${fechaHoy}.xlsx`);
   };
 
   useEffect(() => {
-    if(userAreas?.length === 1) {
+    if (userAreas?.length === 1) {
       setSelectedArea(userAreas[0]?.id);
     }
   }, [userAreas]);
@@ -352,7 +343,7 @@ const getUniqueSubAreas = () => {
       setUserAreas(prev =>
         prev.map(area =>
           area.id === selectedArea
-            ? { ...area, tasks: area.tasks.filter(task => task.id !== taskId) }
+            ? { ...area, tasks: (area.tasks || []).filter(task => task.id !== taskId) }
             : area
         )
       );
@@ -370,20 +361,24 @@ const getUniqueSubAreas = () => {
         priority: newTask.priority,
         assignedBy: 'Usuario Actual',
         assignedTo: newTask.assignedTo,
-        createdAt: new Date().toLocaleString()
+        createdAt: new Date().toISOString(),
+        resolvedAt: null
       };
-      setAreaData(prev => ({
-        ...prev,
-        tasks: [task, ...prev.tasks]
-      }));
+      // Actualiza en userAreas (no existe setAreaData)
+      setUserAreas(prev =>
+        prev.map(area =>
+          area.id === selectedArea
+            ? { ...area, tasks: [task, ...(area.tasks || [])] }
+            : area
+        )
+      );
       setNewTask({ title: '', priority: 'medium', assignedTo: '' });
       setShowNewTaskModal(false);
     }
   };
 
-  // Usar las tareas filtradas
   const filteredTasks = getFilteredTasks();
-  
+
   return (
     <Layout>
       <div className="bg-gray-50 w-full min-h-screen py-3 sm:py-6">
@@ -394,7 +389,7 @@ const getUniqueSubAreas = () => {
             </div>
           </div>
 
-          <hr className="my-3 sm:my-4 border-gray-200"/>
+          <hr className="my-3 sm:my-4 border-gray-200" />
 
           <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
@@ -416,7 +411,9 @@ const getUniqueSubAreas = () => {
                     <div className="px-3 sm:px-4 py-3 text-gray-500 text-xs sm:text-sm">No tienes áreas asignadas como encargado.</div>
                   )}
                   {userAreas.length === 1 && (
-                    <div onClick={() => setIsDropdownOpen(false)} className="px-3 sm:px-4 py-3 text-gray-500 text-xs sm:text-sm">Solo tienes un área asignada: {userAreas[0].name}</div>
+                    <div onClick={() => setIsDropdownOpen(false)} className="px-3 sm:px-4 py-3 text-gray-500 text-xs sm:text-sm">
+                      Solo tienes un área asignada: {userAreas[0].name}
+                    </div>
                   )}
                   {userAreas.length > 1 && userAreas.map(area => (
                     <button
@@ -492,6 +489,7 @@ const getUniqueSubAreas = () => {
                         {selectedSubArea !== "all" && ` - ${selectedSubArea}`}
                       </h3>
                     </div>
+
                     <div className="mt-4 block text-xs sm:text-sm text-gray-700">
                       <div className="flex flex-col max-h-[400px] sm:max-h-92 gap-1.5 overflow-y-auto scrollbar-hide">
                         {filteredTasks.length > 0 ? (
@@ -501,15 +499,14 @@ const getUniqueSubAreas = () => {
                               className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 gap-2"
                             >
                               <div className="flex items-center space-x-2 sm:space-x-3">
-                                <div className={`p-1.5 sm:p-2 rounded-full ${
-                                  resolved ? 'bg-gray-200' : getPriorityColor(task.priority)
-                                }`}>
+                                <div className={`p-1.5 sm:p-2 rounded-full ${resolved ? 'bg-gray-200' : getPriorityColor(task.priority)}`}>
                                   {getPriorityIcon(task.priority)}
                                 </div>
                                 <div>
                                   <h4 className="font-medium text-gray-900 text-sm sm:text-base">
                                     <b className="text-teal-600">{task.subArea?.name}</b> | {task.title}
                                   </h4>
+
                                   {resolved ? (
                                     <>
                                       <p className="text-xs sm:text-sm text-gray-500">
@@ -531,69 +528,42 @@ const getUniqueSubAreas = () => {
                                   )}
                                 </div>
                               </div>
+
                               <div className={resolved ? "text-right ml-8 sm:ml-0" : "flex sm:block items-center gap-2 ml-8 sm:ml-0"}>
                                 <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
                                   Creado {getDate(task.createdAt)}
                                 </p>
+
                                 {resolved ? (
                                   <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
                                     Resuelto {getDate(task.resolvedAt)}
                                   </p>
-                                </div>
+                                ) : (
+                                  <>
+                                    {role !== 'medico' && (
+                                      <div className='flex justify-end gap-1'>
+                                        <div
+                                          onClick={() => handleDeleteTask(task.id)}
+                                          className='flex justify-center items-center p-1 sm:px-2 text-red-600 cursor-pointer hover:bg-red-50 rounded'
+                                        >
+                                          <Trash2 size={15} className="sm:w-[17px]" />
+                                        </div>
+                                        <span
+                                          onClick={() => setResolvedTaskModal(task.id)}
+                                          className="cursor-pointer inline-flex px-2 py-1 text-xs sm:text-sm text-white font-medium rounded-full bg-teal-600/80"
+                                        >
+                                          Resolver
+                                        </span>
+                                      </div>
+                                    )}
+                                  </>
+                                )}
                               </div>
-                            ))
-                        ) : (
-                          <div className="text-gray-500 text-center py-4">No hay tareas resueltas en esta área.</div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col max-h-[400px] sm:max-h-92 gap-1.5 overflow-y-auto scrollbar-hide">
-                        {areaData?.tasks?.filter(task => task.resolvedAt === null).length > 0 ? (
-                          areaData.tasks
-                            .filter(task => task.resolvedAt === null)
-                            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                            .map(task => (
-                              <div
-                                key={task.id}
-                                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 gap-2"
-                              >
-                                <div className="flex items-center space-x-2 sm:space-x-3">
-                                  <div className={`p-1.5 sm:p-2 rounded-full ${getPriorityColor(task.priority)}`}>
-                                    {getPriorityIcon(task.priority)}
-                                  </div>
-                                  <div>
-                                    <h4 className="font-medium text-gray-900 text-sm sm:text-base">
-                                      <b>{task.subArea?.name}</b> | {task.title}
-                                    </h4>
-                                    <p className="text-xs sm:text-sm text-gray-500">
-                                      Creado por: {task.creator.name}
-                                    </p>
-                                    <p className="text-xs sm:text-sm text-gray-500">
-                                      {task.description && `Descripción: ${task.description}`}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex sm:block items-center gap-2 ml-8 sm:ml-0">
-                                  <p className="text-[10px] sm:text-xs text-gray-500 sm:mb-2">
-                                    Creado {getDate(task.createdAt)}
-                                  </p>
-                                  {role !== 'medico' && <div className='flex justify-end gap-1'>
-                                    <div onClick={() => handleDeleteTask(task.id)} className='flex justify-center items-center p-1 sm:px-2 text-red-600 cursor-pointer hover:bg-red-50 rounded'>
-                                      <Trash2 size={15} className="sm:w-[17px]"/>
-                                    </div>
-                                    <span
-                                      onClick={() => setResolvedTaskModal(task.id)}
-                                      className="cursor-pointer inline-flex px-2 py-1 text-xs sm:text-sm text-white font-medium rounded-full bg-teal-600/80"
-                                    >
-                                      Resolver
-                                    </span>
-                                  </div>}
-                                </div>
-                              </div>
-                            ))
+                            </div>
+                          ))
                         ) : (
                           <div className="text-gray-500 text-center py-4">
-                            No hay tareas {resolved ? 'resueltas' : 'pendientes'} 
+                            No hay tareas {resolved ? 'resueltas' : 'pendientes'}
                             {selectedSubArea !== "all" && ` en ${selectedSubArea}`}.
                           </div>
                         )}
@@ -601,23 +571,23 @@ const getUniqueSubAreas = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 order-1 xl:order-2">
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Acciones Rápidas</h3>
                   <div className="space-y-2 sm:space-y-3">
-                    <button onClick={() => setShowNewTaskModal(true)}  
+                    <button onClick={() => setShowNewTaskModal(true)}
                       className="w-full cursor-pointer flex items-center p-2.5 sm:p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
                     >
                       <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 mr-3" />
                       <span className="text-xs sm:text-sm font-medium text-teal-800">Crear Tarea</span>
                     </button>
-                    <button onClick={() => (setShowNoteModal(true))}  
+                    <button onClick={() => (setShowNoteModal(true))}
                       className="w-full cursor-pointer flex items-center p-2.5 sm:p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
                     >
                       <FaRegStickyNote className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 mr-3" />
                       <span className="text-xs sm:text-sm font-medium text-teal-800">Crear Nota</span>
                     </button>
-                    <button onClick={() => (setShowRequestModal(true))}  
+                    <button onClick={() => (setShowRequestModal(true))}
                       className="w-full cursor-pointer flex items-center p-2.5 sm:p-3 text-left bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
                     >
                       <FaRegStickyNote className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 mr-3" />
@@ -694,14 +664,15 @@ const getUniqueSubAreas = () => {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                   <div className="flex items-center space-x-2 mb-3 sm:mb-4">
                     <BiSolidBookContent className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900">Solicitudes</h3>
                   </div>
-                  <RequestsList/>
+                  <RequestsList />
                 </div>
+
                 <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                   <div className="flex items-center space-x-2 mb-3 sm:mb-4">
                     <Users className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
@@ -715,11 +686,11 @@ const getUniqueSubAreas = () => {
                             {personal.map((user) => (
                               <tr key={user.id} className="hover:bg-gray-50">
                                 <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                                  <div className="text-xs sm:text-sm font-medium text-gray-900">{user.name}</div>                                                  
-                                </td>                                          
+                                  <div className="text-xs sm:text-sm font-medium text-gray-900">{user.name}</div>
+                                </td>
                                 <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                                   {user.areas[0].UserArea.role}
-                                </td>                                                                  
+                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -730,22 +701,23 @@ const getUniqueSubAreas = () => {
                     )}
                   </div>
                 </div>
+
                 <div className="space-y-4 sm:space-y-6">
                   <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Distribución de Tareas</h3>
                     <div className="h-40 sm:h-48">
-                      {areaData && areaData.tasks.length > 0 ? 
-                        <Doughnut data={chartData} options={{ maintainAspectRatio: false }} /> : 
+                      {areaData && (areaData.tasks?.length > 0) ?
+                        <Doughnut data={chartData} options={{ maintainAspectRatio: false }} /> :
                         <div className="flex items-center justify-center h-full text-gray-500 text-sm">No hay datos que graficar</div>
                       }
                     </div>
                   </div>
-                  
+
                   <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Actividad Semanal</h3>
                     <div className="h-40 sm:h-48">
                       {(areaData && days.datasets.length > 0 && days.datasets.some(ds => ds.data.some(v => v > 0))) ?
-                        <Bar 
+                        <Bar
                           data={days}
                           options={{
                             maintainAspectRatio: false,
@@ -759,13 +731,12 @@ const getUniqueSubAreas = () => {
                                 stacked: true,
                                 beginAtZero: true,
                                 ticks: {
-                                  callback: (value) =>
-                                    Number.isInteger(value) ? value : "",
+                                  callback: (value) => Number.isInteger(value) ? value : "",
                                 },
                               },
                             },
                           }}
-                        /> : 
+                        /> :
                         <div className="flex items-center justify-center h-full text-gray-500 text-sm">No hay datos que graficar</div>
                       }
                     </div>
@@ -774,12 +745,12 @@ const getUniqueSubAreas = () => {
               </div>
             </>
           )}
-          
+
           {showNewTaskModal && (
             <NewTask
               areaId={selectedArea}
               onClose={() => setShowNewTaskModal(false)}
-              users={areaData.staff}
+              users={areaData?.staff || []}
             />
           )}
           {showNoteModal && (
