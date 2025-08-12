@@ -673,7 +673,7 @@ function Areas() {
                     <BiSolidBookContent className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900">Solicitudes</h3>
                   </div>
-                  <RequestsList />
+                  <RequestsList areaId={selectedArea} />
                 </div>
 
                 <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
