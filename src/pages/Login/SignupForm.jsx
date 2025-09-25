@@ -10,11 +10,11 @@ import { useAreas } from '../../utils/context/AreasContext';
 
 const SignupForm = ({ setShowRegister }) => {
     const { signup } = useAuth();
-    const { areas } = useAreas();
+    const { areas, loadingAreas } = useAreas();
     const [areasByDirection, setAreasByDirection] = useState({});
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
-    const [tokenValid, setTokenValid] = useState(false);
+    const [tokenValid, setTokenValid] = useState('medico');
     const [showPassword, setShowPassword] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [selectedAreas, setSelectedAreas] = useState([]);
@@ -39,8 +39,10 @@ const SignupForm = ({ setShowRegister }) => {
             setTokenValid('jefe de area');
         } else if (token === 'DMadmin') {
             setTokenValid('admin');
+        } else if (token === '') {
+            setTokenValid('medico'); // Usuario normal sin token - usando medico como default hasta encontrar el rol correcto
         } else {
-            setTokenValid(false);
+            setTokenValid(false); // Token inválido
         }
     };
 
@@ -57,14 +59,16 @@ const SignupForm = ({ setShowRegister }) => {
     };
 
     useEffect(() => {
-        const groupedAreas = areas.reduce((acc, area) => {
-            if (!acc[area.direction]) {
-                acc[area.direction] = [];
-            }
-            acc[area.direction].push(area);
-            return acc;
-        }, {});
-        setAreasByDirection(groupedAreas);
+        if (areas && Array.isArray(areas)) {
+            const groupedAreas = areas.reduce((acc, area) => {
+                if (!acc[area.direction]) {
+                    acc[area.direction] = [];
+                }
+                acc[area.direction].push(area);
+                return acc;
+            }, {});
+            setAreasByDirection(groupedAreas);
+        }
     }, [areas]);
 
     return (
@@ -86,9 +90,10 @@ const SignupForm = ({ setShowRegister }) => {
                     name: values.name,
                     email: values.email,
                     password: values.password,
-                    role: tokenValid || 'user',
-                    area: values.area, 
+                    role: tokenValid || 'medico',
+                    area: values.area,
                 }
+                console.log('Datos a enviar:', valuesToSend);
                 try {
                     const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`, valuesToSend, {
                         headers: {
@@ -102,6 +107,8 @@ const SignupForm = ({ setShowRegister }) => {
                     }
                 } catch (error) {
                     console.error('Error al registrar:', error);
+                    console.error('Respuesta del servidor:', error.response?.data);
+                    console.error('Status code:', error.response?.status);
                 }
                 setIsLoading(false);
                 setSubmitting(false);
@@ -109,11 +116,8 @@ const SignupForm = ({ setShowRegister }) => {
             >
             {({ setFieldValue }) => {
                 const toggleArea = (id) => {
-                    // const current = values.area ? values.area.split(',') : [];
-                    // const exists = current.includes(id);
-                    // const updated = exists ? current.filter((a) => a !== id) : [...current, id];
                     setFieldValue('area', id);
-                    setSelectedAreas(id);
+                    setSelectedAreas([id]); // Mantener como array para consistencia con el estado
                 };
             return (
                 <Form className="space-y-2 sm:space-y-2">
@@ -170,7 +174,7 @@ const SignupForm = ({ setShowRegister }) => {
                 {/* Campo Token  */}
                 <div className="space-y-1">
                     <label htmlFor="token" className="block text-xs font-medium text-gray-700">
-                        Token de acceso
+                        Token de acceso <span className="text-gray-400">(opcional)</span>
                     </label>
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -194,6 +198,21 @@ const SignupForm = ({ setShowRegister }) => {
                         component="div"
                         className="text-red-500 text-xs mt-1"
                     />
+                    {tokenValid === false && (
+                        <p className="text-xs text-red-500 mt-1">
+                            Token inválido. Deja vacío para usuario normal o usa: DMmedico, DMjefatura, DMadmin
+                        </p>
+                    )}
+                    {tokenValid && tokenValid !== 'user' && tokenValid !== false && (
+                        <p className="text-xs text-green-500 mt-1">
+                            ✓ Token válido: {tokenValid}
+                        </p>
+                    )}
+                    {tokenValid === 'medico' && (
+                        <p className="text-xs text-gray-500 mt-1">
+                            Registro como médico (sin token)
+                        </p>
+                    )}
                 </div>
 
                 {/* Campo Contraseña */}
@@ -254,16 +273,18 @@ const SignupForm = ({ setShowRegister }) => {
 
                 {/* Areas */}
                 <div className="space-y-1">
-                    <label htmlFor="area" onClick={() => console.log(areasByDirection)} className="block text-xs font-medium text-gray-700">
-                        Área de interes
+                    <label htmlFor="area" className="block text-xs font-medium text-gray-700">
+                        Área de interés
                     </label>
                     <div className="flex flex-wrap gap-2 max-h-64 overflow-y-auto">
-                        {areasByDirection && Object.entries(areasByDirection).map(([direction, areas]) => (
+                        {loadingAreas ? (
+                            <div className="w-full text-center text-xs text-gray-500">Cargando áreas...</div>
+                        ) : areasByDirection && Object.entries(areasByDirection).map(([direction, areas]) => (
                             <div key={direction} className="flex flex-col w-full p-2 bg-gray-100 rounded-lg">
                                 <h3 className="w-full text-xs text-center font-medium text-gray-800 mb-1">{direction}</h3>
                                 <div className="flex flex-wrap gap-2">
                                     {areas.map((area) => {
-                                        const isSelected = selectedAreas.includes(area.id);
+                                        const isSelected = Array.isArray(selectedAreas) ? selectedAreas.includes(area.id) : selectedAreas === area.id;
                                         return (
                                             <div
                                                 key={area.id}
@@ -278,6 +299,9 @@ const SignupForm = ({ setShowRegister }) => {
                                 </div>
                             </div>
                         ))}
+                        {!loadingAreas && (!areasByDirection || Object.keys(areasByDirection).length === 0) && (
+                            <div className="w-full text-center text-xs text-gray-500">No hay áreas disponibles</div>
+                        )}
                         <Field
                             id="area"
                             name="area"
@@ -296,7 +320,7 @@ const SignupForm = ({ setShowRegister }) => {
                 {/* Botón de envío */}
                 <button
                     type="submit"
-                    disabled={isLoading || !tokenValid}
+                    disabled={isLoading || tokenValid === false}
                     className="w-full bg-teal-600 mt-3 cursor-pointer text-white py-1 sm:py-1 px-4 rounded-lg font-medium hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg text-sm sm:text-base"
                 >
                     {isLoading ? (
