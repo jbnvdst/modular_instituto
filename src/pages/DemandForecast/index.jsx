@@ -236,7 +236,7 @@ const DemandForecast = () => {
 
             {/* Model Information */}
             <div className="bg-gray-50 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Información del Modelo</h3>
+              {/* <h3 className="text-lg font-semibold text-gray-800 mb-4">Información del Modelo</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                 <div>
                   <span className="font-medium">Algoritmo:</span> Regresión Lineal Simple
@@ -250,7 +250,7 @@ const DemandForecast = () => {
                 <div>
                   <span className="font-medium">R² Solicitudes:</span> {modelStats.requestModel.rSquared.toFixed(3)}
                 </div>
-              </div>
+              </div> */}
               <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-xs text-yellow-800">
                   <strong>Nota:</strong> Los datos históricos mostrados son generados sintéticamente para fines de demostración.
@@ -276,13 +276,13 @@ const DemandForecast = () => {
               Predicción de demanda de servicios médicos por área usando Machine Learning
             </p>
           </div>
-          <button
+          {/* <button
             onClick={fetchAllAreasPredictions}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <RefreshCw size={18} />
             Actualizar Predicciones
-          </button>
+          </button> */}
         </div>
         <hr className="my-3 sm:my-4 border-gray-200"/>
 
