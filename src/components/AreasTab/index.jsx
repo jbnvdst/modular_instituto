@@ -4,6 +4,7 @@ import { useAreas } from "../../utils/context/AreasContext";
 import { Formik, Form, Field } from "formik";
 import { EditArea } from "../EditArea";
 import { ModalAlert } from '../ModalAlert';
+// import { DemandPrediction } from '../DemandPrediction';
 import axios from "axios";
 
 const AreasTab = ({ users}) => {

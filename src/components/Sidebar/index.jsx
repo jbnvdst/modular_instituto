@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { GoHome } from "react-icons/go";
-import { Activity } from 'lucide-react';
+import { Activity, TrendingUp } from 'lucide-react';
 import { BsStoplights } from "react-icons/bs";
 import { LuUserRoundCog, LuCalendarClock  } from "react-icons/lu";
 import { CgTemplate } from "react-icons/cg";
@@ -79,6 +79,17 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <NavLink to="/areas" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
                 <IoLayersOutline className={({ isActive }) => ` ${isActive ? activeStyle : unactiveStyle}`} size={22} />
                 <span className="font-medium">Areas</span>
+              </NavLink>
+            </li>
+
+            <li className="w-full">
+              <NavLink to="/demand-forecast" className={({ isActive }) => `flex gap-2 w-full py-2 px-6 ${isActive ? activeStyle : unactiveStyle}`}>
+                {({ isActive }) => (
+                  <>
+                    <TrendingUp className={`${isActive ? activeStyle : unactiveStyle}`} size={22} />
+                    <span className="font-medium">Pronóstico Demanda</span>
+                  </>
+                )}
               </NavLink>
             </li>
             <li className="w-full">

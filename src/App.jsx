@@ -8,6 +8,7 @@ import Notifications from './pages/Notifications';
 import Areas from './pages/Areas';
 import TaskTemplates from './pages/TaskTemplates';
 import RecurringTasks from './pages/RecurringTasks';
+import DemandForecast from './pages/DemandForecast';
 import { AreasProvider } from "./utils/context/AreasContext";
 import { useAuth } from './utils/context/AuthContext';
 
@@ -95,6 +96,14 @@ const AppRoutes = () => {
       element: (
         <RequireAuth loading={loadingAuth} user={user}>
           <RecurringTasks />
+        </RequireAuth>
+      ),
+    },
+    {
+      path: '/demand-forecast',
+      element: (
+        <RequireAuth loading={loadingAuth} user={user}>
+          <DemandForecast />
         </RequireAuth>
       ),
     },

@@ -62,7 +62,8 @@ const Home = () => {
         const resultado = {};
 
         tasks.forEach(task => {
-            const subArea = task.subArea.name;
+            // Verificar si la tarea tiene subArea antes de acceder a sus propiedades
+            const subArea = task.subArea?.name || 'Sin subárea';
             const prioridad = priorityMap[task.priority];
 
             if (!resultado[subArea]) {
@@ -421,7 +422,7 @@ const Home = () => {
                                 <div key={task.id} className="flex items-center py-2">
                                     <PiSirenDuotone className={`${task.priority === "rojo" ? "text-red-500" : task.priority === "amarillo" ? "text-yellow-500" : "text-green-500"}  mr-3 mt-1`} size={24} />
                                     <div className="flex flex-col flex-1">
-                                        <b className="text-gray-800">{task.Area.name} | <b className="text-xs font-semibold text-gray-800">{task.subArea.name}</b></b>
+                                        <b className="text-gray-800">{task.Area.name} | <b className="text-xs font-semibold text-gray-800">{task.subArea?.name || 'Sin subárea'}</b></b>
                                         <p onClick={() => console.log(task)} className="text-gray-800">{task.title}</p>
                                     </div>
                                     <span className="text-gray-500 text-sm ml-4 whitespace-nowrap">{getDate(task.createdAt)}</span>

@@ -14,9 +14,10 @@ const SignupForm = ({ setShowRegister }) => {
     const [areasByDirection, setAreasByDirection] = useState({});
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
-    const [tokenValid, setTokenValid] = useState('medico');
+    const [tokenValid, setTokenValid] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [selectedAreas, setSelectedAreas] = useState([]);
 
     const SignupSchema = Yup.object().shape({
@@ -26,7 +27,7 @@ const SignupForm = ({ setShowRegister }) => {
         confirmPassword: Yup.string()
             .oneOf([Yup.ref('password')], 'Las contraseñas no coinciden')
             .required('Confirma tu contraseña'),
-        token: Yup.string(),
+        token: Yup.string().required('El token de acceso es requerido'),
     });
 
     const handleChangeToken = (e, handleChange) => {
@@ -40,7 +41,7 @@ const SignupForm = ({ setShowRegister }) => {
         } else if (token === 'DMadmin') {
             setTokenValid('admin');
         } else if (token === '') {
-            setTokenValid('medico'); // Usuario normal sin token - usando medico como default hasta encontrar el rol correcto
+            setTokenValid(false); // Token vacío ya no es válido
         } else {
             setTokenValid(false); // Token inválido
         }
@@ -84,16 +85,24 @@ const SignupForm = ({ setShowRegister }) => {
             validationSchema={SignupSchema}
             onSubmit={async (values, { setSubmitting }) => {
                 setIsLoading(true);
-                // Aquí iría la lógica de registro
-                // alert(`Registrado: ${values.name}, ${values.email}`);
+
+                // Validación adicional para asegurar que el token es válido
+                if (!tokenValid || tokenValid === false) {
+                    alert('Debes ingresar un token válido para registrarte');
+                    setIsLoading(false);
+                    setSubmitting(false);
+                    return;
+                }
+
                 const valuesToSend = {
                     name: values.name,
                     email: values.email,
                     password: values.password,
-                    role: tokenValid || 'medico',
+                    role: tokenValid,
                     area: values.area,
                 }
                 console.log('Datos a enviar:', valuesToSend);
+                console.log('Token valid state:', tokenValid);
                 try {
                     const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`, valuesToSend, {
                         headers: {
@@ -109,6 +118,13 @@ const SignupForm = ({ setShowRegister }) => {
                     console.error('Error al registrar:', error);
                     console.error('Respuesta del servidor:', error.response?.data);
                     console.error('Status code:', error.response?.status);
+
+                    // Manejar error de usuario existente
+                    if (error.response?.status === 400 && error.response?.data?.message === 'El usuario ya existe') {
+                        setErrorMessage('El usuario ya existe. Por favor, usa un correo electrónico diferente.');
+                    } else {
+                        setErrorMessage('Error al registrar usuario. Por favor, intenta nuevamente.');
+                    }
                 }
                 setIsLoading(false);
                 setSubmitting(false);
@@ -121,6 +137,17 @@ const SignupForm = ({ setShowRegister }) => {
                 };
             return (
                 <Form className="space-y-2 sm:space-y-2">
+                {/* Mensaje de error */}
+                {errorMessage && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                        <div className="flex items-center">
+                            <div className="text-red-600 text-sm">
+                                {errorMessage}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Campo Nombre */}
                 <div className="space-y-1">
                     <label htmlFor="name" className="block text-xs font-medium text-gray-700">
@@ -155,14 +182,22 @@ const SignupForm = ({ setShowRegister }) => {
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <AtSign className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
-                        <Field
-                            id="email"
-                            name="email"
-                            type="text"
-                            className="w-full pl-8 sm:pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
-                            placeholder="Correo electrónico"
-                            required
-                        />
+                        <Field name="email">
+                            {({ field, form }) => (
+                                <input
+                                    {...field}
+                                    id="email"
+                                    type="text"
+                                    className="w-full pl-8 sm:pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
+                                    placeholder="Correo electrónico"
+                                    onChange={(e) => {
+                                        setErrorMessage(''); // Limpiar mensaje de error
+                                        form.handleChange(e); // Mantener comportamiento de Formik
+                                    }}
+                                    required
+                                />
+                            )}
+                        </Field>
                     </div>
                     <ErrorMessage
                         name="email"
@@ -174,7 +209,7 @@ const SignupForm = ({ setShowRegister }) => {
                 {/* Campo Token  */}
                 <div className="space-y-1">
                     <label htmlFor="token" className="block text-xs font-medium text-gray-700">
-                        Token de acceso <span className="text-gray-400">(opcional)</span>
+                        Token de acceso <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -189,30 +224,11 @@ const SignupForm = ({ setShowRegister }) => {
                                     onChange={(e) => handleChangeToken(e, form.handleChange)}
                                     className="w-full pl-8 sm:pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 text-sm sm:text-xs"
                                     placeholder="Token de acceso"
+                                    required
                                 />
                             )}
                         </Field>
                     </div>
-                    <ErrorMessage
-                        name="token"
-                        component="div"
-                        className="text-red-500 text-xs mt-1"
-                    />
-                    {tokenValid === false && (
-                        <p className="text-xs text-red-500 mt-1">
-                            Token inválido. Deja vacío para usuario normal o usa: DMmedico, DMjefatura, DMadmin
-                        </p>
-                    )}
-                    {tokenValid && tokenValid !== 'user' && tokenValid !== false && (
-                        <p className="text-xs text-green-500 mt-1">
-                            ✓ Token válido: {tokenValid}
-                        </p>
-                    )}
-                    {tokenValid === 'medico' && (
-                        <p className="text-xs text-gray-500 mt-1">
-                            Registro como médico (sin token)
-                        </p>
-                    )}
                 </div>
 
                 {/* Campo Contraseña */}

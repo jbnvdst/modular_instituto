@@ -68,6 +68,8 @@ const Layout = ({ children }) => {
         pageTitle = "Plantillas de Tareas";
     } else if (location.pathname.startsWith("/recurringtasks")) {
         pageTitle = "Tareas Recurrentes";
+    } else if (location.pathname.startsWith("/demand-forecast")) {
+        pageTitle = "Pronóstico Demanda";
     }
 
     // Limpiar el input de búsqueda al cambiar de ruta
