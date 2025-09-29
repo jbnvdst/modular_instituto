@@ -14,10 +14,18 @@ const Admin = () => {
 
     const fetchUsers = async () => {
         try {
-            const reponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/get`);
-            setUsers(reponse.data);
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/get`);
+
+            // Ensure we always set an array, even if the response is not an array
+            if (Array.isArray(response.data)) {
+                setUsers(response.data);
+            } else {
+                console.warn('API returned non-array data:', response.data);
+                setUsers([]);
+            }
         } catch (error) {
             console.error("Error fetching users:", error);
+            setUsers([]); // Set empty array on error
         }
     };
 

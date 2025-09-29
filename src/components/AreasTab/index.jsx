@@ -79,6 +79,9 @@ const AreasTab = ({ users}) => {
     };
 
     const filterPersonal = () => {
+        if (!Array.isArray(personalInArea) || !Array.isArray(users)) {
+            return [];
+        }
         const personalInAreaIds = new Set(personalInArea.map(user => user.id));
         const filteredUsers = users.filter(user => !personalInAreaIds.has(user.id));
         return filteredUsers;
@@ -148,7 +151,7 @@ const AreasTab = ({ users}) => {
             {/* Grid de Áreas - Responsive */}
             {!selectedArea && (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 pb-4">
-                    {areas.map((area) => (
+                    {Array.isArray(areas) && areas.map((area) => (
                         <div
                             key={area.id}
                             className={`h-full flex flex-col bg-white justify-between ${area.color} 
@@ -182,10 +185,10 @@ const AreasTab = ({ users}) => {
 
                             <div className="flex flex-col justify-between items-start px-3 sm:px-4 pb-3 sm:pb-4 gap-2">
                                 <span className="text-xs sm:text-sm text-gray-800">
-                                    <b>Dirección:</b> {area.direction}
+                                    <b>Dirección:</b> {area.direction || 'Sin dirección'}
                                 </span>
                                 <span className="text-xs sm:text-sm text-gray-800">
-                                    <b>Encargado:</b> {area.ownerUser.name}
+                                    <b>Encargado:</b> {area.ownerUser?.name || 'Sin encargado'}
                                 </span>
                                 <p className="text-xs sm:text-sm text-gray-800 line-clamp-2">
                                     {area.description}
@@ -195,7 +198,7 @@ const AreasTab = ({ users}) => {
                             <div className="flex flex-col items-end px-3 sm:px-4 gap-3 sm:gap-4 pb-3 sm:pb-4">
                                 <div className="flex w-full items-center gap-2">
                                     <span className="text-xs sm:text-sm text-gray-600">Personal Total:</span>
-                                    <span className="font-semibold text-gray-800">{area.usersCount}</span>
+                                    <span className="font-semibold text-gray-800">{area.usersCount || 0}</span>
                                 </div>
 
                                 <button
@@ -393,14 +396,14 @@ const AreasTab = ({ users}) => {
 
                         {/* Vista móvil - Cards de personal */}
                         <div className="block lg:hidden space-y-2">
-                            {personalInArea.map((user) => (
+                            {Array.isArray(personalInArea) && personalInArea.map((user) => (
                                 <div key={user.id} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                                     <div className="flex justify-between items-start">
                                         <div className="flex-1">
                                             <div className="text-sm font-medium text-gray-900">{user.name}</div>
                                             <div className="text-xs text-gray-500">{user.email}</div>
                                             <div className="text-xs text-gray-600 mt-1">
-                                                Rol: <span className="font-medium">{user.areas[0].UserArea.role}</span>
+                                                Rol: <span className="font-medium">{user.areas?.[0]?.UserArea?.role || 'Sin rol'}</span>
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
@@ -439,7 +442,7 @@ const AreasTab = ({ users}) => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {personalInArea.map((user) => (
+                                    {Array.isArray(personalInArea) && personalInArea.map((user) => (
                                         <tr key={user.id} className="hover:bg-gray-50">
                                             <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
                                                 <div>
@@ -448,7 +451,7 @@ const AreasTab = ({ users}) => {
                                                 </div>
                                             </td>
                                             <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {user.areas[0].UserArea.role}
+                                                {user.areas?.[0]?.UserArea?.role || 'Sin rol'}
                                             </td>
                                             <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div className="flex space-x-2">

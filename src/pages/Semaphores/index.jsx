@@ -10,6 +10,11 @@ const Semaphores = () => {
     const [orderByQualification, setOrderByQualification] = React.useState(false);
 
     const tasksCount = areas.reduce((acc, area) => {
+        // Defensive programming: check if area and tasks exist
+        if (!area || !area.tasks || !Array.isArray(area.tasks)) {
+            return acc;
+        }
+
         const urgentTasks = area.tasks.filter(task => task.priority === 'rojo').length;
         const attentionTasks = area.tasks.filter(task => task.priority === 'amarillo').length;
         const pendingTasks = area.tasks.filter(task => task.priority === 'verde').length;
