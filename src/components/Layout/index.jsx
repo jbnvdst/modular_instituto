@@ -44,7 +44,7 @@ const Layout = ({ children }) => {
         if (!token) return profilePic;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload.profilePicture ? `http://localhost:4000/${payload.profilePicture}` : profilePic;
+            return payload.profilePicture ? `${import.meta.env.VITE_API_BASE_URL}/${payload.profilePicture}` : profilePic;
         } catch {
             return profilePic;
         }

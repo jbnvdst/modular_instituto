@@ -61,7 +61,7 @@ const Profile = () => {
         if (!token) return null;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload.profilePicture ? `http://localhost:4000/${payload.profilePicture}` : null;
+            return payload.profilePicture ? `${import.meta.env.VITE_API_BASE_URL}/${payload.profilePicture}` : null;
         } catch {
             return null;
         }
