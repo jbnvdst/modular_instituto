@@ -11,11 +11,22 @@ export const AreasProvider = ({ children }) => {
   const fetchAreas = async () => {
     setLoadingAreas(true);
     try {
+      console.log("Fetching areas from:", `${import.meta.env.VITE_API_BASE_URL}/api/area/tasksByArea`);
       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/area/tasksByArea`);
-      setAreas(response.data);
       console.log("Areas fetched:", response.data);
+
+      // Verificar que cada área tenga tareas
+      response.data.forEach(area => {
+        console.log(`Área ${area.name}: ${area.tasks?.length || 0} tareas`);
+        if (area.tasks && area.tasks.length > 0) {
+          console.log(`- Prioridades:`, area.tasks.map(t => t.priority).join(', '));
+        }
+      });
+
+      setAreas(response.data);
     } catch (error) {
       console.error("Error fetching areas:", error);
+      console.error("Error details:", error.response?.data || error.message);
     }
     setLoadingAreas(false);
   };
