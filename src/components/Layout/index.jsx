@@ -44,7 +44,15 @@ const Layout = ({ children }) => {
         if (!token) return profilePic;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload.profilePicture ? `${import.meta.env.VITE_API_BASE_URL}/${payload.profilePicture}` : profilePic;
+            if (!payload.profilePicture) return profilePic;
+
+            // If the URL is already complete (starts with http/https), return as is
+            if (payload.profilePicture.startsWith('http://') || payload.profilePicture.startsWith('https://')) {
+                return payload.profilePicture;
+            }
+
+            // For relative URLs, prepend the API base URL
+            return `${import.meta.env.VITE_API_BASE_URL}${payload.profilePicture}`;
         } catch {
             return profilePic;
         }

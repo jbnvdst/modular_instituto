@@ -108,11 +108,16 @@ export const AuthProvider = ({ children }) => {
   const fetchUserArea = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/area/byUser/${user.id}`);
-      if (response.status === 200) {
+      if (response.status === 200 && response.data && response.data.length > 0) {
         setUserArea(response.data[0].id);
+      } else {
+        // Si no hay datos, usar un área por defecto
+        setUserArea(1); // ID de área por defecto
       }
     } catch (error) {
       console.error("Error fetching userArea:", error);
+      // En caso de error, usar un área por defecto
+      setUserArea(1);
     }
   };
 
