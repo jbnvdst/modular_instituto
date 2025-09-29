@@ -394,7 +394,7 @@ const Home = () => {
             <hr className="my-4 border-gray-200"/>
             <div className="flex flex-col gap-2 shadow-md bg-gradient-to-tr from-[#0f7871] to-[#13b2a0] rounded-2xl p-6">
                 <h1 className="text-white font-bold text-2xl">
-                    Hola {nombre}
+                    Hola
                 </h1>
                 <p className="text-white text-xs">Sistema de gestión hospitalaria operando como {getRoleFromToken()}</p>
             </div>
