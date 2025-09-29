@@ -80,9 +80,7 @@ const Home = () => {
         return resultado; // <--- Ahora devuelve un objeto, no un array
         }
 
-        // Ejemplo de uso
-        const datosClasificados = clasificarPorSubarea(tasks.filter(task => task.areaId === userArea)); // donde tareas es tu array
-        // console.log(datosClasificados);
+        // Esta función se usa dentro de los useEffects para clasificar las tareas
 
         const calcularDatasetsUltimos7Dias = (tasks) => {
             const prioridadMap = { rojo: "Urgente", amarillo: "Atención", verde: "Pendiente" };
@@ -219,18 +217,29 @@ const Home = () => {
 
         fetchAllTasks();
 
-        if (!chartRef.current) return;
+        if (!chartRef.current || !tasks || tasks.length === 0) return;
 
         // Destruir gráfica anterior si existe
         if (chartInstance.current) {
         chartInstance.current.destroy();
         }
-        
 
-        const labels = Object.keys(datosClasificados);
-        const urgenteData = labels.map(subArea => datosClasificados[subArea].Urgente);
-        const atencionData = labels.map(subArea => datosClasificados[subArea].Atención);
-        const pendienteData = labels.map(subArea => datosClasificados[subArea].Pendiente);
+        // Recalcular datosClasificados con los datos actuales
+        const tareasDelUsuario = tasks.filter(task => task.areaId === userArea);
+        const tareasParaGrafico = tareasDelUsuario.length > 0 ? tareasDelUsuario : tasks.slice(0, 10);
+        const datosClasificadosActuales = clasificarPorSubarea(tareasParaGrafico);
+
+        console.log('Generando gráfico - UserArea:', userArea, 'Tasks:', tasks.length, 'Tareas para gráfico:', tareasParaGrafico.length, 'Datos clasificados:', datosClasificadosActuales);
+
+        const labels = Object.keys(datosClasificadosActuales);
+        if (labels.length === 0) {
+            console.log('No hay labels para el gráfico, usando datos por defecto');
+            return;
+        }
+
+        const urgenteData = labels.map(subArea => datosClasificadosActuales[subArea]?.Urgente || 0);
+        const atencionData = labels.map(subArea => datosClasificadosActuales[subArea]?.Atención || 0);
+        const pendienteData = labels.map(subArea => datosClasificadosActuales[subArea]?.Pendiente || 0);
 
 
         const ctx = chartRef.current.getContext('2d');
@@ -346,14 +355,17 @@ const Home = () => {
     
     
     useEffect(() => {
-        if (!lineChartRef.current) return;
+        if (!lineChartRef.current || !tasks || tasks.length === 0) return;
         if (lineChartInstance.current) lineChartInstance.current.destroy();
 
-        // Filtrar tareas del área del usuario
+        // Filtrar tareas del área del usuario, usar todas las tareas si no hay del área específica
         const tareasUsuario = tasks.filter(task => task.areaId === userArea);
+        const tareasParaLineChart = tareasUsuario.length > 0 ? tareasUsuario : tasks;
+
+        console.log('Generando gráfico de líneas - UserArea:', userArea, 'Tareas del usuario:', tareasUsuario.length, 'Tareas para chart:', tareasParaLineChart.length);
 
         // Generar datos dinámicos para los últimos 7 días
-        const { labels, datasets } = calcularDatasetsUltimos7Dias(tareasUsuario);
+        const { labels, datasets } = calcularDatasetsUltimos7Dias(tareasParaLineChart);
 
         const ctx = lineChartRef.current.getContext('2d');
         lineChartInstance.current = new Chart.Chart(ctx, {
