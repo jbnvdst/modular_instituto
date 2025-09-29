@@ -12,11 +12,21 @@ const UsuariosTab = ({users, setUsers, fetchUsers}) => {
     const [ filteredUsers, setFilteredUsers ] = useState([]);
 
     useEffect(() => {
-        if (searchTerm === ''){ 
+        if (!Array.isArray(users)) {
+            setFilteredUsers([]);
+            return;
+        }
+
+        if (searchTerm === ''){
             setFilteredUsers(users);
         }
         else{
-            setFilteredUsers(users.filter(u => (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.role.includes(searchTerm.toLowerCase()) || u.areas.some(area => area.name.toLowerCase().includes(searchTerm.toLocaleLowerCase())))));
+            setFilteredUsers(users.filter(u => {
+                const nameMatch = u.name?.toLowerCase().includes(searchTerm.toLowerCase());
+                const roleMatch = u.role?.includes(searchTerm.toLowerCase());
+                const areaMatch = Array.isArray(u.areas) && u.areas.some(area => area.name?.toLowerCase().includes(searchTerm.toLowerCase()));
+                return nameMatch || roleMatch || areaMatch;
+            }));
         }
     }, [searchTerm, users])
 
@@ -82,7 +92,7 @@ const UsuariosTab = ({users, setUsers, fetchUsers}) => {
                 {/* Vista móvil - Cards */}
                 <div className="block lg:hidden">
                     <div className="divide-y divide-gray-200">
-                        {filteredUsers.map((user) => (
+                        {Array.isArray(filteredUsers) && filteredUsers.map((user) => (
                             <div key={user.id} className="p-4 hover:bg-gray-50">
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex-1">
@@ -107,8 +117,8 @@ const UsuariosTab = ({users, setUsers, fetchUsers}) => {
                                     <div className="flex">
                                         <span className="font-medium mr-2">Área:</span>
                                         <span className="text-gray-900">
-                                            {user.areas.length > 0 
-                                                ? user.areas.map(area => area.name).join(", ") 
+                                            {Array.isArray(user.areas) && user.areas.length > 0
+                                                ? user.areas.map(area => area.name).join(", ")
                                                 : "No asignada"}
                                         </span>
                                     </div>
@@ -160,7 +170,7 @@ const UsuariosTab = ({users, setUsers, fetchUsers}) => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {filteredUsers.map((user) => (
+                            {Array.isArray(filteredUsers) && filteredUsers.map((user) => (
                                 <tr key={user.id} className="hover:bg-gray-50">
                                     <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
                                         <div>
@@ -174,8 +184,8 @@ const UsuariosTab = ({users, setUsers, fetchUsers}) => {
                                         </div>
                                     </td>
                                     <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {user.areas.length > 0 
-                                            ? user.areas.map(area => area.name).join(", ") 
+                                        {Array.isArray(user.areas) && user.areas.length > 0
+                                            ? user.areas.map(area => area.name).join(", ")
                                             : "No asignada"}
                                     </td>
                                     <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-900">

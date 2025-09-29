@@ -1,11 +1,17 @@
 import React, { useEffect } from "react";
 
-const SemaphoreCard = ({ semaphore, setSelectedArea, orderByQualification }) => { 
+const SemaphoreCard = ({ semaphore, setSelectedArea, orderByQualification }) => {
     const [order, setOrder] = React.useState(0);
     const [average, setAverage] = React.useState(0);
-    const { id, name, description, ownerUser } = semaphore;
 
-    const tasksCount = semaphore.tasks.map((task) => task.priority).reduce((acc, priority) => {
+    if (!semaphore) {
+        return null;
+    }
+
+    const { id, name, description, ownerUser } = semaphore;
+    const safeTasks = Array.isArray(semaphore.tasks) ? semaphore.tasks : [];
+
+    const tasksCount = safeTasks.map((task) => task?.priority || 'verde').reduce((acc, priority) => {
         if (priority === 'rojo') {
             acc.urgent += 1;
         }
@@ -21,13 +27,13 @@ const SemaphoreCard = ({ semaphore, setSelectedArea, orderByQualification }) => 
     useEffect(() => {
         let value = calculateOrder();
         setOrder(value);
-        setAverage(value < 0 ? 100 - (value * -1 / semaphore.tasks.length) : 100);
-    }, [semaphore.tasks]);
+        setAverage(value < 0 ? 100 - (value * -1 / safeTasks.length) : 100);
+    }, [safeTasks]);
 
     const calculateOrder = () => {
-        if(semaphore.tasks.length === 0) return 0;
+        if(safeTasks.length === 0) return 0;
         let order = 0;
-        semaphore.tasks.forEach((task) => {
+        safeTasks.forEach((task) => {
             if (task.priority === 'rojo') {
                 order += 100;
             }
@@ -92,7 +98,7 @@ const SemaphoreCard = ({ semaphore, setSelectedArea, orderByQualification }) => 
                         onClick={() => console.log(semaphore)} 
                         className="text-lg sm:text-xl md:text-2xl text-white font-semibold truncate flex-1 mr-2"
                     >
-                        {name}
+                        {name || 'Sin nombre'}
                     </h2>
                     <h1 className="text-2xl sm:text-3xl md:text-4xl text-white font-semibold">
                         {Math.floor(average)}
@@ -102,10 +108,10 @@ const SemaphoreCard = ({ semaphore, setSelectedArea, orderByQualification }) => 
                 {/* Contenido */}
                 <div className="flex flex-col h-full justify-between gap-2 px-3 sm:px-4 py-3 sm:pb-4">
                     <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
-                        {description}
+                        {description || 'Sin descripción'}
                     </p>
                     <b className="text-xs sm:text-sm text-gray-700 truncate">
-                        Encargado: {ownerUser.name}
+                        Encargado: {ownerUser?.name || 'Sin encargado'}
                     </b>
                     <button 
                         onClick={() => setSelectedArea(semaphore)} 
